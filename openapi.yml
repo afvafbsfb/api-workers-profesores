@@ -1,0 +1,40 @@
+openapi: 3.0.1
+info:
+  title: Workers API (staging)
+  version: "0.1.0"
+servers:
+  - url: https://api.luisromeroperez.com
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: OK
+  /v1/command:
+    post:
+      summary: Ejecuta una acción del digital worker
+      security:
+        - api_key: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action]
+              properties:
+                action:
+                  type: string
+                args:
+                  type: object
+                  additionalProperties: true
+      responses:
+        "200":
+          description: OK
+components:
+  securitySchemes:
+    api_key:
+      type: apiKey
+      in: header
+      name: X-Api-Key
