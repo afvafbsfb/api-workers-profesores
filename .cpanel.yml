@@ -1,13 +1,9 @@
 deployment:
   tasks:
-    - /bin/rsync -a --delete \
-      --exclude='.git*' --exclude='.github' \
-      --exclude='.cpanel.yml' --exclude='.htaccess' \
-      --exclude='requirements.txt' \
-      ./ /home/s018fbe6/workers-api/
-
+    - /bin/rsync -a --delete --exclude='.git*' --exclude='.github' --exclude='.cpanel.yml' --exclude='.htaccess' --exclude='requirements.txt' ./ /home/s018fbe6/workers-api/
     - /usr/bin/env bash -lc '/home/s018fbe6/virtualenv/workers-api/3.7/bin/pip install -r requirements.txt || true'
     - /usr/bin/env bash -lc 'git rev-parse --short HEAD > /home/s018fbe6/workers-api/.build || true'
     - /bin/mkdir -p /home/s018fbe6/workers-api/tmp
     - /bin/touch /home/s018fbe6/workers-api/tmp/restart.txt
+
 
