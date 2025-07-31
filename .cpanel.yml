@@ -6,4 +6,8 @@ deployment:
     - /usr/bin/env bash -lc 'git rev-parse --short HEAD > /home/s018fbe6/workers-api/.build || true'
     - /bin/mkdir -p /home/s018fbe6/workers-api/tmp
     - /bin/touch /home/s018fbe6/workers-api/tmp/restart.txt
-
+    # --- AÑADE ESTAS LÍNEAS MÁGICAS ---
+    # Reconstruye el archivo de configuración de Apache
+    - /scripts/rebuildhttpdconf
+    # Reinicia Apache de forma segura para aplicar los cambios
+    - /scripts/restartsrv_httpd
