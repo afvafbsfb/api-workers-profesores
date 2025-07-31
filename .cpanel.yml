@@ -17,10 +17,10 @@ SetEnv API_KEY dominique2013
 # DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION END
 EOF'
 
-    # Instalar dependencias desde el repo (no desde el docroot)
-    - /usr/bin/env bash -lc '/home/s018fbe6/virtualenv/workers-api/3.7/bin/pip install -r /home/s018fbe6/repos/workers-api/requirements.txt || true'
+    # Instalar dependencias desde el repo (ruta NUEVA)
+    - /usr/bin/env bash -lc '/home/s018fbe6/virtualenv/workers-api/3.7/bin/pip install -r /home/s018fbe6/repositories/workers-api/requirements.txt || true'
 
-    # Marcar build y forzar reload de Passenger
-    - /usr/bin/env bash -lc 'git -C /home/s018fbe6/repos/workers-api rev-parse --short HEAD > /home/s018fbe6/workers-api/.build || true'
+    # Guardar SHA compilado (ruta NUEVA) y reiniciar Passenger
+    - /usr/bin/env bash -lc 'git -C /home/s018fbe6/repositories/workers-api rev-parse --short HEAD > /home/s018fbe6/workers-api/.build || true'
     - /bin/mkdir -p /home/s018fbe6/workers-api/tmp
     - /bin/touch /home/s018fbe6/workers-api/tmp/restart.txt
