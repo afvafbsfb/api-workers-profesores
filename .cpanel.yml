@@ -4,10 +4,7 @@ deployment:
     - /usr/bin/env bash -lc '[ -f ./.htaccess ] && cp -f ./.htaccess /home/s018fbe6/workers-api/.htaccess || true'
     - /usr/bin/env bash -lc '/home/s018fbe6/virtualenv/workers-api/3.7/bin/pip install -r requirements.txt || true'
     - /usr/bin/env bash -lc 'git rev-parse --short HEAD > /home/s018fbe6/workers-api/.build || true'
+    - /bin/touch /home/s018fbe6/workers-api/.htaccess || true
     - /bin/mkdir -p /home/s018fbe6/workers-api/tmp
     - /bin/touch /home/s018fbe6/workers-api/tmp/restart.txt
-    # --- AÑADE ESTAS LÍNEAS MÁGICAS ---
-    # Reconstruye el archivo de configuración de Apache
-    - /scripts/rebuildhttpdconf
-    # Reinicia Apache de forma segura para aplicar los cambios
-    - /scripts/restartsrv_httpd
+    - /usr/bin/curl -sS -m 10 https://api.luisromeroperez.com/health >/dev/null 2>&1 || true
