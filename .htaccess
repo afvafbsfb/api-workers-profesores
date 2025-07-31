@@ -8,4 +8,4 @@ PassengerPython "/home/s018fbe6/virtualenv/workers-api/3.7/bin/python"
 <IfModule Litespeed>
 SetEnv API_KEY dominique2013
 </IfModule>
-# DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION END
+# DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION ENDFIN
