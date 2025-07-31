@@ -6,3 +6,4 @@ deployment:
     - /usr/bin/env bash -lc 'git rev-parse --short HEAD > /home/s018fbe6/workers-api/.build || true'
     - /bin/mkdir -p /home/s018fbe6/workers-api/tmp
     - /bin/touch /home/s018fbe6/workers-api/tmp/restart.txt
+
