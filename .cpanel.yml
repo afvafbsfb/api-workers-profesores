@@ -1,17 +1,23 @@
 deployment:
   tasks:
     - export DOCROOT=/home/s018fbe6/workers-api
+    - export REPO=/home/s018fbe6/repos/workers-api
 
-    # No dejes al docroot sin .htaccess (Passenger)
-    - /bin/rsync -a --delete --exclude='.git*' --exclude='.github' --exclude='.htaccess' ./ $DOCROOT/
-    # Si versionas .htaccess, cópialo encima (sin borrar)
+    # Copia código pero NO borres .htaccess ni .cpanel.yml ni requirements
+    - /bin/rsync -a --delete \
+      --exclude='.git*' --exclude='.github' \
+      --exclude='.cpanel.yml' --exclude='.htaccess' \
+      --exclude='requirements.txt' \
+      ./ $DOCROOT/
+
+    # (Si versionas .htaccess en el repo, sobreescríbelo encima)
     - /bin/test -f ./.htaccess && /bin/cp -f ./.htaccess $DOCROOT/.htaccess || true
 
-    # Dependencias
-    - /usr/bin/env bash -lc '/home/s018fbe6/virtualenv/workers-api/3.7/bin/pip install -r $DOCROOT/requirements.txt || true'
+    # Instala dependencias desde el repo
+    - /usr/bin/env bash -lc '/home/s018fbe6/virtualenv/workers-api/3.7/bin/pip install -r $REPO/requirements.txt || true'
 
-    # Marcar build y recargar servidor
-    - /usr/bin/env bash -lc 'git -C /home/s018fbe6/repos/workers-api rev-parse --short HEAD > $DOCROOT/.build || true'
+    # Marca build y fuerza reload de reglas/Passenger
+    - /usr/bin/env bash -lc 'git -C $REPO rev-parse --short HEAD > $DOCROOT/.build || true'
     - /bin/mkdir -p $DOCROOT/tmp
     - /bin/touch $DOCROOT/.htaccess || true
     - /bin/touch $DOCROOT/tmp/restart.txt
