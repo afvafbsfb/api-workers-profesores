@@ -24,4 +24,3 @@ EOF'
     - /usr/bin/env bash -lc 'git -C /home/s018fbe6/repos/workers-api rev-parse --short HEAD > /home/s018fbe6/workers-api/.build || true'
     - /bin/mkdir -p /home/s018fbe6/workers-api/tmp
     - /bin/touch /home/s018fbe6/workers-api/tmp/restart.txt
-
