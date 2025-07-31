@@ -3,16 +3,25 @@ deployment:
     # Copiar código al docroot sin tocar archivos críticos
     - /bin/rsync -a --delete --exclude='.git*' --exclude='.github' --exclude='.cpanel.yml' --exclude='.htaccess' --exclude='requirements.txt' ./ /home/s018fbe6/workers-api/
 
-    # Si tienes .htaccess versionado en el repo, sobreescríbelo encima (si no existe, ignora)
-    - /usr/bin/env bash -lc 'test -f ./.htaccess && cp -f ./.htaccess /home/s018fbe6/workers-api/.htaccess || true'
+    # (Re)crear SIEMPRE un .htaccess válido de Passenger
+    - /usr/bin/env bash -lc 'cat > /home/s018fbe6/workers-api/.htaccess << "EOF"
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION BEGIN
+PassengerAppRoot "/home/s018fbe6/workers-api"
+PassengerBaseURI "/"
+PassengerPython "/home/s018fbe6/virtualenv/workers-api/3.7/bin/python"
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION END
+# DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION BEGIN
+<IfModule Litespeed>
+SetEnv API_KEY dominique2013
+</IfModule>
+# DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION END
+EOF'
 
-    # Instalar dependencias usando el requirements del repo (no del docroot)
+    # Instalar dependencias desde el repo (no desde el docroot)
     - /usr/bin/env bash -lc '/home/s018fbe6/virtualenv/workers-api/3.7/bin/pip install -r /home/s018fbe6/repos/workers-api/requirements.txt || true'
 
-    # Marcar el commit desplegado y forzar reload de Passenger/LiteSpeed
+    # Marcar build y forzar reload de Passenger
     - /usr/bin/env bash -lc 'git -C /home/s018fbe6/repos/workers-api rev-parse --short HEAD > /home/s018fbe6/workers-api/.build || true'
     - /bin/mkdir -p /home/s018fbe6/workers-api/tmp
-    - /bin/touch /home/s018fbe6/workers-api/.htaccess || true
     - /bin/touch /home/s018fbe6/workers-api/tmp/restart.txt
-
 
