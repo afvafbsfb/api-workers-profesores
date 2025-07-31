@@ -9,3 +9,10 @@ PassengerPython "/home/s018fbe6/virtualenv/workers-api/3.7/bin/python"
 SetEnv API_KEY dominique2013
 </IfModule>
 # DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION END
+
+#DESACTIVAR CACHE
+<IfModule LiteSpeed>
+  CacheDisable public /
+  CacheDisable private /
+</IfModule>
+#DESACTIVAR CACHE

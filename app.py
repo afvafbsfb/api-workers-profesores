@@ -24,3 +24,11 @@ def command():
     if (data.get("action") or "").lower() == "ping":
         return ok("pong")
     return err("unknown_action", data.get("action"))
+
+@app.after_request
+def no_cache(resp):
+    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+    resp.headers["X-LiteSpeed-Cache-Control"] = "no-store"
+    return resp
