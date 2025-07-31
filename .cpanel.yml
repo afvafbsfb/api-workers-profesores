@@ -3,5 +3,7 @@ deployment:
     - export DOCROOT=/home/s018fbe6/workers-api
     - /bin/rsync -a --exclude='.git*' --exclude='.github' ./ $DOCROOT/
     - /usr/bin/env bash -lc '/home/s018fbe6/virtualenv/workers-api/3.7/bin/pip install -r $DOCROOT/requirements.txt || true'
+    - /usr/bin/env bash -lc 'git -C /home/s018fbe6/repos/workers-api rev-parse --short HEAD > $DOCROOT/.build || true'
     - /bin/mkdir -p $DOCROOT/tmp
     - /bin/touch $DOCROOT/tmp/restart.txt
+    
