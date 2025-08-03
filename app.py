@@ -66,6 +66,10 @@ def command():
 def debug():
     return "Flask está vivo"
 
+import logging
+
+logging.basicConfig(filename='flask_error.log', level=logging.ERROR)
+
 @app.route("/vlodeiro/secretaria/turnos", methods=["GET"])
 def listar_turnos():
     try:
@@ -84,6 +88,7 @@ def listar_turnos():
         ])
     except Exception as e:
         import traceback
+        logging.error(traceback.format_exc())
         print("ERROR EN TURNOS:", e)
         print(traceback.format_exc())
         return jsonify({"ok": False, "error": str(e), "trace": traceback.format_exc()}), 500
