@@ -71,6 +71,7 @@ def listar_turnos():
     try:
         repo = ClaseMySQLRepository()
         turnos = repo.listar_turnos()
+        print("Turnos encontrados:", turnos)
         return jsonify([
             {
                 "id": getattr(t, "id", None),
@@ -83,4 +84,6 @@ def listar_turnos():
         ])
     except Exception as e:
         import traceback
+        print("ERROR EN TURNOS:", e)
+        print(traceback.format_exc())
         return jsonify({"ok": False, "error": str(e), "trace": traceback.format_exc()}), 500
