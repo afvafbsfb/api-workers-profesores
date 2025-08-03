@@ -37,7 +37,6 @@ def health():
 
 @app.route("/openapi.yml", methods=["GET"])
 def openapi_spec():
-    # sirve el archivo OpenAPI desde la raíz del proyecto
     return send_from_directory(".", "openapi.yml", mimetype="text/yaml")
 
 @app.route("/v1/command", methods=["POST"])
@@ -50,3 +49,7 @@ def command():
     if action == "ping":
         return ok("pong")
     return err("unknown_action", action)
+
+@app.route("/debug", methods=["GET"])
+def debug():
+    return "Flask está vivo"
