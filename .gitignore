@@ -1,17 +1,17 @@
+# Python
 __pycache__/
 *.py[cod]
 *.log
 .env
+venv/
 .venv/
 .python-version
-.build
 
-# cPanel & deploy
-.cpanel.yml.local
-.cpanel/
-tmp/
-
-# OS/Editor
-.DS_Store
+# Editors/OS
 .idea/
 .vscode/
+.DS_Store
+
+# cPanel / Git
+.cpanel/
+.cpanel.yml.local
