@@ -1,10 +1,11 @@
-
 # vlodeiro/secretaria/infrastructure/repositorio_mysql.py
 
 # Este archivo contendría la implementación de los repositorios
 # que interactúan con una base de datos MySQL.
 # Aquí se traducirían los objetos de dominio a estructuras de base de datos
 # y viceversa.
+
+from vlodeiro.secretaria.domain.models import Turno
 
 class AlumnoMySQLRepository:
     def get_by_id(self, alumno_id: str):
@@ -35,6 +36,9 @@ class ClaseMySQLRepository:
         # Simulación de guardado en DB
         pass
 
+    def listar_turnos(self, empresa_id=1):
+        return Turno.query.filter_by(empresa_id=empresa_id, activo=True).all()
+
 class PagoMySQLRepository:
     def get_by_id(self, pago_id: str):
         print(f"[MySQL] Obteniendo pago con ID: {pago_id}")
@@ -45,20 +49,3 @@ class PagoMySQLRepository:
         print(f"[MySQL] Guardando pago de {pago.monto} para alumno {pago.alumno_id}")
         # Simulación de guardado en DB
         pass
-# Adjust the import path according to your project structure.
-# For example, if 'models.py' is in 'vlodeiro/secretaria/domain/', use:
-# from vlodeiro.secretaria.domain.turno import Turno
-# If the module does not exist, define a placeholder Turno class for testing:
-class Turno:
-    @staticmethod
-    def query():
-        class Query:
-            @staticmethod
-            def filter_by(empresa_id, activo):
-                return []
-        return Query()
-# from vlodeiro.secretaria.domain.models import db  # Removed because 'db' is not used
-
-class ClaseMySQLRepository:
-    def listar_turnos(self, empresa_id=1):
-        return Turno.query.filter_by(empresa_id=empresa_id, activo=True).all()

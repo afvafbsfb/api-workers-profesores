@@ -68,15 +68,19 @@ def debug():
 
 @app.route("/vlodeiro/secretaria/turnos", methods=["GET"])
 def listar_turnos():
-    repo = ClaseMySQLRepository()
-    turnos = repo.listar_turnos()
-    return jsonify([
-        {
-            "id": t.id,
-            "dia": t.dia_semana,
-            "hora": t.hora.strftime('%H:%M'),
-            "tipo": t.tipo_alumno,
-            "duracion": t.duracion,
-            "capacidad": t.capacidad
-        } for t in turnos
-    ])
+    try:
+        repo = ClaseMySQLRepository()
+        turnos = repo.listar_turnos()
+        return jsonify([
+            {
+                "id": getattr(t, "id", None),
+                "dia": getattr(t, "dia_semana", None),
+                "hora": getattr(t, "hora", None) and t.hora.strftime('%H:%M'),
+                "tipo": getattr(t, "tipo_alumno", None),
+                "duracion": getattr(t, "duracion", None),
+                "capacidad": getattr(t, "capacidad", None)
+            } for t in turnos
+        ])
+    except Exception as e:
+        import traceback
+        return jsonify({"ok": False, "error": str(e), "trace": traceback.format_exc()}), 500
