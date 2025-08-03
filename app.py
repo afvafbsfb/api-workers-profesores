@@ -5,6 +5,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 app.register_blueprint(secretaria_bp, url_prefix='/vlodeiro/secretaria')
+print(app.url_map)
 API_KEY = os.getenv("API_KEY", "changeme")
 
 def ok(result=None, **extra):
