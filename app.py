@@ -4,10 +4,20 @@ from vlodeiro.secretaria.interfaces.flask_routes import secretaria_bp
 from datetime import datetime
 from vlodeiro.secretaria.infrastructure.repositorio_mysql import ClaseMySQLRepository
 
+from models import db  # Importa SQLAlchemy
+
 app = Flask(__name__)
 app.register_blueprint(secretaria_bp, url_prefix='/vlodeiro/secretaria')
 print(app.url_map)
 API_KEY = os.getenv("API_KEY", "changeme")
+
+# Configuración de la base de datos
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://s018fbe6_workersusr:rm]5wz5i9Z6bQ%KR@localhost/s018fbe6_workersapi'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db.init_app(app)  # Inicializa SQLAlchemy con la app
+
+app.debug = True  # Opcional: activa modo debug
 
 def ok(result=None, **extra):
     return jsonify({"ok": True, "result": result, **extra})
@@ -55,8 +65,6 @@ def command():
 @app.route("/debug", methods=["GET"])
 def debug():
     return "Flask está vivo"
-
-
 
 @app.route("/vlodeiro/secretaria/turnos", methods=["GET"])
 def listar_turnos():
