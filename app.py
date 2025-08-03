@@ -2,6 +2,7 @@ import os
 from flask import Flask, request, jsonify, send_from_directory
 from vlodeiro.secretaria.interfaces.flask_routes import secretaria_bp
 from datetime import datetime
+from vlodeiro.secretaria.infrastructure.repositorio_mysql import ClaseMySQLRepository
 
 app = Flask(__name__)
 app.register_blueprint(secretaria_bp, url_prefix='/vlodeiro/secretaria')
@@ -55,23 +56,19 @@ def command():
 def debug():
     return "Flask está vivo"
 
+
+
 @app.route("/vlodeiro/secretaria/turnos", methods=["GET"])
-def listar_turnos_directo():
+def listar_turnos():
+    repo = ClaseMySQLRepository()
+    turnos = repo.listar_turnos()
     return jsonify([
         {
-            "id": 1,
-            "dia": "lunes",
-            "hora": "16:30",
-            "tipo": "niño",
-            "duracion": 60,
-            "capacidad": 8
-        },
-        {
-            "id": 2,
-            "dia": "miércoles",
-            "hora": "17:30",
-            "tipo": "adulto",
-            "duracion": 90,
-            "capacidad": 6
-        }
+            "id": t.id,
+            "dia": t.dia_semana,
+            "hora": t.hora.strftime('%H:%M'),
+            "tipo": t.tipo_alumno,
+            "duracion": t.duracion,
+            "capacidad": t.capacidad
+        } for t in turnos
     ])
