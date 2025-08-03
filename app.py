@@ -1,8 +1,10 @@
 import os
 from flask import Flask, request, jsonify, send_from_directory
+from vlodeiro.secretaria.interfaces.flask_routes import secretaria_bp
 from datetime import datetime
 
 app = Flask(__name__)
+app.register_blueprint(secretaria_bp, url_prefix='/secretaria')
 API_KEY = os.getenv("API_KEY", "changeme")
 
 def ok(result=None, **extra):
