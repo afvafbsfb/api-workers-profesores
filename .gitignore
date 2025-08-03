@@ -1,17 +1,51 @@
-# Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-*.log
-.env
+*$py.class
+
+# Virtual environment
 venv/
-.venv/
-.python-version
+env/
+.virtualenv/
+virtualenv/
+*/.Python
+*.pyo
+*.pyd
 
-# Editors/OS
-.idea/
+# VSCode settings
 .vscode/
-.DS_Store
 
-# cPanel / Git
-.cpanel/
-.cpanel.yml.local
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Pytest cache
+.cache/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Environment variables
+.env
+.env.*
+
+# SQLite DBs
+*.sqlite3
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Personal/local scripts
+subir.bat
+subir.ps1
+*.sh
+
+# ZIPs and deployment archives
+*.zip
+deploy/
