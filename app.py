@@ -54,3 +54,24 @@ def command():
 @app.route("/debug", methods=["GET"])
 def debug():
     return "Flask está vivo"
+
+@app.route("/vlodeiro/secretaria/turnos", methods=["GET"])
+def listar_turnos_directo():
+    return jsonify([
+        {
+            "id": 1,
+            "dia": "lunes",
+            "hora": "16:30",
+            "tipo": "niño",
+            "duracion": 60,
+            "capacidad": 8
+        },
+        {
+            "id": 2,
+            "dia": "miércoles",
+            "hora": "17:30",
+            "tipo": "adulto",
+            "duracion": 90,
+            "capacidad": 6
+        }
+    ])
