@@ -88,9 +88,8 @@ logging.basicConfig(filename='/home/s018fbe6/workers-api/tmp/flask_error.log', l
 @app.route("/vlodeiro/secretaria/turnos", methods=["GET"])
 def listar_turnos():
     try:
-        with app.app_context():
-            repo = ClaseMySQLRepository()
-            turnos = repo.listar_turnos()
+        repo = ClaseMySQLRepository()
+        turnos = repo.listar_turnos()
         print("Turnos encontrados:", turnos)
         return jsonify([
             {
