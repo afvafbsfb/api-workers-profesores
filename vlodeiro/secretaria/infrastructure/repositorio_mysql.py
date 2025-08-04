@@ -5,7 +5,7 @@
 # Aquí se traducirían los objetos de dominio a estructuras de base de datos
 # y viceversa.
 
-from vlodeiro.secretaria.domain.models import Turno
+from models import Turno
 
 class AlumnoMySQLRepository:
     def get_by_id(self, alumno_id: str):
