@@ -1,2 +1,4 @@
-pip-requirements
+flask
 flask_sqlalchemy
+python-dotenv
+pymysql
