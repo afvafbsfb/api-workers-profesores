@@ -5,7 +5,7 @@ from datetime import datetime
 from vlodeiro.secretaria.infrastructure.repositorio_mysql import ClaseMySQLRepository
 from dotenv import load_dotenv
 
-from vlodeiro.secretaria.domain.models import db, Turno  # Importa SQLAlchemy y modelos
+from models import db, Turno  # Importa SQLAlchemy y modelos
 
 load_dotenv()
 
