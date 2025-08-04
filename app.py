@@ -5,7 +5,7 @@ from datetime import datetime
 from vlodeiro.secretaria.infrastructure.repositorio_mysql import ClaseMySQLRepository
 from dotenv import load_dotenv
 
-from models import db  # Importa SQLAlchemy
+from vlodeiro.secretaria.domain.models import db, Turno  # Importa SQLAlchemy y modelos
 
 load_dotenv()
 
@@ -31,7 +31,7 @@ SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PO
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db.init_app(app)  # Inicializa SQLAlchemy con la app
+db.init_app(app)
 
 app.debug = True  # Opcional: activa modo debug
 
