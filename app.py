@@ -3,16 +3,32 @@ from flask import Flask, request, jsonify, send_from_directory
 from vlodeiro.secretaria.interfaces.flask_routes import secretaria_bp
 from datetime import datetime
 from vlodeiro.secretaria.infrastructure.repositorio_mysql import ClaseMySQLRepository
+from dotenv import load_dotenv
 
 from models import db  # Importa SQLAlchemy
+
+load_dotenv()
 
 app = Flask(__name__)
 app.register_blueprint(secretaria_bp, url_prefix='/vlodeiro/secretaria')
 print(app.url_map)
-API_KEY = os.getenv("API_KEY", "changeme")
 
-# Configuración de la base de datos
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://s018fbe6_workersusr:rm]5wz5i9Z6bQ%KR@localhost/s018fbe6_workersapi'
+# Configuración de la base de datos usando variables de entorno
+def get_env_var(name):
+    value = os.getenv(name)
+    if not value:
+        raise RuntimeError(f"Falta la variable de entorno: {name}")
+    return value
+
+DB_USER = get_env_var('DB_USER')
+DB_PASS = get_env_var('DB_PASS')
+DB_HOST = get_env_var('DB_HOST')
+DB_PORT = get_env_var('DB_PORT')
+DB_NAME = get_env_var('DB_NAME')
+API_KEY = get_env_var('API_KEY')
+
+SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)  # Inicializa SQLAlchemy con la app
