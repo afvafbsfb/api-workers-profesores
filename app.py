@@ -83,8 +83,7 @@ def debug():
     return "Flask está vivo"
 
 import logging
-
-logging.basicConfig(filename='flask_error.log', level=logging.ERROR)
+logging.basicConfig(filename='/home/s018fbe6/workers-api/tmp/flask_error.log', level=logging.ERROR)
 
 @app.route("/vlodeiro/secretaria/turnos", methods=["GET"])
 def listar_turnos():
