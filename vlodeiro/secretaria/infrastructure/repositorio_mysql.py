@@ -1,3 +1,23 @@
+# Stub para evitar error de importación
+class PagoMySQLRepository:
+    def save(self, pago):
+        from models import Pago as PagoModel, db, Inscripcion
+        # Buscar la inscripción activa del alumno
+        inscripcion = Inscripcion.query.filter_by(alumno_id=pago.alumno_id, fecha_fin=None).first()
+        if not inscripcion:
+            raise Exception("No existe inscripción activa para el alumno")
+        # Crear instancia del modelo Pago para la base de datos
+        pago_db = PagoModel(
+            inscripcion_id=inscripcion.id,
+            fecha_pago=pago.fecha,
+            monto=pago.importe,
+            metodo=pago.concepto  # Usamos 'concepto' como método de pago
+        )
+        db.session.add(pago_db)
+        db.session.commit()
+        # Asignar el id generado en la base de datos al objeto de dominio
+        pago.id = pago_db.id
+        return pago_db
 # vlodeiro/secretaria/infrastructure/repositorio_mysql.py
 
 # Este archivo contendría la implementación de los repositorios
@@ -5,15 +25,18 @@
 # Aquí se traducirían los objetos de dominio a estructuras de base de datos
 # y viceversa.
 
+
 from models import Turno
+from datetime import date
 
 class AlumnoMySQLRepository:
     def get_by_id(self, alumno_id: str):
         print(f"[MySQL] Obteniendo alumno con ID: {alumno_id}")
-        # Simulación de una consulta a DB
-        if alumno_id == "1":
-            from vlodeiro.secretaria.domain.alumno import Alumno
-            return Alumno(id="1", nombre="Juan Perez", email="juan.perez@example.com")
+        from models import Alumno as AlumnoModel
+        alumno = AlumnoModel.query.filter_by(id=int(alumno_id)).first()
+        if alumno:
+            # Devuelve un objeto compatible con el dominio si es necesario
+            return alumno
         return None
 
     def save(self, alumno):
@@ -22,30 +45,51 @@ class AlumnoMySQLRepository:
         pass
 
 class ClaseMySQLRepository:
-    def get_by_id(self, clase_id: str):
-        print(f"[MySQL] Obteniendo clase con ID: {clase_id}")
-        # Simulación de una consulta a DB
-        if clase_id == "clase-001":
-            from vlodeiro.secretaria.domain.clase import Clase
-            from datetime import datetime
-            return Clase(id="clase-001", nombre="Matematicas", fecha=datetime.now(), capacidad=20)
-        return None
 
-    def save(self, clase):
-        print(f"[MySQL] Guardando clase: {clase.nombre}")
-        # Simulación de guardado en DB
-        pass
+    def get_by_id(self, clase_id: str):
+        from models import Clase
+        clase = Clase.query.filter_by(id=clase_id).first()
+        return clase
+
+    def inscribir_alumno(self, clase_id: int, alumno_id: int) -> bool:
+        from models import Inscripcion, Clase, db
+        clase = Clase.query.filter_by(id=clase_id).first()
+        if not clase:
+            return False
+        # Verificar capacidad
+        inscripciones = Inscripcion.query.filter_by(turno_id=clase_id).count()
+        if inscripciones >= clase.capacidad:
+            return False
+        # Registrar inscripción
+        inscripcion = Inscripcion(alumno_id=alumno_id, turno_id=clase_id, tarifa_id=1, fecha_inicio=date.today(), fecha_fin=None)
+        db.session.add(inscripcion)
+        db.session.commit()
+        return True
 
     def listar_turnos(self, empresa_id=1):
         return Turno.query.filter_by(empresa_id=empresa_id, activo=True).all()
 
-class PagoMySQLRepository:
-    def get_by_id(self, pago_id: str):
-        print(f"[MySQL] Obteniendo pago con ID: {pago_id}")
-        # Simulación de una consulta a DB
-        return None
+class TurnoMySQLRepository:
+    def get_by_id(self, turno_id: str):
+        from models import Turno
+        turno = Turno.query.filter_by(id=turno_id).first()
+        return turno
 
-    def save(self, pago):
-        print(f"[MySQL] Guardando pago de {pago.monto} para alumno {pago.alumno_id}")
-        # Simulación de guardado en DB
-        pass
+    def listar_turnos(self, empresa_id=1):
+        from models import Turno
+        return Turno.query.filter_by(empresa_id=empresa_id, activo=True).all()
+
+    def inscribir_alumno(self, turno_id: int, alumno_id: int) -> bool:
+        from models import Inscripcion, Turno, db
+        turno = Turno.query.filter_by(id=turno_id).first()
+        if not turno:
+            return False
+        # Verificar capacidad
+        inscripciones_activas = Inscripcion.query.filter_by(turno_id=turno_id, fecha_fin=None).count()
+        if inscripciones_activas >= turno.capacidad:
+            return False
+        # Registrar inscripción
+        inscripcion = Inscripcion(alumno_id=alumno_id, turno_id=turno_id, tarifa_id=1, fecha_inicio=date.today(), fecha_fin=None)
+        db.session.add(inscripcion)
+        db.session.commit()
+        return True

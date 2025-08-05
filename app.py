@@ -9,7 +9,7 @@ try:
     # DDD: Importa blueprint de empresa
     from vlodeiro.empresa.interfaces.empresa_routes import empresa_bp
     from datetime import datetime
-    from vlodeiro.secretaria.infrastructure.repositorio_mysql import ClaseMySQLRepository
+    # from vlodeiro.secretaria.infrastructure.repositorio_mysql import TurnoMySQLRepository
     ## from dotenv import load_dotenv
     from functools import wraps
     from models import db, Turno  # Importa SQLAlchemy y modelos
@@ -126,20 +126,8 @@ try:
     def openapi_spec():
         return send_from_directory(".", "openapi.yml", mimetype="text/yaml")
 
-    @app.route("/v1/command", methods=["POST"])
-    @require_api_key
-    def command():
-        data = request.get_json(silent=True) or {}
-        # Validación y sanitización
-        try:
-            validated = CommandSchema().load(data)
-        except ValidationError as ve:
-            return err("invalid_input", hint=ve.messages, status=400)
-        action = validated["action"].lower()
-        args = validated["args"]
-        if action == "ping":
-            return ok("pong")
-        return err("unknown_action", action)
+
+    # ...existing code...
 
     @app.route("/debug", methods=["GET"])
     def debug():
@@ -152,8 +140,8 @@ try:
     logging.basicConfig(filename='tmp/flask_error.log', level=logging.ERROR)
 
 
+    if __name__ == "__main__":
+        app.run(host="0.0.0.0", port=5000, debug=True)
 except Exception as e:
     init_error = traceback.format_exc()
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    print(init_error)

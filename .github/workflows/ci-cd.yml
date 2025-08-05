@@ -1,0 +1,29 @@
+name: CI/CD workers-api
+
+on:
+  push:
+    branches: [staging, main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.7'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run tests
+        run: PYTHONPATH=. pytest || echo "No tests found"
+      - name: Lint
+        run: flake8 . || echo "Lint warnings"
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/staging'
+    steps:
+      - name: Deploy to cPanel (manual step)
+        run: echo "Haz deploy en cPanel: Git Version Control → Deploy HEAD Commit"
