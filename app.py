@@ -28,6 +28,9 @@ try:
     # Permite CORS solo para dominios confiables (ajusta en producción)
     CORS(app, resources={r"/*": {"origins": ["http://localhost", "https://tudominio.com"]}}, supports_credentials=True)
     app.register_blueprint(secretaria_bp, url_prefix='/vlodeiro/secretaria')
+    print("[DEBUG] Blueprint secretaria_bp registrado")
+    print("[DEBUG] Mapeo de rutas:")
+    print(app.url_map)
     # DDD: Registra blueprint de empresa
     app.register_blueprint(empresa_bp, url_prefix='/vlodeiro/empresa')
     print(app.url_map)
