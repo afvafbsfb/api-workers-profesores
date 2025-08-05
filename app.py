@@ -142,32 +142,6 @@ try:
         os.makedirs('tmp')
     logging.basicConfig(filename='tmp/flask_error.log', level=logging.ERROR)
 
-    @app.route("/vlodeiro/secretaria/turnos", methods=["GET"])
-    @require_api_key
-    def listar_turnos():
-        try:
-            repo = ClaseMySQLRepository()
-            turnos = repo.listar_turnos()
-            print("Turnos encontrados:", turnos)
-            return jsonify([
-                {
-                    "id": getattr(t, "id", None),
-                    "dia": getattr(t, "dia_semana", None),
-                    "hora": getattr(t, "hora", None) and t.hora.strftime('%H:%M'),
-                    "tipo": getattr(t, "tipo_alumno", None),
-                    "duracion": getattr(t, "duracion", None),
-                    "capacidad": getattr(t, "capacidad", None)
-                } for t in turnos
-            ])
-        except Exception as e:
-            import traceback
-            logging.error(traceback.format_exc())
-            print("ERROR EN TURNOS:", e)
-            print(traceback.format_exc())
-            # Sanitiza error en producción
-            if current_app.config.get("ENV") == "production":
-                return err("internal_error", status=500)
-            return jsonify({"ok": False, "error": str(e), "trace": traceback.format_exc()}), 500
 
 except Exception as e:
     init_error = traceback.format_exc()
