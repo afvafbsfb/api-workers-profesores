@@ -99,7 +99,16 @@ def root():
 
 @app.route("/health", methods=["GET"])
 def health():
-    return ok(ts=datetime.utcnow().isoformat(), build=_build())
+    try:
+        return ok(ts=datetime.utcnow().isoformat(), build=_build())
+    except Exception as e:
+        import traceback
+        # Muestra el error y el traceback en la respuesta para depuración
+        return jsonify({
+            "ok": False,
+            "error": str(e),
+            "trace": traceback.format_exc()
+        }), 500
 
 @app.route("/openapi.yml", methods=["GET"])
 def openapi_spec():
