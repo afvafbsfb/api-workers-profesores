@@ -26,4 +26,5 @@ jobs:
     if: github.ref == 'refs/heads/staging'
     steps:
       - name: Deploy to cPanel (manual step)
-        run: echo "Haz deploy en cPanel: Git Version Control → Deploy HEAD Commit"
+        run: |
+          echo "Haz deploy en cPanel: Git Version Control -> Deploy HEAD Commit"
