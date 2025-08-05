@@ -155,15 +155,5 @@ try:
 except Exception as e:
     init_error = traceback.format_exc()
 
-# --- ENDPOINT /health SIEMPRE DISPONIBLE ---
-from flask import Flask, jsonify
-app = Flask(__name__)
-@app.route("/health", methods=["GET"])
-def health():
-    if init_error:
-        return jsonify({"ok": False, "init_error": init_error}), 500
-    else:
-        return jsonify({"ok": True, "msg": "App inicializada correctamente"}), 200
-
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
