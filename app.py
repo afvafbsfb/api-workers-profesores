@@ -1,21 +1,31 @@
-
 import os
 from flask import Flask, request, jsonify, send_from_directory, current_app
 from vlodeiro.secretaria.interfaces.flask_routes import secretaria_bp
+# DDD: Importa blueprint de empresa
+from vlodeiro.empresa.interfaces.empresa_routes import empresa_bp
 from datetime import datetime
 from vlodeiro.secretaria.infrastructure.repositorio_mysql import ClaseMySQLRepository
-from dotenv import load_dotenv
+## from dotenv import load_dotenv
 from functools import wraps
 from models import db, Turno  # Importa SQLAlchemy y modelos
+# Validación de entrada
+from marshmallow import Schema, fields, ValidationError
+# Esquema de validación para /v1/command
+class CommandSchema(Schema):
+    action = fields.Str(required=True)
+    args = fields.Dict(missing={})
 # Seguridad: CORS y headers
 from flask_cors import CORS
 
-load_dotenv()
+## load_dotenv()  # Desactivado para evitar sobrescribir variables de entorno
+
 
 app = Flask(__name__)
 # Permite CORS solo para dominios confiables (ajusta en producción)
 CORS(app, resources={r"/*": {"origins": ["http://localhost", "https://tudominio.com"]}}, supports_credentials=True)
 app.register_blueprint(secretaria_bp, url_prefix='/vlodeiro/secretaria')
+# DDD: Registra blueprint de empresa
+app.register_blueprint(empresa_bp, url_prefix='/vlodeiro/empresa')
 print(app.url_map)
 
 # Configuración de la base de datos usando variables de entorno
@@ -99,8 +109,13 @@ def openapi_spec():
 @require_api_key
 def command():
     data = request.get_json(silent=True) or {}
-    action = (data.get("action") or "").lower()
-    args = data.get("args") or {}
+    # Validación y sanitización
+    try:
+        validated = CommandSchema().load(data)
+    except ValidationError as ve:
+        return err("invalid_input", hint=ve.messages, status=400)
+    action = validated["action"].lower()
+    args = validated["args"]
     if action == "ping":
         return ok("pong")
     return err("unknown_action", action)
@@ -141,3 +156,6 @@ def listar_turnos():
         if current_app.config.get("ENV") == "production":
             return err("internal_error", status=500)
         return jsonify({"ok": False, "error": str(e), "trace": traceback.format_exc()}), 500
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
