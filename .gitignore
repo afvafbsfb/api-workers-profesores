@@ -2,24 +2,38 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyo
+*.pyd
 
-# Virtual environment
+# Virtual environments
 venv/
 env/
 .virtualenv/
 virtualenv/
 */.Python
-*.pyo
-*.pyd
 
-# VSCode settings
+# Editors / IDE
 .vscode/
+.idea/
+*.iml
 
-# Jupyter Notebook checkpoints
-.ipynb_checkpoints
+# Pyenv / versiones
+.python-version
 
-# Pytest cache
+# Jupyter
+.ipynb_checkpoints/
+
+# Tests / coverage / linters
+.pytest_cache/
 .cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.pytype/
 
 # Distribution / packaging
 build/
@@ -29,15 +43,22 @@ dist/
 # Environment variables
 .env
 .env.*
+*.env
 
-# SQLite DBs
+# Databases (ajusta según lo que quieras)
 *.sqlite3
+*.db
+instance/*.db
+# Si quieres ignorar TODO instance (Flask típico):
+# instance/
+# Y luego mantener archivos de ejemplo:
+# !instance/config.example.py
 
 # Logs and temporary files
 *.log
 *.tmp
 
-# OS files
+# OS
 .DS_Store
 Thumbs.db
 
@@ -46,6 +67,11 @@ subir.bat
 subir.ps1
 *.sh
 
-# ZIPs and deployment archives
+# Archives / deployment
 *.zip
 deploy/
+
+# (Opcional) Lock files de herramientas que NO uses
+# Pipenv / Poetry (descomenta si decides ignorarlos)
+# Pipfile.lock
+# poetry.lock

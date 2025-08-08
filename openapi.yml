@@ -3,7 +3,7 @@ info:
   title: Workers API (staging)
   version: "0.1.0"
 servers:
-  - url: https://api.luisromeroperez.com
+  - url: http://localhost:5000
 paths:
   /health:
     get:
@@ -11,30 +11,117 @@ paths:
       responses:
         "200":
           description: OK
-  /v1/command:
+
+  /vlodeiro/secretaria/turnos_libres:
+    get:
+      summary: Lista todos los turnos con plazas libres
+      responses:
+        "200":
+          description: Lista de turnos con plazas libres
+
+  /vlodeiro/secretaria/inscribir:
     post:
-      summary: Ejecuta una acción del digital worker
-      security:
-        - api_key: []
+      summary: Inscribe un alumno en un turno
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [action]
+              required: [alumno_id, turno_id]
               properties:
-                action:
-                  type: string
-                args:
-                  type: object
-                  additionalProperties: true
+                alumno_id:
+                  type: integer
+                turno_id:
+                  type: integer
       responses:
         "200":
-          description: OK
+          description: Alumno inscrito correctamente
+        "400":
+          description: Error al inscribir alumno
+
+  /vlodeiro/secretaria/registrar_pago:
+    post:
+      summary: Registra un pago para un alumno
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [alumno_id, importe, concepto]
+              properties:
+                alumno_id:
+                  type: integer
+                importe:
+                  type: number
+                concepto:
+                  type: string
+      responses:
+        "200":
+          description: Pago registrado correctamente
+        "400":
+          description: Error al registrar pago
+
+  /vlodeiro/secretaria/turnos:
+    get:
+      summary: Lista todos los turnos activos de la empresa
+      responses:
+        "200":
+          description: Lista de turnos activos
+
+  /vlodeiro/empresa/empresa:
+    post:
+      summary: Crea una nueva empresa
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nombre]
+              properties:
+                nombre:
+                  type: string
+                descripcion:
+                  type: string
+                usuarios:
+                  type: array
+                  items:
+                    type: string
+                config:
+                  type: object
+      responses:
+        "201":
+          description: Empresa creada correctamente
+        "400":
+          description: El nombre es obligatorio
+
+    get:
+      summary: Lista todas las empresas
+      responses:
+        "200":
+          description: Lista de empresas
+
+  /vlodeiro/empresa/empresa/{empresa_id}:
+    get:
+      summary: Obtiene los datos de una empresa por su ID
+      parameters:
+        - in: path
+          name: empresa_id
+          schema:
+            type: string
+          required: true
+          description: ID de la empresa
+      responses:
+        "200":
+          description: Datos de la empresa
+        "404":
+          description: Empresa no encontrada
+
 components:
   securitySchemes:
     api_key:
       type: apiKey
       in: header
-      name: X-Api-Key
+      name: X-Api

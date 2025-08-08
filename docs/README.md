@@ -16,9 +16,12 @@
 `workers-api` es una API desarrollada en Python con Flask, orientada a la gestión de alumnos, clases y pagos para la secretaría de una empresa educativa. Utiliza SQLAlchemy para la persistencia en MySQL y sigue una arquitectura modular por dominios.
 
 ## Arquitectura general
-- **Flask** como framework web principal.
-- **SQLAlchemy** para ORM y acceso a base de datos MySQL.
-- **Blueprints** para modularizar rutas por dominio.
+- **Flask** como framework web principal. Flask es un framework ligero de Python que permite definir rutas, manejar peticiones HTTP y construir aplicaciones web de forma sencilla y modular.
+En este proyecto, toda la lógica de la API y la gestión de peticiones se basa en Flask.
+- **SQLAlchemy** para ORM y acceso a base de datos MySQL. Usamos SQLAlchemy como herramienta para interactuar con la base de datos MySQL. SQLAlchemy es un ORM (Object Relational Mapper), lo que permite trabajar con la base de datos usando objetos y clases de Python en vez de escribir directamente sentencias SQL.
+Así, podemos crear, consultar y modificar datos en MySQL de forma más sencilla y estructurada desde nuestro código Python.
+- **Blueprints** para modularizar rutas por dominio. En Flask, los Blueprints son una forma de organizar y modularizar el código de una aplicación dividiéndolo en componentes independientes. En este proyecto, se usan Blueprints para separar las rutas (endpoints) según el dominio (por ejemplo, alumnos, clases, pagos), facilitando el mantenimiento y la escalabilidad del código.
+Así, cada grupo de rutas relacionadas se gestiona en un archivo o módulo diferente, y luego se registran en la aplicación principal.
 - **Separación en capas:**
   - Dominio (modelos y lógica de negocio)
   - Infraestructura (repositorios y acceso a datos)

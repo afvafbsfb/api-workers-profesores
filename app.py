@@ -18,7 +18,7 @@ try:
     # Esquema de validación para /v1/command
     class CommandSchema(Schema):
         action = fields.Str(required=True)
-        args = fields.Dict(missing={})
+        args = fields.Dict(load_default={})
     # Seguridad: CORS y headers
     from flask_cors import CORS
 

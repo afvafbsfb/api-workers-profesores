@@ -1,4 +1,3 @@
-s
 # workers-api (staging)
 
 ## Arquitectura y Estado Actual
