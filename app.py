@@ -64,7 +64,8 @@ try:
 
     db.init_app(app)
 
-    app.debug = True  # Opcional: activa modo debug
+    # Debug solo si FLASK_DEBUG está activo explícitamente
+    app.debug = str(os.getenv("FLASK_DEBUG", "0")).lower() in ("1", "true", "yes")
 
     def ok(result=None, **extra):
         return jsonify({"ok": True, "result": result, **extra})

@@ -6,3 +6,4 @@ flask-cors
 marshmallow
 requests
 pyyaml
+gunicorn

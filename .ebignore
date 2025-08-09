@@ -1,0 +1,13 @@
+# Ignore local/venv/tests/docs files to keep EB uploads small
+.venv/
+__pycache__/
+*.pyc
+.git/
+.gitignore
+**/.pytest_cache/
+**/.mypy_cache/
+**/.coverage
+**/htmlcov/
+docs/
+*.md
+**/tmp/
