@@ -198,7 +198,24 @@ def print_result(r: Dict[str, Any], dynamic: bool = False) -> None:
     if r["ok"]:
         print(f"[PASS] {method} {path}{suffix} -> {status} ({expected_txt}) {elapsed_ms}ms")
     else:
-        print(f"[FAIL] {method} {path}{suffix} -> {status} ({expected_txt}) {elapsed_ms}ms")
+    expected_text = ""
+    if validation == "exact_200":
+        expected_text = "esperado 200"
+    elif validation == "200_or_404":
+        expected_text = "esperado 200 o 404"
+
+    suffix = ""
+    if dynamic:
+        suffix = " (dinámico)"
+
+    if error:
+        print(f"[FAIL] {method} {path}{suffix} -> error de conexión: {error} ({expected_text})")
+        return
+
+    if r["ok"]:
+        print(f"[PASS] {method} {path}{suffix} -> {status} ({expected_text}) {elapsed_ms}ms")
+    else:
+        print(f"[FAIL] {method} {path}{suffix} -> {status} ({expected_text}) {elapsed_ms}ms")
 
 
 def main() -> int:
