@@ -8,7 +8,7 @@ try:
     from vlodeiro.secretaria.interfaces.flask_routes import secretaria_bp
     # DDD: Importa blueprint de empresa
     from vlodeiro.empresa.interfaces.empresa_routes import empresa_bp
-    from datetime import datetime
+    from datetime import datetime, timezone
     # from vlodeiro.secretaria.infrastructure.repositorio_mysql import TurnoMySQLRepository
     ## from dotenv import load_dotenv
     from functools import wraps
@@ -107,12 +107,12 @@ try:
 
     @app.route("/", methods=["GET"])
     def root():
-        return ok(ts=datetime.utcnow().isoformat(), up=True, build=_build())
+        return ok(ts=datetime.now(timezone.utc).isoformat(), up=True, build=_build())
 
     @app.route("/health", methods=["GET"])
     def health():
         try:
-            return ok(ts=datetime.utcnow().isoformat(), build=_build())
+            return ok(ts=datetime.now(timezone.utc).isoformat(), build=_build())
         except Exception as e:
             import traceback
             # Muestra el error y el traceback en la respuesta para depuración
@@ -125,6 +125,11 @@ try:
     @app.route("/openapi.yml", methods=["GET"])
     def openapi_spec():
         return send_from_directory(".", "openapi.yml", mimetype="text/yaml")
+
+    @app.route("/docs", methods=["GET"])
+    def docs_index():
+        # Sirve la UI de Swagger desde /docs
+        return send_from_directory("docs", "index.html", mimetype="text/html")
 
 
     # ...existing code...

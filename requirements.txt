@@ -4,3 +4,5 @@ python-dotenv
 pymysql
 flask-cors
 marshmallow
+requests
+pyyaml

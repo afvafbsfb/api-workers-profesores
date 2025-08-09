@@ -128,3 +128,58 @@ def listar_turnos():
         if current_app.config.get("ENV") == "production":
             return jsonify({"ok": False, "error": "internal_error"}), 500
         return jsonify({"ok": False, "error": str(e), "trace": traceback.format_exc()}), 500
+
+
+# --- NUEVOS ENDPOINTS: ALUMNOS ---
+@secretaria_bp.route('/alumnos', methods=['GET'])
+def listar_alumnos():
+    try:
+        from models import Alumno
+        alumnos = Alumno.query.all()
+        return jsonify([
+            {
+                "id": a.id,
+                "nombre": a.nombre,
+                "email": a.email,
+            } for a in alumnos
+        ])
+    except Exception as e:
+        import traceback
+        if current_app.config.get("ENV") == "production":
+            return jsonify({"ok": False, "error": "internal_error"}), 500
+        return jsonify({"ok": False, "error": str(e), "trace": traceback.format_exc()}), 500
+
+
+@secretaria_bp.route('/alumnos/<int:alumno_id>', methods=['GET'])
+def obtener_alumno(alumno_id: int):
+    try:
+        from models import Alumno
+        a = Alumno.query.filter_by(id=alumno_id).first()
+        if not a:
+            return jsonify({"error": "Alumno no encontrado"}), 404
+        return jsonify({"id": a.id, "nombre": a.nombre, "email": a.email})
+    except Exception as e:
+        import traceback
+        if current_app.config.get("ENV") == "production":
+            return jsonify({"ok": False, "error": "internal_error"}), 500
+        return jsonify({"ok": False, "error": str(e), "trace": traceback.format_exc()}), 500
+
+
+@secretaria_bp.route('/alumnos/buscar', methods=['GET'])
+def buscar_alumnos_por_nombre():
+    try:
+        nombre = request.args.get('nombre')
+        if not nombre:
+            return jsonify({"error": "Parámetro 'nombre' requerido"}), 400
+        from models import Alumno
+        from sqlalchemy import func
+        patrones = f"%{nombre}%"
+        alumnos = Alumno.query.filter(func.lower(Alumno.nombre).like(func.lower(patrones))).all()
+        return jsonify([
+            {"id": a.id, "nombre": a.nombre, "email": a.email} for a in alumnos
+        ])
+    except Exception as e:
+        import traceback
+        if current_app.config.get("ENV") == "production":
+            return jsonify({"ok": False, "error": "internal_error"}), 500
+        return jsonify({"ok": False, "error": str(e), "trace": traceback.format_exc()}), 500

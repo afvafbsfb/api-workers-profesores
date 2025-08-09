@@ -70,6 +70,45 @@ paths:
         "200":
           description: Lista de turnos activos
 
+  /vlodeiro/secretaria/alumnos:
+    get:
+      summary: Lista todos los alumnos
+      responses:
+        "200":
+          description: Lista de alumnos
+
+  /vlodeiro/secretaria/alumnos/{alumno_id}:
+    get:
+      summary: Obtiene los datos de un alumno por su ID
+      parameters:
+        - in: path
+          name: alumno_id
+          schema:
+            type: integer
+          required: true
+          description: ID del alumno
+      responses:
+        "200":
+          description: Datos del alumno
+        "404":
+          description: Alumno no encontrado
+
+  /vlodeiro/secretaria/alumnos/buscar:
+    get:
+      summary: Busca alumnos por nombre (coincidencia parcial)
+      parameters:
+        - in: query
+          name: nombre
+          required: true
+          schema:
+            type: string
+          description: Texto a buscar en el nombre
+      responses:
+        "200":
+          description: Lista de alumnos que coinciden
+        "400":
+          description: Falta parámetro 'nombre'
+
   /vlodeiro/empresa/empresa:
     post:
       summary: Crea una nueva empresa
