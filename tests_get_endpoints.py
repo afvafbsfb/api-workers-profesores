@@ -185,7 +185,9 @@ def print_result(r: Dict[str, Any], dynamic: bool = False) -> None:
     if validation == "exact_200":
         expected_txt = "esperado 200"
     elif validation == "200_or_404":
-        expected_txt = "esperado 200 o 404"
+        expected_txt = "expected 200"
+    elif validation == "200_or_404":
+        expected_txt = "expected 200 or 404"
 
     suffix = ""
     if dynamic:
