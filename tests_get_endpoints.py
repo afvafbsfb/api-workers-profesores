@@ -4,18 +4,20 @@ con descubrimiento dinámico de IDs de empresa.
 
 Uso:
     python tests_get_endpoints.py
-
+    
 Variables de entorno opcionales:
     BASE_URL="http://localhost:5000"
     API_KEY="tu_api_key"
+    TEST_EMPRESA_ID="999999"
     HTTP_TIMEOUT="5.0"
     MAX_EMPRESA_IDS="1"          (cuántos IDs reales de empresa probar)
     FALLBACK_PLACEHOLDER="0"     (si "1", añade un endpoint placeholder aceptando 404 cuando no hay IDs)
 
 Objetivos:
     - Verificación rápida de disponibilidad.
-    - Descubrir dinámicamente un (o varios) IDs de empresa para probar detalle real.
-    - Salida clara PASS / FAIL sin pytest (fase posterior).
+    - Salida clara de PASS / FAIL sin pytest (fase posterior).
+    - Descubrimiento dinámico de uno o varios IDs de empresa para probar detalle real (debe retornar 200).
+    - Test con ID inexistente que tolera 200 o 404.
 """
 import os
 import sys
@@ -42,16 +44,18 @@ OPENAPI_PATH = os.getenv("OPENAPI_PATH", "openapi.yml")
 # ========== MODELOS SENCILLOS ==========
 
 class TestResult:
-    def __init__(
-        self,
-        method: str,
-        path: str,
-        url: str,
-        expected: List[int],
-        status: Optional[int],
-        ok: bool,
-        error: Optional[str] = None
-    ):
+      def __init__(
+          self,
+          method: str,
+          path: str,
+          url: str,
+          expected: List[int],
+          status: Optional[int],
+          ok: bool,
+          error: Optional[str] = None,
+          is_info: bool = False,
+          dynamic: bool = False
+      ):
         self.method = method
         self.path = path
         self.url = url
@@ -59,14 +63,23 @@ class TestResult:
         self.status = status
         self.ok = ok
         self.error = error
+        self.is_info = is_info  # Para resultados INFO que no cuentan como fallo
+        self.dynamic = dynamic  # Para marcar tests dinámicos
 
     def line(self) -> str:
         status_part = f"{self.status}" if self.status is not None else "NO_RESP"
         expected_part = "/".join(str(s) for s in self.expected)
-        mark = "PASS" if self.ok else "FAIL"
+        
+        if self.is_info:
+            mark = "INFO"
+        else:
+            mark = "PASS" if self.ok else "FAIL"
+        
+        suffix = " (dinámico)" if self.dynamic else ""
+        
         if self.error:
-            return f"[{mark}] GET {self.path} -> {status_part} (esperado {expected_part}) ERROR: {self.error}"
-        return f"[{mark}] GET {self.path} -> {status_part} (esperado {expected_part})"
+          return f"[{mark}] {self.method} {self.path}{suffix} -> {status_part} (esperado {expected_part}) ERROR: {self.error}"
+          return f"[{mark}] {self.method} {self.path}{suffix} -> {status_part} (esperado {expected_part})"
 
 # ========== HELPERS ==========
 
@@ -103,6 +116,28 @@ def safe_get_json(url: str) -> Dict[str, Any]:
         "error": err,
         "text": resp.text
     }
+
+def test_get(path: str, expected_status: List[int], dynamic: bool = False) -> TestResult:
+    method = "GET"
+    real_path = expand_path(path)
+    url = f"{BASE_URL}{real_path}"
+    headers = build_headers()
+    info = safe_get_json(url)
+    status = info.get("status")
+    error = info.get("error")
+    ok = status in expected_status
+    return TestResult(
+        method=method,
+        path=real_path,
+        url=url,
+        expected=expected_status,
+        status=status,
+        ok=ok,
+        error=error,
+        is_info=False,
+        dynamic=dynamic,
+    )
+
 
 def discover_empresa_ids(max_ids: int) -> List[Any]:
     """
@@ -141,9 +176,38 @@ def test_get(path: str, expected_status: List[int]) -> TestResult:
         resp = session.get(url, headers=build_headers(), timeout=TIMEOUT)
         status = resp.status_code
         ok = status in expected_status
-        return TestResult("GET", path, url, expected_status, status, ok)
+        return TestResult(
+            method=method,
+            path=path,
+            url=url,
+            expected=expected_status,
+            status=status,
+            ok=ok,
+            error=error,
+            is_info=False,
+            dynamic=dynamic,
+        )
     except Exception as e:
-        return TestResult("GET", path, url, expected_status, None, False, error=str(e))
+        return TestResult(
+            method=method,
+            path=path,
+            url=url,
+            expected=expected_status,
+            status=None,
+            ok=False,
+            error=str(e),
+            is_info=False,
+            dynamic=dynamic,
+        )
+
+
+def discover_empresa_id() -> Optional[str]:
+    """
+    Descubre un único ID de empresa usando el listado, si existe.
+    Retorna el ID como string o None si no hay resultados.
+    """
+    ids = discover_empresa_ids(1)
+    return str(ids[0]) if ids else None
 
 # ========== OPENAPI HELPERS ==========
 
@@ -183,6 +247,10 @@ def get_required_fields_from_openapi(path: str, method: str = "get") -> Optional
     except Exception as e:
         return None
 
+Copilot said: Reemplaza todo el bloque por este contenido
+Reemplaza todo el bloque por este contenido (sin los marcadores), manteniendo la indentación de nivel superior:
+
+Python
 # ========== FLUJO PRINCIPAL DE TESTS ==========
 
 def collect_endpoints() -> List[Tuple[str, str, List[int]]]:
@@ -223,14 +291,21 @@ def run_all_tests(endpoints: List[Tuple[str, str, List[int]]]):
         required_fields = get_required_fields_from_openapi(path, "get")
         if required_fields:
             print(f"[INFO] Campos requeridos para GET {path}: {required_fields}")
-        res = test_get(path, expected)
+        # Marcar como dinámico los endpoints de detalle de empresa
+        is_dynamic = "Detalle de empresa" in desc
+        res = test_get(path, expected, dynamic=is_dynamic)
         results.append(res)
+
     duration = time.time() - start
     return results, duration
 
 def summarize(results: List[TestResult], duration: float) -> int:
-    total = len(results)
-    passed = sum(r.ok for r in results)
+    # Separar resultados INFO de los tests reales
+    real_tests = [r for r in results if not r.is_info]
+    info_results = [r for r in results if r.is_info]
+    
+    total = len(real_tests)
+    passed = sum(r.ok for r in real_tests)
     failed = total - passed
 
     print("\nResumen:")
@@ -240,6 +315,8 @@ def summarize(results: List[TestResult], duration: float) -> int:
     else:
         print("  API Key: (no proporcionada)")
     print(f"  Endpoints probados: {total}")
+    if info_results:
+        print(f"  Resultados INFO: {len(info_results)} (no cuentan como fallo)")
     print(f"  PASS: {passed}")
     print(f"  FAIL: {failed}")
     print(f"  Tiempo total: {duration:.2f}s")
