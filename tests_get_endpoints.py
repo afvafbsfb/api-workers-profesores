@@ -264,7 +264,9 @@ def main() -> int:
     if exit_code == 0:
         print("Resultado final: EXIT 0 (éxito)")
     else:
-        print("Resultado final: EXIT 1 (fallos)")
+        print("Final result: EXIT 0 (success)")
+    else:
+        print("Final result: EXIT 1 (failures)")
     return exit_code
 
 
