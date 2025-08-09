@@ -54,7 +54,7 @@ if not BASE_URL:
 
 API_KEY = env("API_KEY")
 TIMEOUT = float(env("HTTP_TIMEOUT", "5.0"))
-TEST_EMPRESA_ID = env("TEST_EMPRESA_ID", "999999")  # ID "inexistente" (tolerante 200 o 404)
+TEST_EMPRESA_ID = env("TEST_EMPRESA_ID", DEFAULT_INEXISTENT_EMPRESA_ID)  # ID "inexistente" (tolerante 200 o 404)
 
 # Endpoints base (ruta relativa desde BASE_URL)
 # Formato: (method, path, tipo_validación)
