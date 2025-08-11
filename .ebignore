@@ -1,3 +1,31 @@
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# VCS
+.git/
+.gitignore
+
+# Local/IDE
+.vscode/
+.idea/
+
+# Tests, docs and dev-only artifacts
+tests/
+docs/
+
+# Local/runtime data
+instance/
+tmp/
+*.log
+local.db
+
+# Archives and misc
+*.zip
+*.tar
+*.tar.gz
 # Ignore local/venv/tests/docs files to keep EB uploads small
 .venv/
 __pycache__/
