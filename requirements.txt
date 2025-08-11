@@ -7,3 +7,4 @@ marshmallow
 requests
 pyyaml
 gunicorn
+awsgi; sys_platform != 'win32'
