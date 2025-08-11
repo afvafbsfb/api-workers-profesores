@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
     <style>
       body { margin: 0; background: #fafafa; }
-      .topbar { display: none; }
+      /* Keep Swagger topbar visible so the Authorize button is accessible */
     </style>
   </head>
   <body>
@@ -15,8 +15,9 @@
 
     <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js" crossorigin></script>
     <script>
+      const specUrl = '/openapi.yml?v=' + Date.now(); // cache-bust to avoid stale spec
       window.ui = SwaggerUIBundle({
-        url: '/openapi.yml',
+        url: specUrl,
         dom_id: '#swagger-ui',
         deepLinking: true,
         persistAuthorization: true,

@@ -30,11 +30,13 @@ paths:
           application/json:
             schema:
               type: object
-              required: [alumno_id, turno_id]
+              required: [alumno_id, turno_id, tarifa_id]
               properties:
                 alumno_id:
                   type: integer
                 turno_id:
+                  type: integer
+                tarifa_id:
                   type: integer
       responses:
         "200":
@@ -71,6 +73,100 @@ paths:
       responses:
         "200":
           description: Lista de turnos activos
+
+  /vlodeiro/secretaria/tarifas:
+    get:
+      summary: Lista todas las tarifas
+      responses:
+        "200":
+          description: Lista de tarifas
+    post:
+      summary: Crea una tarifa
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [empresa_id, descripcion, duracion_min, precio_base]
+              properties:
+                empresa_id:
+                  type: integer
+                descripcion:
+                  type: string
+                duracion_min:
+                  type: integer
+                precio_base:
+                  type: number
+                descuento:
+                  type: number
+                activo:
+                  type: boolean
+      responses:
+        "201":
+          description: Tarifa creada
+
+  /vlodeiro/secretaria/tarifas/{tarifa_id}:
+    put:
+      summary: Actualiza una tarifa
+      parameters:
+        - in: path
+          name: tarifa_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Tarifa actualizada
+        "404":
+          description: Tarifa no encontrada
+    delete:
+      summary: Elimina una tarifa
+      parameters:
+        - in: path
+          name: tarifa_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Tarifa eliminada
+        "404":
+          description: Tarifa no encontrada
+
+  /vlodeiro/secretaria/turnos/{turno_id}/alumnos:
+    get:
+      summary: Lista alumnos inscritos (activos) en un turno
+      parameters:
+        - in: path
+          name: turno_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Lista de alumnos en el turno
+
+  /vlodeiro/secretaria/inscripciones/{inscripcion_id}/baja:
+    post:
+      summary: Da de baja (fecha_fin = hoy) una inscripción
+      parameters:
+        - in: path
+          name: inscripcion_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Inscripción dada de baja
+        "404":
+          description: Inscripción no encontrada
 
   /vlodeiro/secretaria/alumnos:
     get:
@@ -165,4 +261,4 @@ components:
     api_key:
       type: apiKey
       in: header
-  name: X-Api-Key
+      name: X-Api-Key

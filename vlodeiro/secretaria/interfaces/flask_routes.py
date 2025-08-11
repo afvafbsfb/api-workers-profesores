@@ -43,6 +43,7 @@ def turnos_libres():
 class InscribirSchema(Schema):
     alumno_id = fields.Int(required=True)
     turno_id = fields.Int(required=True)
+    tarifa_id = fields.Int(required=True)
 
 # Esquema para registrar pago
 class RegistrarPagoSchema(Schema):
@@ -59,6 +60,7 @@ def inscribir():
         return jsonify({'error': 'Datos inválidos', 'detalles': ve.messages}), 400
     alumno_id = validated['alumno_id']
     turno_id = validated['turno_id']
+    tarifa_id = validated['tarifa_id']
     # Depuración avanzada
     debug_info = {}
     alumno = alumno_repo.get_by_id(str(alumno_id))
@@ -69,6 +71,15 @@ def inscribir():
     if not turno:
         debug_info['motivo'] = 'turno_no_encontrado'
         return jsonify({'error': 'No se pudo inscribir al alumno', 'debug': debug_info}), 400
+    # Validar tarifa: existe, activa y pertenece a la misma empresa
+    from models import Tarifa
+    tarifa = Tarifa.query.filter_by(id=tarifa_id, activo=True).first()
+    if not tarifa:
+        debug_info['motivo'] = 'tarifa_no_valida'
+        return jsonify({'error': 'Tarifa no válida o inactiva'}), 400
+    if getattr(tarifa, 'empresa_id', None) != getattr(turno, 'empresa_id', None):
+        debug_info['motivo'] = 'tarifa_empresa_mismatch'
+        return jsonify({'error': 'La tarifa no pertenece a la misma empresa del turno', 'debug': debug_info}), 400
     # Verificar capacidad
     from models import Inscripcion
     inscripciones = Inscripcion.query.filter_by(turno_id=turno_id).count()
@@ -82,9 +93,15 @@ def inscribir():
     if ya_inscrito:
         debug_info['motivo'] = 'alumno_ya_inscrito'
         return jsonify({'error': 'No se pudo inscribir al alumno', 'debug': debug_info}), 400
-    # Ejecutar inscripción
-    if inscribir_alumno_use_case.execute(alumno_id, turno_id):
-        return jsonify({'message': 'Alumno inscrito correctamente'}), 200
+    # Ejecutar inscripción con manejo de errores
+    try:
+        if inscribir_alumno_use_case.execute(alumno_id, turno_id, tarifa_id):
+            return jsonify({'message': 'Alumno inscrito correctamente'}), 200
+    except Exception as e:
+        # Evitar 500 por errores de integridad/relaciones
+        debug_info['motivo'] = 'excepcion_en_inscripcion'
+        debug_info['detalle'] = str(e)
+        return jsonify({'error': 'No se pudo inscribir al alumno', 'debug': debug_info}), 400
     debug_info['motivo'] = 'fallo_desconocido'
     return jsonify({'error': 'No se pudo inscribir al alumno', 'debug': debug_info}), 400
 
@@ -125,6 +142,116 @@ def listar_turnos():
         print("ERROR EN TURNOS:", e)
         print(traceback.format_exc())
         # Sanitiza error en producción
+        if current_app.config.get("ENV") == "production":
+            return jsonify({"ok": False, "error": "internal_error"}), 500
+        return jsonify({"ok": False, "error": str(e), "trace": traceback.format_exc()}), 500
+
+# --- ENDPOINTS TARIFAS ---
+@secretaria_bp.route('/tarifas', methods=['GET'])
+def listar_tarifas():
+    try:
+        from models import Tarifa
+        tarifas = Tarifa.query.all()
+        return jsonify([
+            {
+                "id": t.id,
+                "empresa_id": t.empresa_id,
+                "descripcion": t.descripcion,
+                "duracion_min": t.duracion_min,
+                "precio_base": t.precio_base,
+                "descuento": t.descuento,
+                "activo": t.activo,
+            } for t in tarifas
+        ])
+    except Exception as e:
+        import traceback
+        if current_app.config.get("ENV") == "production":
+            return jsonify({"ok": False, "error": "internal_error"}), 500
+        return jsonify({"ok": False, "error": str(e), "trace": traceback.format_exc()}), 500
+
+@secretaria_bp.route('/tarifas', methods=['POST'])
+def crear_tarifa():
+    try:
+        from models import Tarifa, db
+        data = request.get_json() or {}
+        required = ["empresa_id", "descripcion", "duracion_min", "precio_base"]
+        if not all(k in data for k in required):
+            return jsonify({"error": "Faltan campos requeridos", "requeridos": required}), 400
+        t = Tarifa(
+            empresa_id=int(data["empresa_id"]),
+            descripcion=data.get("descripcion"),
+            duracion_min=int(data["duracion_min"]),
+            precio_base=float(data["precio_base"]),
+            descuento=float(data.get("descuento", 0)),
+            activo=bool(data.get("activo", True)),
+        )
+        db.session.add(t)
+        db.session.commit()
+        return jsonify({"message": "Tarifa creada", "id": t.id}), 201
+    except Exception as e:
+        import traceback
+        if current_app.config.get("ENV") == "production":
+            return jsonify({"ok": False, "error": "internal_error"}), 500
+        return jsonify({"ok": False, "error": str(e), "trace": traceback.format_exc()}), 500
+
+@secretaria_bp.route('/tarifas/<int:tarifa_id>', methods=['PUT'])
+def actualizar_tarifa(tarifa_id: int):
+    try:
+        from models import Tarifa, db
+        data = request.get_json() or {}
+        t = Tarifa.query.filter_by(id=tarifa_id).first()
+        if not t:
+            return jsonify({"error": "Tarifa no encontrada"}), 404
+        for field in ["empresa_id", "descripcion", "duracion_min", "precio_base", "descuento", "activo"]:
+            if field in data:
+                setattr(t, field, data[field])
+        db.session.commit()
+        return jsonify({"message": "Tarifa actualizada"})
+    except Exception as e:
+        import traceback
+        if current_app.config.get("ENV") == "production":
+            return jsonify({"ok": False, "error": "internal_error"}), 500
+        return jsonify({"ok": False, "error": str(e), "trace": traceback.format_exc()}), 500
+
+@secretaria_bp.route('/tarifas/<int:tarifa_id>', methods=['DELETE'])
+def eliminar_tarifa(tarifa_id: int):
+    try:
+        from models import Tarifa, db
+        t = Tarifa.query.filter_by(id=tarifa_id).first()
+        if not t:
+            return jsonify({"error": "Tarifa no encontrada"}), 404
+        db.session.delete(t)
+        db.session.commit()
+        return jsonify({"message": "Tarifa eliminada"})
+    except Exception as e:
+        import traceback
+        if current_app.config.get("ENV") == "production":
+            return jsonify({"ok": False, "error": "internal_error"}), 500
+        return jsonify({"ok": False, "error": str(e), "trace": traceback.format_exc()}), 500
+
+# --- ENDPOINTS INSCRIPCIONES ---
+@secretaria_bp.route('/turnos/<int:turno_id>/alumnos', methods=['GET'])
+def alumnos_en_turno(turno_id: int):
+    try:
+        rows = turno_repo.alumnos_inscritos(turno_id)
+        return jsonify([
+            {"alumno_id": r[0], "nombre": r[1], "email": r[2], "inscripcion_id": r[3]} for r in rows
+        ])
+    except Exception as e:
+        import traceback
+        if current_app.config.get("ENV") == "production":
+            return jsonify({"ok": False, "error": "internal_error"}), 500
+        return jsonify({"ok": False, "error": str(e), "trace": traceback.format_exc()}), 500
+
+@secretaria_bp.route('/inscripciones/<int:inscripcion_id>/baja', methods=['POST'])
+def baja_inscripcion(inscripcion_id: int):
+    try:
+        ok = turno_repo.baja_inscripcion(inscripcion_id)
+        if not ok:
+            return jsonify({"error": "Inscripción no encontrada o ya dada de baja"}), 404
+        return jsonify({"message": "Inscripción dada de baja"})
+    except Exception as e:
+        import traceback
         if current_app.config.get("ENV") == "production":
             return jsonify({"ok": False, "error": "internal_error"}), 500
         return jsonify({"ok": False, "error": str(e), "trace": traceback.format_exc()}), 500

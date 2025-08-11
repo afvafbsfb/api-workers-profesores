@@ -10,7 +10,12 @@ try:
     from vlodeiro.empresa.interfaces.empresa_routes import empresa_bp
     from datetime import datetime, timezone
     # from vlodeiro.secretaria.infrastructure.repositorio_mysql import TurnoMySQLRepository
-    ## from dotenv import load_dotenv
+    # Dotenv: opcional en desarrollo. Si no está instalado, usa no-op
+    try:
+        from dotenv import load_dotenv as _load_dotenv
+    except Exception:
+        def _load_dotenv(*args, **kwargs):
+            return False
     from functools import wraps
     from models import db, Turno  # Importa SQLAlchemy y modelos
     # Validación de entrada
@@ -22,7 +27,12 @@ try:
     # Seguridad: CORS y headers
     from flask_cors import CORS
 
-    ## load_dotenv()  # Desactivado para evitar sobrescribir variables de entorno
+    # Carga variables desde .env si existe, sin sobrescribir variables del proceso
+    # Seguro en producción (no hay .env en el servidor y override=False)
+    try:
+        _load_dotenv(override=False)
+    except Exception:
+        pass
 
     app = Flask(__name__)
     # Permite CORS solo para dominios confiables (ajusta en producción)
@@ -48,11 +58,17 @@ try:
     APP_ENV = (_env('APP_ENV', 'development') or 'development').strip().lower()
 
     def _db_uri_from_components(prefix: str = ''):
-        u = _env(f'{prefix}DB_USER')
-        p = _env(f'{prefix}DB_PASS')
-        h = _env(f'{prefix}DB_HOST')
-        pt = _env(f'{prefix}DB_PORT')
-        n = _env(f'{prefix}DB_NAME')
+        """
+        Construye la URI a partir de variables de entorno con prefijos:
+        - prefix='DB_DEV_'  -> usa DB_DEV_HOST, DB_DEV_PORT, DB_DEV_USER, DB_DEV_PASS, DB_DEV_NAME
+        - prefix='DB_PROD_' -> usa DB_PROD_HOST, ...
+        - prefix='DB_'      -> usa DB_HOST, DB_PORT, DB_USER, DB_PASS, DB_NAME
+        """
+        u = _env(f'{prefix}USER')
+        p = _env(f'{prefix}PASS')
+        h = _env(f'{prefix}HOST')
+        pt = _env(f'{prefix}PORT')
+        n = _env(f'{prefix}NAME')
         if all([u, h, pt, n]) and p is not None:
             return f"mysql+pymysql://{u}:{p}@{h}:{pt}/{n}"
         return None

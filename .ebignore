@@ -15,27 +15,26 @@ __pycache__/
 # Tests, docs and dev-only artifacts
 tests/
 docs/
+*.md
+**/.pytest_cache/
+**/.mypy_cache/
+**/.coverage
+**/htmlcov/
 
 # Local/runtime data
 instance/
 tmp/
+**/tmp/
 *.log
 local.db
+*.sqlite*
+
+# Environments
+.venv/
+.env
+*.env
 
 # Archives and misc
 *.zip
 *.tar
 *.tar.gz
-# Ignore local/venv/tests/docs files to keep EB uploads small
-.venv/
-__pycache__/
-*.pyc
-.git/
-.gitignore
-**/.pytest_cache/
-**/.mypy_cache/
-**/.coverage
-**/htmlcov/
-docs/
-*.md
-**/tmp/

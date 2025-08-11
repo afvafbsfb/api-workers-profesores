@@ -3,7 +3,7 @@ import uuid
 import requests
 import pytest
 from app import app
-from models import db, Empresa, Turno, Alumno, Tarifa
+from models import db, Empresa, Turno, Alumno, Tarifa, Inscripcion
 
 USE_LIVE = os.getenv("USE_LIVE") == "1"
 BASE_URL = os.getenv("BASE_URL", "http://localhost:5000").rstrip("/")
@@ -110,11 +110,20 @@ def test_turnos_libres(client):
     assert 'plazas_libres' in data[0]
 
 def test_inscribir_and_pago(client):
-    # Inscribir alumno 3 en turno 1
-    resp = client.post('/vlodeiro/secretaria/inscribir', json={"alumno_id": 3, "turno_id": 1})
-    assert resp.status_code == 200 or resp.status_code == 400
+    # Obtener ids para prueba
+    with app.app_context():
+        tarifa = Tarifa.query.filter_by(activo=True).first()
+        assert tarifa is not None
+        turno = Turno.query.first()
+        alumno = Alumno.query.first()
+        assert turno is not None and alumno is not None
+        turno_id = turno.id
+        alumno_id = alumno.id
+    # Inscribir alumno con tarifa explícita
+    resp = client.post('/vlodeiro/secretaria/inscribir', json={"alumno_id": alumno_id, "turno_id": turno_id, "tarifa_id": tarifa.id})
+    assert resp.status_code in (200, 400)
     # Registrar pago para alumno 3
-    resp = client.post('/vlodeiro/secretaria/registrar_pago', json={"alumno_id": 3, "importe": 500, "concepto": "Matricula"})
+    resp = client.post('/vlodeiro/secretaria/registrar_pago', json={"alumno_id": alumno_id, "importe": 500, "concepto": "Matricula"})
     assert resp.status_code == 200 or resp.status_code == 400
 
 
@@ -166,3 +175,49 @@ def test_alumnos_listado_y_consulta(client):
     assert resp.status_code == 200
     resultados = resp.get_json()
     assert isinstance(resultados, list)
+
+
+def test_tarifas_crud_y_inscritos_y_baja(client):
+    # Crear tarifa
+    with app.app_context():
+        empresa = Empresa.query.first()
+        assert empresa is not None
+        empresa_id = empresa.id
+    resp = client.post('/vlodeiro/secretaria/tarifas', json={
+        "empresa_id": empresa_id,
+        "descripcion": "Tarifa Test",
+        "duracion_min": 60,
+        "precio_base": 25.0
+    })
+    assert resp.status_code in (201, 400)
+    # Listar tarifas
+    resp = client.get('/vlodeiro/secretaria/tarifas')
+    assert resp.status_code == 200
+    tarifas = resp.get_json()
+    assert isinstance(tarifas, list)
+    if tarifas:
+        tid = tarifas[0].get('id')
+        # Actualizar tarifa
+        resp = client.put(f'/vlodeiro/secretaria/tarifas/{tid}', json={"descuento": 5})
+        assert resp.status_code in (200, 404)
+    # Alumnos inscritos en un turno
+    with app.app_context():
+        turno = Turno.query.first()
+        alumno = Alumno.query.first()
+        tarifa = Tarifa.query.first()
+        assert turno and alumno and tarifa
+        # Asegurar una inscripción para poder probar la baja
+        ins = Inscripcion.query.filter_by(alumno_id=alumno.id, turno_id=turno.id, fecha_fin=None).first()
+        if not ins:
+            ins = Inscripcion(alumno_id=alumno.id, turno_id=turno.id, tarifa_id=tarifa.id, fecha_inicio=__import__('datetime').date.today())
+            db.session.add(ins)
+            db.session.commit()
+        ins_id = ins.id
+        turno_id = turno.id
+    resp = client.get(f'/vlodeiro/secretaria/turnos/{turno_id}/alumnos')
+    assert resp.status_code == 200
+    lst = resp.get_json()
+    assert isinstance(lst, list)
+    # Dar de baja inscripción
+    resp = client.post(f'/vlodeiro/secretaria/inscripciones/{ins_id}/baja')
+    assert resp.status_code in (200, 404)

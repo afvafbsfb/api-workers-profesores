@@ -51,8 +51,8 @@ class ClaseMySQLRepository:
         clase = Clase.query.filter_by(id=clase_id).first()
         return clase
 
-    def inscribir_alumno(self, clase_id: int, alumno_id: int) -> bool:
-        from models import Inscripcion, Clase, db
+    def inscribir_alumno(self, clase_id: int, alumno_id: int, tarifa_id: int) -> bool:
+        from models import Inscripcion, Clase, db, Tarifa
         clase = Clase.query.filter_by(id=clase_id).first()
         if not clase:
             return False
@@ -60,8 +60,12 @@ class ClaseMySQLRepository:
         inscripciones = Inscripcion.query.filter_by(turno_id=clase_id).count()
         if inscripciones >= clase.capacidad:
             return False
+        # Validar tarifa explícita
+        tarifa = Tarifa.query.filter_by(id=tarifa_id, activo=True).first()
+        if not tarifa:
+            return False
         # Registrar inscripción
-        inscripcion = Inscripcion(alumno_id=alumno_id, turno_id=clase_id, tarifa_id=1, fecha_inicio=date.today(), fecha_fin=None)
+        inscripcion = Inscripcion(alumno_id=alumno_id, turno_id=clase_id, tarifa_id=tarifa.id, fecha_inicio=date.today(), fecha_fin=None)
         db.session.add(inscripcion)
         db.session.commit()
         return True
@@ -79,8 +83,8 @@ class TurnoMySQLRepository:
         from models import Turno
         return Turno.query.filter_by(empresa_id=empresa_id, activo=True).all()
 
-    def inscribir_alumno(self, turno_id: int, alumno_id: int) -> bool:
-        from models import Inscripcion, Turno, db
+    def inscribir_alumno(self, turno_id: int, alumno_id: int, tarifa_id: int) -> bool:
+        from models import Inscripcion, Turno, db, Tarifa
         turno = Turno.query.filter_by(id=turno_id).first()
         if not turno:
             return False
@@ -88,8 +92,32 @@ class TurnoMySQLRepository:
         inscripciones_activas = Inscripcion.query.filter_by(turno_id=turno_id, fecha_fin=None).count()
         if inscripciones_activas >= turno.capacidad:
             return False
+        # Validar tarifa explícita
+        tarifa = Tarifa.query.filter_by(id=tarifa_id, activo=True).first()
+        if not tarifa:
+            return False
         # Registrar inscripción
-        inscripcion = Inscripcion(alumno_id=alumno_id, turno_id=turno_id, tarifa_id=1, fecha_inicio=date.today(), fecha_fin=None)
+        inscripcion = Inscripcion(alumno_id=alumno_id, turno_id=turno_id, tarifa_id=tarifa.id, fecha_inicio=date.today(), fecha_fin=None)
         db.session.add(inscripcion)
+        db.session.commit()
+        return True
+
+    # Listar alumnos inscritos en un turno
+    def alumnos_inscritos(self, turno_id: int):
+        from models import Inscripcion, Alumno
+        return (
+            Inscripcion.query.filter_by(turno_id=turno_id, fecha_fin=None)
+            .join(Alumno, Inscripcion.alumno_id == Alumno.id)
+            .with_entities(Alumno.id, Alumno.nombre, Alumno.email, Inscripcion.id.label('inscripcion_id'))
+            .all()
+        )
+
+    # Dar de baja (cerrar) una inscripción
+    def baja_inscripcion(self, inscripcion_id: int) -> bool:
+        from models import Inscripcion, db
+        ins = Inscripcion.query.filter_by(id=inscripcion_id, fecha_fin=None).first()
+        if not ins:
+            return False
+        ins.fecha_fin = date.today()
         db.session.commit()
         return True

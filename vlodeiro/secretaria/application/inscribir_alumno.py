@@ -8,7 +8,7 @@ class InscribirAlumno:
         self.alumno_repository = alumno_repository
         self.turno_repository = turno_repository
 
-    def execute(self, alumno_id: str, turno_id: str) -> bool:
+    def execute(self, alumno_id: str, turno_id: str, tarifa_id: str) -> bool:
         alumno = self.alumno_repository.get_by_id(alumno_id)
         turno = self.turno_repository.get_by_id(turno_id)
 
@@ -16,4 +16,4 @@ class InscribirAlumno:
             return False
 
         # Usar el método inscribir_alumno del repositorio para registrar en la base de datos
-        return self.turno_repository.inscribir_alumno(turno_id, alumno_id)
+        return self.turno_repository.inscribir_alumno(turno_id, alumno_id, tarifa_id)

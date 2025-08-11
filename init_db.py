@@ -2,6 +2,7 @@ from app import app
 
 from models import db, Empresa, Turno, Tarifa, Inscripcion, Sesion, Asistencia, Pago, Alumno
 from datetime import date
+import argparse
 
 def seed_if_empty():
     # Solo poblar si no hay registros
@@ -52,10 +53,40 @@ def seed_if_empty():
         db.session.add_all(alumnos)
         db.session.commit()
 
+    # Asegurar una tarifa por defecto para evitar errores de FK en inscripciones
+    if db.session.query(Tarifa).count() == 0:
+        default_tarifa = Tarifa(
+            empresa_id=empresa.id,
+            descripcion="General 120min",
+            duracion_min=120,
+            precio_base=40.0,
+            descuento=0,
+            activo=True,
+        )
+        db.session.add(default_tarifa)
+        db.session.commit()
+        print(f"[init_db] Tarifa por defecto creada con id={default_tarifa.id}")
+    else:
+        print("[init_db] Ya existen tarifas; no se crean nuevas")
+
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Inicializa la base de datos y carga datos de prueba.")
+    parser.add_argument(
+        "--reset",
+        action="store_true",
+        help="BORRA todas las tablas y las recrea antes de cargar datos (¡destructivo!).",
+    )
+    args = parser.parse_args()
+
     with app.app_context():
+        if args.reset:
+            print("[init_db] --reset solicitado: borrando todas las tablas...")
+            db.drop_all()
         # Crea tablas si no existen y pobla datos si está vacío
         db.create_all()
         seed_if_empty()
-        print("Init DB: tablas aseguradas y datos iniciales listos (idempotente)")
+        if args.reset:
+            print("[init_db] Reset completado: tablas recreadas y datos de prueba cargados")
+        else:
+            print("Init DB: tablas aseguradas y datos iniciales listos (idempotente)")
