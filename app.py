@@ -41,24 +41,38 @@ try:
     app.register_blueprint(empresa_bp, url_prefix='/vlodeiro/empresa')
     print(app.url_map)
 
-    # Configuración de la base de datos usando variables de entorno
-    def get_env_var(name):
-        value = os.getenv(name)
-        if not value:
-            raise RuntimeError(f"Falta la variable de entorno: {name}")
-        return value
+    # Configuración por entorno y seguridad (dev/prod) + DB
+    def _env(name, default=None):
+        return os.getenv(name, default)
 
-    try:
-        DB_USER = get_env_var('DB_USER')
-        DB_PASS = get_env_var('DB_PASS')
-        DB_HOST = get_env_var('DB_HOST')
-        DB_PORT = get_env_var('DB_PORT')
-        DB_NAME = get_env_var('DB_NAME')
-        SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-    except RuntimeError:
-        # Si faltan variables, usa SQLite en local
-        SQLALCHEMY_DATABASE_URI = "sqlite:///local.db"
-    API_KEY = os.getenv('API_KEY', 'devkey')
+    APP_ENV = (_env('APP_ENV', 'development') or 'development').strip().lower()
+
+    def _db_uri_from_components(prefix: str = ''):
+        u = _env(f'{prefix}DB_USER')
+        p = _env(f'{prefix}DB_PASS')
+        h = _env(f'{prefix}DB_HOST')
+        pt = _env(f'{prefix}DB_PORT')
+        n = _env(f'{prefix}DB_NAME')
+        if all([u, h, pt, n]) and p is not None:
+            return f"mysql+pymysql://{u}:{p}@{h}:{pt}/{n}"
+        return None
+
+    # Precedencia para DB: DATABASE_URL/SQLALCHEMY_DATABASE_URI > env por entorno > env genérico > SQLite local (/tmp en Lambda)
+    is_lambda = bool(_env('AWS_LAMBDA_FUNCTION_NAME'))
+    SQLALCHEMY_DATABASE_URI = (
+        _env('DATABASE_URL')
+        or _env('SQLALCHEMY_DATABASE_URI')
+        or (_db_uri_from_components('DB_PROD_') if APP_ENV in ('prod', 'production') else _db_uri_from_components('DB_DEV_'))
+        or _db_uri_from_components('DB_')
+        or ("sqlite:////tmp/local.db" if is_lambda else "sqlite:///local.db")
+    )
+
+    # API Key por entorno: API_KEY > API_KEY_PROD/API_KEY_DEV > 'devkey'
+    API_KEY = (
+        _env('API_KEY')
+        or (_env('API_KEY_PROD') if APP_ENV in ('prod', 'production') else _env('API_KEY_DEV'))
+        or 'devkey'
+    )
     app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -76,7 +90,7 @@ try:
             return jsonify({"ok": False, "error": code}), status
         return jsonify({"ok": False, "error": code, "hint": hint}), status
 
-    # Decorador para requerir API Key
+    # Decorador para requerir API Key (por si quieres aplicarlo a endpoints concretos)
     def require_api_key(f):
         @wraps(f)
         def decorated(*args, **kwargs):
@@ -85,6 +99,21 @@ try:
                 return err("unauthorized", status=401)
             return f(*args, **kwargs)
         return decorated
+
+    # Enforce global API Key salvo rutas públicas mínimas (docs y spec)
+    PUBLIC_PATHS = {'/docs', '/openapi.yml'}
+
+    @app.before_request
+    def _enforce_api_key_globally():
+        if request.method == 'OPTIONS':
+            return None
+        path = request.path.rstrip('/') if request.path != '/' else '/'
+        if path in PUBLIC_PATHS:
+            return None
+        api_key = request.headers.get('X-Api-Key')
+        if api_key != API_KEY:
+            return err('unauthorized', status=401)
+        return None
 
     def _build():
         try:

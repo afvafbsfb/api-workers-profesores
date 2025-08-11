@@ -4,6 +4,8 @@ info:
   version: "0.1.0"
 servers:
   - url: http://localhost:5000
+security:
+  - api_key: []
 paths:
   /health:
     get:
@@ -163,4 +165,4 @@ components:
     api_key:
       type: apiKey
       in: header
-      name: X-Api
+  name: X-Api-Key
