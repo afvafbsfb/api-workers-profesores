@@ -3,7 +3,7 @@ info:
   title: Workers API (staging)
   version: "0.1.0"
 servers:
-  - url: http://localhost:5000
+  - url: /
 security:
   - api_key: []
 paths:
