@@ -26,6 +26,8 @@ try:
         args = fields.Dict(load_default={})
     # Seguridad: CORS y headers
     from flask_cors import CORS
+    # Autenticación API Key modularizada
+    import auth
 
     # Carga variables desde .env si existe, sin sobrescribir variables del proceso
     # Seguro en producción (no hay .env en el servidor y override=False)
@@ -83,12 +85,7 @@ try:
         or ("sqlite:////tmp/local.db" if is_lambda else "sqlite:///local.db")
     )
 
-    # API Key por entorno: API_KEY > API_KEY_PROD/API_KEY_DEV > 'devkey'
-    API_KEY = (
-        _env('API_KEY')
-        or (_env('API_KEY_PROD') if APP_ENV in ('prod', 'production') else _env('API_KEY_DEV'))
-        or 'devkey'
-    )
+
     app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -106,34 +103,11 @@ try:
             return jsonify({"ok": False, "error": code}), status
         return jsonify({"ok": False, "error": code, "hint": hint}), status
 
-    # Decorador para requerir API Key (por si quieres aplicarlo a endpoints concretos)
-    def require_api_key(f):
-        @wraps(f)
-        def decorated(*args, **kwargs):
-            api_key = request.headers.get("X-Api-Key")
-            if api_key != API_KEY:
-                return err("unauthorized", status=401)
-            return f(*args, **kwargs)
-        return decorated
-
     # Enforce global API Key salvo rutas públicas mínimas (docs y spec)
-    # Ahora: cualquier path que contenga '/docs' u 'openapi.yml' es público (para evitar 401 con prefijos de Gateway)
-    PUBLIC_PATH_KEYWORDS = ("/docs", "openapi.yml")
-
     @app.before_request
     def _enforce_api_key_globally():
         print(f"[DEBUG] Path recibido: {request.path}", flush=True)
-        if request.method == 'OPTIONS':
-            return None
-        raw_path = request.path or '/'
-        # Si el path contiene alguna palabra clave pública, no requerir API Key
-        # Solo /docs y /openapi.yml son públicos (exactos)
-        if raw_path in ("/docs", "/openapi.yml"):
-            return None
-        api_key = request.headers.get('X-Api-Key')
-        if api_key != API_KEY:
-            return err('unauthorized', status=401)
-        return None
+        return auth.enforce_api_key_globally()
 
     def _build():
         try:

@@ -1,13 +1,21 @@
 # Reglas de oro para GitHub Copilot en este proyecto
 
+**Versión actual de Python del proyecto: 3.13.5**
+
 Copilot debe encargarse siempre de:
 
 - Al inicio de cada sesión, revisar la consistencia entre el código fuente y la documentación técnica y funcional del proyecto.
+
 - Cuando el usuario solicite ejecutar el CI/CD, actualizar la documentación funcional y técnica en la carpeta `docs/`.
+
 - Actualizar el archivo `VERSION` siguiendo el versionado semántico (semver) para cada cambio relevante.
+
 - Mantener el archivo `CHANGELOG.md` actualizado con cada nueva funcionalidad, corrección de errores o refactorización.
+
 - Preparar el commit con un mensaje claro, descriptivo y relacionado con el cambio realizado.
+
 - Realizar el commit y el push al repositorio remoto.
+
 - No omitir nunca estos pasos, aunque el usuario no los recuerde explícitamente.
 
 Copilot debe priorizar la calidad, el contexto técnico y operativo para ayudar en desarrollo, testing y despliegue.
