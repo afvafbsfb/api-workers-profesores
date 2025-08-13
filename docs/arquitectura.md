@@ -1,3 +1,19 @@
+# Principios clave de la arquitectura
+
+- **Arquitectura DDD (Domain Driven Design):**  
+	✔️ El proyecto está organizado por dominios (`vlodeiro/empresa`, `vlodeiro/secretaria`) y capas (`domain`, `application`, `infrastructure`, `interfaces`).
+
+- **Separación clara entre dominio, infraestructura y presentación:**  
+	✔️ Cada dominio tiene sus propias carpetas para lógica de negocio, acceso a datos y endpoints HTTP.
+
+- **Endpoints REST protegidos por API Key (X-Api-Key):**  
+	✔️ Parcialmente.  
+	Los endpoints están protegidos por API Key, pero la API está expuesta mediante AWS API Gateway (HTTP API), no como REST API Gateway clásico.  
+	La validación de la API Key se realiza en el backend Flask, no en el gateway.
+
+- **Despliegue:**  
+	✔️ El despliegue se realiza en AWS Elastic Beanstalk, no en cPanel.
+
 # Arquitectura y organización del proyecto Workers API
 
 ## Estructura principal
@@ -15,3 +31,38 @@
 - `docs/`: Documentación extendida y ejemplos.
 
 > Nota: Desde agosto 2025, la autenticación por API Key está modularizada en `auth.py` y ya no reside en `app.py`.
+
+# Flujo típico de una petición
+
+1. El usuario realiza una petición HTTP a un endpoint (por ejemplo, `/vlodeiro/secretaria/alumnos/2`).
+2. El endpoint valida la API Key y los parámetros de entrada.
+3. Se consulta el dominio correspondiente (por ejemplo, `Alumno`) y se ejecuta la lógica de negocio.
+4. El resultado se devuelve en formato JSON.
+
+# Dependencias principales
+
+El proyecto utiliza las siguientes dependencias principales:
+
+- Flask
+- Flask-SQLAlchemy
+- Marshmallow
+- flask-cors
+- python-dotenv
+- pymysql
+- cryptography
+- requests
+- pyyaml
+- gunicorn
+- awsgi (solo en Linux)
+
+Para testing y desarrollo:
+- pytest
+- pytest-cov
+
+# Ejemplos de uso
+
+Para ver y probar ejemplos de todos los endpoints, consulta la documentación interactiva en Swagger UI:
+
+**[Swagger UI (documentación y pruebas de endpoints)](https://o5nztloqde.execute-api.eu-west-3.amazonaws.com/docs)**
+
+Allí puedes ver los parámetros, respuestas y realizar pruebas en tiempo real sobre la API.
