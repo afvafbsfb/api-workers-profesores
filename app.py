@@ -117,14 +117,18 @@ try:
         return decorated
 
     # Enforce global API Key salvo rutas públicas mínimas (docs y spec)
-    PUBLIC_PATHS = {'/docs', '/openapi.yml'}
+    # Ahora: cualquier path que contenga '/docs' u 'openapi.yml' es público (para evitar 401 con prefijos de Gateway)
+    PUBLIC_PATH_KEYWORDS = ("/docs", "openapi.yml")
 
     @app.before_request
     def _enforce_api_key_globally():
+        print(f"[DEBUG] Path recibido: {request.path}", flush=True)
         if request.method == 'OPTIONS':
             return None
-        path = request.path.rstrip('/') if request.path != '/' else '/'
-        if path in PUBLIC_PATHS:
+        raw_path = request.path or '/'
+        # Si el path contiene alguna palabra clave pública, no requerir API Key
+        # Solo /docs y /openapi.yml son públicos (exactos)
+        if raw_path in ("/docs", "/openapi.yml"):
             return None
         api_key = request.headers.get('X-Api-Key')
         if api_key != API_KEY:
