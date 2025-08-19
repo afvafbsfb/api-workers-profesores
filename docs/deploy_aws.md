@@ -4,7 +4,7 @@
 
 ### 1. Preparar el paquete
 - Verifica que todos los tests pasen y la cobertura sea suficiente.
-- Empaqueta el proyecto en un archivo ZIP (incluye app.py, requirements.txt, openapi.yml, Procfile, y la carpeta vlodeiro/).
+- Empaqueta todo el proyecto en un archivo ZIP (incluye: app.py, requirements.txt, openapi.yml, Procfile, y la carpeta vlodeiro/).
 
 ### 2. Subir archivos a Elastic Beanstalk
 - Accede a la consola de AWS y entra en Elastic Beanstalk.
