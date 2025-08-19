@@ -4,12 +4,13 @@ info:
   title: Workers API (staging)
   version: "0.1.0"
 servers:
-  - url: http://o5nztloqde.execute-api.eu-west-3.amazonaws.com
+  - url: https://o5nztloqde.execute-api.eu-west-3.amazonaws.com
 security:
   - api_key: []
 paths:
   /health:
     get:
+      operationId: healthCheck
       summary: Health check
       responses:
         "200":
@@ -17,6 +18,7 @@ paths:
 
   /vlodeiro/secretaria/turnos_libres:
     get:
+      operationId: getTurnosLibres
       summary: Lista todos los turnos con plazas libres
       responses:
         "200":
@@ -24,6 +26,7 @@ paths:
 
   /vlodeiro/secretaria/inscribir:
     post:
+      operationId: inscribirAlumno
       summary: Inscribe un alumno en un turno
       requestBody:
         required: true
@@ -47,6 +50,7 @@ paths:
 
   /vlodeiro/secretaria/registrar_pago:
     post:
+      operationId: registrarPago
       summary: Registra un pago para un alumno
       requestBody:
         required: true
@@ -70,6 +74,7 @@ paths:
 
   /vlodeiro/secretaria/turnos:
     get:
+      operationId: getTurnosActivos
       summary: Lista todos los turnos activos de la empresa
       responses:
         "200":
@@ -77,11 +82,13 @@ paths:
 
   /vlodeiro/secretaria/tarifas:
     get:
+      operationId: getTarifas
       summary: Lista todas las tarifas
       responses:
         "200":
           description: Lista de tarifas
     post:
+      operationId: crearTarifa
       summary: Crea una tarifa
       requestBody:
         required: true
@@ -109,6 +116,7 @@ paths:
 
   /vlodeiro/secretaria/tarifas/{tarifa_id}:
     put:
+      operationId: actualizarTarifa
       summary: Actualiza una tarifa
       parameters:
         - in: path
@@ -129,6 +137,7 @@ paths:
         "404":
           description: Tarifa no encontrada
     delete:
+      operationId: eliminarTarifa
       summary: Elimina una tarifa
       parameters:
         - in: path
@@ -144,6 +153,7 @@ paths:
 
   /vlodeiro/secretaria/turnos/{turno_id}/alumnos:
     get:
+      operationId: getAlumnosTurno
       summary: Lista alumnos inscritos (activos) en un turno
       parameters:
         - in: path
@@ -157,6 +167,7 @@ paths:
 
   /vlodeiro/secretaria/inscripciones/{inscripcion_id}/baja:
     post:
+      operationId: bajaInscripcion
       summary: Da de baja (fecha_fin = hoy) una inscripción
       parameters:
         - in: path
@@ -172,6 +183,7 @@ paths:
 
   /vlodeiro/secretaria/alumnos:
     get:
+      operationId: getAlumnos
       summary: Lista todos los alumnos
       responses:
         "200":
@@ -179,6 +191,7 @@ paths:
 
   /vlodeiro/secretaria/alumnos/{alumno_id}:
     get:
+      operationId: getAlumnoById
       summary: Obtiene los datos de un alumno por su ID
       parameters:
         - in: path
@@ -195,6 +208,7 @@ paths:
 
   /vlodeiro/secretaria/alumnos/buscar:
     get:
+      operationId: buscarAlumnosPorNombre
       summary: Busca alumnos por nombre (coincidencia parcial)
       parameters:
         - in: query
@@ -211,6 +225,7 @@ paths:
 
   /vlodeiro/empresa/empresa:
     post:
+      operationId: crearEmpresa
       summary: Crea una nueva empresa
       requestBody:
         required: true
@@ -237,6 +252,7 @@ paths:
           description: El nombre es obligatorio
 
     get:
+      operationId: getEmpresas
       summary: Lista todas las empresas
       responses:
         "200":
@@ -244,6 +260,7 @@ paths:
 
   /vlodeiro/empresa/empresa/{empresa_id}:
     get:
+      operationId: getEmpresaById
       summary: Obtiene los datos de una empresa por su ID
       parameters:
         - in: path
@@ -264,3 +281,4 @@ components:
       type: apiKey
       in: header
       name: X-Api-Key
+  schemas: {}
