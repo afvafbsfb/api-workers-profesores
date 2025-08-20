@@ -15,14 +15,28 @@
 
 Abre Git Bash en la raíz del proyecto.
 
-# 1. Copia el archivo a la raíz temporalmente
-cp docs/openapi-rest.yaml openapi-rest.yaml
 
-# 2. Crea el ZIP con todo lo necesario (ejecuta esto en la raíz del proyecto)
-zip -r deploy.zip main.py models.py auth.py requirements.txt openapi-rest.yaml Procfile vlodeiro wsgi.py passenger_wsgi.py
+### Automatización del empaquetado para despliegue
 
-# 3. Elimina el archivo temporal de la raíz
+Puedes automatizar los tres pasos con este comando (ejecuta en la raíz del proyecto):
+
+```sh
+cp docs/openapi-rest.yaml openapi-rest.yaml; \
+zip -r deploy.zip main.py models.py auth.py requirements.txt openapi-rest.yaml Procfile vlodeiro wsgi.py passenger_wsgi.py; \
 rm openapi-rest.yaml
+```
+
+Esto copiará el YAML, generará el ZIP y eliminará el archivo temporal automáticamente.
+
+---
+
+### Acceso directo a la documentación Swagger UI en producción
+
+No necesitas usar https://editor.swagger.io ni pegar la URL manualmente. Una vez desplegada la API, accede directamente a la documentación interactiva en:
+
+**https://ppmr69im5j.execute-api.eu-west-3.amazonaws.com/prod/docs**
+
+Desde ahí puedes probar todos los endpoints y ver la especificación OpenAPI cargada automáticamente.
 
 2. Accede a la consola de AWS > Elastic Beanstalk > tu entorno > "Cargar y desplegar".
 
@@ -79,7 +93,7 @@ Configura estas variables en Elastic Beanstalk para conectar con la base de dato
 
 - **API REST Producción:** https://ppmr69im5j.execute-api.eu-west-3.amazonaws.com/prod
 - **OpenAPI YAML:** https://api-workers-plugins.s3.eu-west-3.amazonaws.com/openapi-rest.yaml
-- **Swagger UI:** (puedes usar https://editor.swagger.io/ y cargar la URL del YAML)
+**Swagger UI:** https://ppmr69im5j.execute-api.eu-west-3.amazonaws.com/prod/docs
 
 ## 6. Notas y buenas prácticas
 
@@ -91,6 +105,7 @@ Configura estas variables en Elastic Beanstalk para conectar con la base de dato
 
 ---
 
+
 ## 7. Depuración de errores en producción (logging y debug)
 
 Si tienes un error 500 y no ves el detalle en los logs estándar, sigue estos pasos para obtener el traceback real del backend:
@@ -99,7 +114,33 @@ Si tienes un error 500 y no ves el detalle en los logs estándar, sigue estos pa
 
 Ya está configurado en `main.py`. Los errores se guardan en `tmp/flask_error.log` cada vez que ocurre un error 500.
 
-### Activar modo debug temporalmente
+
+### Acceso SSH y consulta del log de errores
+
+Para conectarte por SSH a la instancia EC2 y ver el log de errores:
+
+1. Asegúrate de tener el archivo `.pem` de tu clave privada (por ejemplo, `eb-angel-2025.pem`).
+2. Ejecuta en tu terminal (ajusta la ruta si es necesario):
+
+	```sh
+	ssh -i "C:/Users/Angel FV/Downloads/eb-angel-2025.pem" ec2-user@51.44.98.213
+	```
+
+3. Una vez conectado, navega al directorio de la app y muestra el log:
+
+	```sh
+	cd /var/app/current
+	cat tmp/flask_error.log
+	```
+
+	Para ver solo las últimas líneas del log:
+
+	```sh
+	tail -n 50 tmp/flask_error.log
+	```
+
+4. Copia el contenido relevante del log para analizar el error.
+
 
 1. Busca en `main.py` el bloque:
 	```python
