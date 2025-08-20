@@ -28,7 +28,7 @@ def require_api_key(f):
 def enforce_api_key_globally():
     """Función para usar en before_request y proteger toda la API salvo rutas públicas."""
     if request.method == 'OPTIONS':
-        return None
+        return '', 204
     raw_path = request.path or '/'
     if raw_path in PUBLIC_PATHS:
         return None

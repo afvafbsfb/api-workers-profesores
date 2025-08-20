@@ -9,7 +9,22 @@
 ### 2. Subir archivos a Elastic Beanstalk
 - Accede a la consola de AWS y entra en Elastic Beanstalk.
 - Selecciona tu entorno y haz clic en "Cargar y desplegar".
-- Sube el ZIP y espera a que el entorno se actualice.
+- Sube el ZIP y espera a que el entorno se actualice.ç
+
+para generar el zip a subir:
+Opción 1: Usar Git Bash (recomendado)
+
+Abre Git Bash y sutuarse en la carpeta de tu proyecto.
+
+cd "/c/Users/Angel FV/Desktop/FORMACION/api-workers-profesores"
+
+Ejecuta:
+zip -r deploy.zip . -x '*.git*' '*.venv*' '*__pycache__*' '*.pytest_cache*' '*.vscode*' '*.env*' 'dist/*' 'instance/*' 'tmp/*' 'tests/*'
+
+subir el .zip a Elastic Beanstalk
+
+
+
 
 ### 3. Configurar entorno Python
 - Elastic Beanstalk detecta automáticamente requirements.txt y crea el entorno virtual.
@@ -24,7 +39,7 @@
 - Si usas MySQL, asegúrate de que la base de datos esté accesible y configurada en las variables de entorno.
 
 ### 6. Verificar endpoints
-- Prueba los endpoints principales desde Swagger UI o con herramientas como curl o Postman.
+- Prueba los endpoints principales del api rest desde Swagger UI o con herramientas como curl o Postman.
 - Ejemplo:
 
 ```bash
