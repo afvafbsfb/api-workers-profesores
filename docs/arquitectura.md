@@ -63,6 +63,6 @@ Para testing y desarrollo:
 
 Para ver y probar ejemplos de todos los endpoints, consulta la documentación interactiva en Swagger UI:
 
-**[Swagger UI (documentación y pruebas de endpoints)](https://o5nztloqde.execute-api.eu-west-3.amazonaws.com/docs)**
+**[Swagger UI / OpenAPI REST (documentación y pruebas de endpoints)](https://api-workers-plugins.s3.eu-west-3.amazonaws.com/openapi-rest.yaml)**
 
 Allí puedes ver los parámetros, respuestas y realizar pruebas en tiempo real sobre la API.

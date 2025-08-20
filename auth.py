@@ -13,7 +13,7 @@ def get_api_key():
 
 API_KEY = get_api_key()
 
-PUBLIC_PATHS = ("/docs", "/openapi.yml")
+PUBLIC_PATHS = ("/health", "/debug")
 
 def require_api_key(f):
     """Decorador para requerir API Key en endpoints concretos."""

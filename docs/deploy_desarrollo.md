@@ -1,4 +1,7 @@
+
 # Despliegue y pruebas en desarrollo
+
+> **Nota:** Este documento es solo para el entorno de desarrollo local (Flask en localhost, SQLite/MySQL de desarrollo). Para despliegue en AWS y API REST consulta `deploy_aws.md` y la documentación de la API REST.
 
 ## 1. Configuración de la base de datos
 

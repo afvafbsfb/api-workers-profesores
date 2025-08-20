@@ -1,0 +1,48 @@
+openapi: "3.0.1"
+info:
+  title: "Workers API (proxy only)"
+  version: "0.2.0"
+servers:
+- url: "https://o5nztloqde.execute-api.eu-west-3.amazonaws.com/{basePath}"
+  variables:
+    basePath:
+      default: ""
+paths:
+  /{proxy+}:
+    parameters:
+    - name: "proxy+"
+      in: "path"
+      description: "Generated path parameter for proxy+"
+      required: true
+      schema:
+        type: "string"
+    x-amazon-apigateway-any-method:
+      responses:
+        default:
+          description: "Default response for ANY /{proxy+}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "1.0"
+        type: "http_proxy"
+        httpMethod: "ANY"
+        uri: "http://servicio-api-workers-env.eba-m5yrjv7b.eu-west-3.elasticbeanstalk.com/{proxy}"
+        connectionType: "INTERNET"
+x-amazon-apigateway-cors:
+  allowMethods:
+  - "DELETE"
+  - "GET"
+  - "HEAD"
+  - "OPTIONS"
+  - "PATCH"
+  - "POST"
+  - "PUT"
+  allowHeaders:
+  - "authorization"
+  - "content-type"
+  - "x-amz-date"
+  - "x-amz-security-token"
+  - "x-api-key"
+  maxAge: 3600
+  allowCredentials: false
+  allowOrigins:
+  - "*"
+x-amazon-apigateway-importexport-version: "1.0"

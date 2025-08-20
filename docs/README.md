@@ -33,7 +33,7 @@ Así, cada grupo de rutas relacionadas se gestiona en un archivo o módulo difer
 workers-api/
 ├── app.py                  # Punto de entrada principal de la API
 ├── models.py               # Modelos globales y configuración de SQLAlchemy
-├── openapi.yml             # Especificación OpenAPI de la API
+├── openapi-rest.yaml       # Especificación OpenAPI REST (actual, versión pública en S3)
 ├── passenger_wsgi.py       # Integración con Passenger/cPanel
 ├── requirements.txt        # Dependencias Python
 ├── vlodeiro/
@@ -52,6 +52,7 @@ workers-api/
 - **vlodeiro/secretaria/infrastructure/repositorio_mysql.py:** Repositorios que implementan acceso a datos usando SQLAlchemy.
 - **vlodeiro/secretaria/interfaces/flask_routes.py:** Define las rutas HTTP para la secretaría usando Flask Blueprints.
 - **vlodeiro/secretaria/application/**: Casos de uso y lógica de negocio (inscribir alumno, registrar pago, etc).
+- **openapi-rest.yaml:** Especificación OpenAPI REST, publicada en S3 para integraciones externas y plugins (ChatGPT, Swagger UI, etc).
 
 ## Flujos funcionales
 - **Gestión de alumnos:** Alta, consulta y persistencia de alumnos.
@@ -60,12 +61,11 @@ workers-api/
 - **Gestión de pagos:** Registro y consulta de pagos de alumnos.
 - **Endpoints de salud y debug:** `/health`, `/debug`, `/openapi.yml`.
 
-## Endpoints principales
+## Endpoints principales (ver detalle y parámetros en openapi-rest.yaml)
 - `/vlodeiro/secretaria/turnos` (GET): Lista los turnos activos.
 - `/vlodeiro/secretaria/alumnos` (GET/POST): Consulta y alta de alumnos.
 - `/vlodeiro/secretaria/clases` (GET/POST): Consulta y alta de clases.
 - `/vlodeiro/secretaria/pagos` (GET/POST): Consulta y registro de pagos.
-- `/v1/command` (POST): Endpoint genérico para comandos autenticados.
 - `/health` (GET): Estado de la API.
 - `/debug` (GET): Prueba de vida de Flask.
 
@@ -75,9 +75,16 @@ workers-api/
 - Tablas principales: `alumno`, `clase`, `turno`, `pago`.
 
 ## Despliegue y configuración
-- Despliegue automatizado vía `.cpanel.yml` y Passenger en cPanel.
-- Variables de entorno para configuración sensible (API_KEY, credenciales DB).
+- Despliegue en AWS Elastic Beanstalk (Python/Flask) y exposición pública mediante API Gateway REST.
+- Especificación OpenAPI REST publicada en S3: https://api-workers-plugins.s3.eu-west-3.amazonaws.com/openapi-rest.yaml
+- Documentación visual e interactiva (Swagger UI) usando la especificación pública de S3.
+- Variables de entorno para configuración sensible (API_KEY, credenciales DB, endpoints, etc).
 - Requiere instalar dependencias de `requirements.txt`.
+## Referencias rápidas
+
+- **API REST producción:** https://ppmr69im5j.execute-api.eu-west-3.amazonaws.com/prod
+- **OpenAPI REST (YAML en S3):** https://api-workers-plugins.s3.eu-west-3.amazonaws.com/openapi-rest.yaml
+- **Swagger UI (documentación visual):** https://api-workers-plugins.s3.eu-west-3.amazonaws.com/openapi-rest.yaml
 - Reinicio automático tras despliegue por archivo `tmp/restart.txt`.
 
 ---

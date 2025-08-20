@@ -1,10 +1,14 @@
 # Documentación de endpoints (OpenAPI y Swagger UI)
 
-- La especificación completa de la API está en el archivo `openapi.yml` en la raíz del proyecto.
-- Para ver, probar y documentar los endpoints de forma interactiva, utiliza Swagger UI en `/docs` o accede a la URL pública:
-  https://o5nztloqde.execute-api.eu-west-3.amazonaws.com/docs
-- Si necesitas editar la especificación, puedes abrir `openapi.yml` en [Swagger Editor](https://editor.swagger.io/).
-- Actualiza siempre `openapi.yml` cuando añadas o modifiques un endpoint.
+- La especificación completa de la API REST está en el archivo `openapi-rest.yaml` (versión pública en S3: https://api-workers-plugins.s3.eu-west-3.amazonaws.com/openapi-rest.yaml).
+- Para ver, probar y documentar los endpoints de forma interactiva, utiliza Swagger UI en `/docs` (antigua HTTP API) o accede a la nueva especificación OpenAPI REST para integraciones externas y el plugin de OpenAI:
+  https://api-workers-plugins.s3.eu-west-3.amazonaws.com/openapi-rest.yaml
+- Si necesitas editar la especificación, puedes abrir `openapi-rest.yaml` en [Swagger Editor](https://editor.swagger.io/).
+- Actualiza siempre `openapi-rest.yaml` cuando añadas o modifiques un endpoint.
+  
+**Integración con ChatGPT (plugin OpenAI):**
+- Usa la URL pública del OpenAPI REST (https://api-workers-plugins.s3.eu-west-3.amazonaws.com/openapi-rest.yaml) al registrar el plugin en ChatGPT o cualquier herramienta compatible con OpenAPI 3.1.
+
 # Guía de desarrollo y testing
 
 ## Ejecución de tests
@@ -48,7 +52,7 @@ Se recomienda crear un workflow de GitHub Actions en `.github/workflows/ci-cd.ym
 - El archivo `VERSION` contiene la versión actual del proyecto.
 - Los cambios importantes deben reflejarse en `CHANGELOG.md`.
 - Se recomienda mantener la cobertura de código por encima del 80%.
-- Documenta los endpoints nuevos en `openapi.yml` y en la carpeta `docs/`.
+- Documenta los endpoints nuevos en `openapi-rest.yaml` y en la carpeta `docs/`.
 
   # Reglas de entorno Python
 

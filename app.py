@@ -115,8 +115,9 @@ try:
         except Exception:
             return None
 
+
     @app.after_request
-    def set_security_headers(resp):
+    def set_security_and_cors_headers(resp):
         resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
         resp.headers["Pragma"] = "no-cache"
         resp.headers["Expires"] = "0"
@@ -127,7 +128,16 @@ try:
         resp.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains; preload"
         resp.headers["Referrer-Policy"] = "no-referrer"
         resp.headers["Permissions-Policy"] = "geolocation=(), microphone=()"
+        # CORS
+        resp.headers["Access-Control-Allow-Origin"] = "*"
+        resp.headers["Access-Control-Allow-Headers"] = "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
+        resp.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS"
         return resp
+
+    # Handler global para OPTIONS (catch-all)
+    @app.route('/<path:path>', methods=['OPTIONS'])
+    def options_handler(path):
+        return '', 204
 
     @app.route("/", methods=["GET"])
     def root():

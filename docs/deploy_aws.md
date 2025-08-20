@@ -4,7 +4,7 @@
 
 ### 1. Preparar el paquete
 - Verifica que todos los tests pasen y la cobertura sea suficiente.
-- Empaqueta todo el proyecto en un archivo ZIP (incluye: app.py, requirements.txt, openapi.yml, Procfile, y la carpeta vlodeiro/).
+- Empaqueta todo el proyecto en un archivo ZIP (incluye: app.py, requirements.txt, openapi-rest.yaml, Procfile, y la carpeta vlodeiro/).
 
 ### 2. Subir archivos a Elastic Beanstalk
 - Accede a la consola de AWS y entra en Elastic Beanstalk.
@@ -28,10 +28,10 @@
 - Ejemplo:
 
 ```bash
-curl -X GET "https://o5nztloqde.execute-api.eu-west-3.amazonaws.com/vlodeiro/secretaria/alumnos/2" -H "X-Api-Key: <tu_api_key>"
+curl -X GET "https://ppmr69im5j.execute-api.eu-west-3.amazonaws.com/prod/vlodeiro/secretaria/alumnos/2" -H "X-Api-Key: <tu_api_key>"
 ```
 
 ## Notas
 - El despliegue es manual, no automatizado por CI/CD.
 - Documenta cualquier cambio importante en CHANGELOG.md.
-- Para ejemplos y pruebas, consulta la documentación Swagger UI: https://o5nztloqde.execute-api.eu-west-3.amazonaws.com/docs
+- Para ejemplos y pruebas, consulta la documentación Swagger UI: https://api-workers-plugins.s3.eu-west-3.amazonaws.com/openapi-rest.yaml
