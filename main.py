@@ -189,3 +189,9 @@ try:
 except Exception as e:
     init_error = traceback.format_exc()
     print(init_error)
+    # Fallback: crea un app mínimo para que Gunicorn/Beanstalk no fallen
+    from flask import Flask
+    app = Flask(__name__)
+    @app.route("/error")
+    def error():
+        return f"<pre>{init_error}</pre>", 500
