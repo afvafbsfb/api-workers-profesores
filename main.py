@@ -17,7 +17,7 @@ try:
         def _load_dotenv(*args, **kwargs):
             return False
     from functools import wraps
-    from . import models  # Importa SQLAlchemy y modelos
+    import models  # Importa SQLAlchemy y modelos
     # Validación de entrada
     from marshmallow import Schema, fields, ValidationError
     # Esquema de validación para /v1/command
