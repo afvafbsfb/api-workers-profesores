@@ -45,6 +45,24 @@ rm openapi-rest.yaml
 
 > Swagger UI y herramientas externas funcionarán correctamente con esta configuración. En producción, sustituye `*` por el dominio autorizado.
 
+### Despliegue y configuración de CORS en API Gateway
+
+1. En el recurso `/{proxy+}` de tu API Gateway, crea el método OPTIONS si no existe.
+2. Selecciona "Simulación" (Mock) como tipo de integración para OPTIONS.
+3. En la respuesta de integración de OPTIONS, añade los siguientes encabezados (en Header mappings):
+	- Access-Control-Allow-Origin: '*' (con comillas simples)
+	- Access-Control-Allow-Headers: 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token' (con comillas simples)
+	- Access-Control-Allow-Methods: 'GET,POST,OPTIONS' (con comillas simples)
+	> **Nota:** Si pones los valores sin comillas, la consola puede dar error de "Invalid mapping expression". Usa siempre comillas simples.
+4. En el método ANY, asegúrate de tener el parámetro de ruta:
+	- proxy → method.request.path.proxy
+5. Guarda los cambios y haz "Deploy API" en la etapa `prod`.
+6. Prueba desde Swagger UI o tu frontend. Si tienes Flask-CORS activo, el resto de headers los añade Flask automáticamente.
+
+**Ejemplo de descripción para el despliegue:**
+> Habilita CORS en API Gateway para integración con Swagger UI y frontends. Añadidos encabezados CORS en OPTIONS con comillas simples para evitar errores de mapeo. Confirmado mapeo de path parameter {proxy}. Listo para pruebas desde Swagger UI y clientes web.
+
+---
 ## 4. Variables de entorno recomendadas
 
 - `APP_ENV=production`
@@ -70,6 +88,30 @@ Configura estas variables en Elastic Beanstalk para conectar con la base de dato
 - Revisa y restringe CORS en producción.
 - Haz backup de la base de datos antes de cambios críticos.
 - Mantén las claves y contraseñas fuera del código fuente.
+
+---
+
+## 7. Depuración de errores en producción (logging y debug)
+
+Si tienes un error 500 y no ves el detalle en los logs estándar, sigue estos pasos para obtener el traceback real del backend:
+
+### Logging de errores en Flask
+
+Ya está configurado en `main.py`. Los errores se guardan en `tmp/flask_error.log` cada vez que ocurre un error 500.
+
+### Activar modo debug temporalmente
+
+1. Busca en `main.py` el bloque:
+	```python
+	# Para activar el modo debug, descomenta la siguiente línea:
+	app.debug = True
+	```
+2. Descomenta la línea `app.debug = True` para activar el modo debug.
+3. Sube y despliega el código.
+4. Reproduce el error y revisa el archivo `tmp/flask_error.log` para ver el traceback real.
+5. Cuando termines, **vuelve a comentar** la línea `app.debug = True` antes de volver a producción.
+
+> El logging de errores puede dejarse activo, ya que solo guarda errores (no información sensible si tu código no la imprime en los logs).
 
 ---
 

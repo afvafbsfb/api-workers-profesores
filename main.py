@@ -38,8 +38,25 @@ try:
 
 
     app = Flask(__name__)
-    # Permite CORS solo para dominios confiables (ajusta en producción)
-    CORS(app, resources={r"/*": {"origins": ["http://localhost", "https://tudominio.com"]}}, supports_credentials=True)
+
+    # --- LOGGING DE ERRORES ---
+    import logging
+    from logging.handlers import RotatingFileHandler
+    if not os.path.exists('tmp'):
+        os.makedirs('tmp')
+    handler = RotatingFileHandler('tmp/flask_error.log', maxBytes=100000, backupCount=3)
+    handler.setLevel(logging.ERROR)
+    app.logger.addHandler(handler)
+    # --- FIN LOGGING ---
+
+    # --- DEBUG (activar solo para depuración temporal) ---
+    # Para activar el modo debug, descomenta la siguiente línea:
+    app.debug = True
+    #
+    # IMPORTANTE: Vuelve a comentar esta línea antes de subir a producción.
+    # --- FIN DEBUG ---
+    # Permite CORS para cualquier origen (útil para pruebas, restringe en producción)
+    CORS(app, resources={r"/*": {"origins": "*"}})
     app.register_blueprint(secretaria_bp, url_prefix='/vlodeiro/secretaria')
     try:
         if not os.path.exists('tmp'):
@@ -150,10 +167,17 @@ try:
 
     @app.route("/health", methods=["GET"])
     def health():
+        import sys
+        import logging
+        print("Entrando en /health", file=sys.stderr)
+        logging.getLogger().info("Entrando en /health (logger root)")
         try:
             return ok(ts=datetime.now(timezone.utc).isoformat(), build=_build())
         except Exception as e:
             import traceback
+            print(f"[HEALTH ERROR] {e}", file=sys.stderr)
+            print(traceback.format_exc(), file=sys.stderr)
+            logging.getLogger().error(f"[HEALTH ERROR] {e}\n{traceback.format_exc()}")
             # Muestra el error y el traceback en la respuesta para depuración
             return jsonify({
                 "ok": False,
