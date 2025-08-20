@@ -36,3 +36,32 @@ DB_DEV_NAME=api_workers
 - No es necesario modificar el código fuente para alternar entre MySQL y SQLite.
 - Solo cambia el archivo `.env` y reinicia la API.
 - Si tienes problemas de conexión, revisa que los datos del `.env` sean correctos y que el servicio MySQL esté iniciado.
+
+
+Para hacer las pruebas en desarrollo contra la base de datos MySQL de desarrollo, solo tienes que:
+
+Asegurarte de que el archivo .env tiene estos valores (ajusta si cambiaste usuario o contraseña):
+DB_DEV_HOST=localhost
+DB_DEV_PORT=3307
+DB_DEV_USER=angel
+DB_DEV_PASS=Abanca0795
+DB_DEV_NAME=api_workers
+
+Verifica que el servicio MySQL está iniciado y accesible en el puerto 3307.
+
+     Desde MySQL Workbench:
+
+        Intenta conectarte con el usuario angel, puerto 3307, host localhost.
+        Si la conexión es exitosa, el servicio está activo y accesible.
+
+Inicia o reinicia tu API (por ejemplo, ejecutando el script o comando habitual para arrancarla).
+
+        Si la API la ejecutas desde la terminal (por ejemplo, con un comando como python app.py), simplemente detén la ejecución (Ctrl+C en la terminal) y vuelve a lanzar el comando.
+
+Realiza tus pruebas: la API usará automáticamente la base de datos MySQL de desarrollo.
+
+        Invoke-WebRequest -Uri "http://localhost:5000/health" -Headers @{ "X-Api-Key" = "devkey-change-me" }
+
+        (Invoke-WebRequest -Uri "http://localhost:5000/vlodeiro/secretaria/alumnos" -Headers @{ "X-Api-Key" = "devkey-change-me" }).Content
+
+No necesitas tocar el código fuente, solo el archivo .env y reiniciar la API.

@@ -19,7 +19,7 @@ Abre Git Bash en la raíz del proyecto.
 cp docs/openapi-rest.yaml openapi-rest.yaml
 
 # 2. Crea el ZIP con todo lo necesario (ejecuta esto en la raíz del proyecto)
-zip -r deploy.zip main.py requirements.txt openapi-rest.yaml Procfile vlodeiro wsgi.py passenger_wsgi.py
+zip -r deploy.zip main.py models.py auth.py requirements.txt openapi-rest.yaml Procfile vlodeiro wsgi.py passenger_wsgi.py
 
 # 3. Elimina el archivo temporal de la raíz
 rm openapi-rest.yaml
