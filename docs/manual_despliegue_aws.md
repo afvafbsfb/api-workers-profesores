@@ -30,13 +30,14 @@ Esto copiará el YAML, generará el ZIP y eliminará el archivo temporal automá
 
 ---
 
+
 ### Acceso directo a la documentación Swagger UI en producción
 
 No necesitas usar https://editor.swagger.io ni pegar la URL manualmente. Una vez desplegada la API, accede directamente a la documentación interactiva en:
 
 **https://ppmr69im5j.execute-api.eu-west-3.amazonaws.com/prod/docs**
 
-Desde ahí puedes probar todos los endpoints y ver la especificación OpenAPI cargada automáticamente.
+Esta ruta, junto con `/openapi.yml`, es pública y no requiere API Key. Desde ahí puedes probar todos los endpoints y ver la especificación OpenAPI cargada automáticamente.
 
 2. Accede a la consola de AWS > Elastic Beanstalk > tu entorno > "Cargar y desplegar".
 
