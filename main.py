@@ -128,6 +128,9 @@ try:
     # Enforce global API Key salvo rutas públicas mínimas (docs y spec)
     @app.before_request
     def _enforce_api_key_globally():
+        public_paths = ["/docs", "/openapi.yml", "/openapi-rest.yaml", "/health", "/"]
+        if request.path in public_paths or request.path.startswith("/static/"):
+            return None  # Permite acceso público
         print(f"[DEBUG] Path recibido: {request.path}", flush=True)
         return auth.enforce_api_key_globally()
 
@@ -185,13 +188,18 @@ try:
                 "trace": traceback.format_exc()
             }), 500
 
+
     @app.route("/openapi.yml", methods=["GET"])
     def openapi_spec():
         return send_from_directory(".", "openapi.yml", mimetype="text/yaml")
 
+    @app.route("/openapi-rest.yaml", methods=["GET"])
+    def openapi_rest_spec():
+        return send_from_directory("docs", "openapi-rest.yaml", mimetype="text/yaml")
+
     @app.route("/docs", methods=["GET"])
     def docs_index():
-        # Sirve la UI de Swagger desde /docs
+        # Sirve la UI de Swagger ya configurada con la especificación de producción
         return send_from_directory("docs", "index.html", mimetype="text/html")
 
 

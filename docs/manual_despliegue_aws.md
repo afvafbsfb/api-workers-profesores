@@ -1,3 +1,4 @@
+
 # Manual de Despliegue y Configuración en AWS
 
 ## 1. Infraestructura AWS
@@ -90,11 +91,16 @@ Esta ruta, junto con `/openapi.yml`, es pública y no requiere API Key. Desde ah
 
 Configura estas variables en Elastic Beanstalk para conectar con la base de datos de producción y proteger la API.
 
+
 ## 5. URLs y Documentación
 
-- **API REST Producción:** https://ppmr69im5j.execute-api.eu-west-3.amazonaws.com/prod
+- **API REST Producción (API Gateway):** https://ppmr69im5j.execute-api.eu-west-3.amazonaws.com/prod
 - **OpenAPI YAML:** https://api-workers-plugins.s3.eu-west-3.amazonaws.com/openapi-rest.yaml
-**Swagger UI:** https://ppmr69im5j.execute-api.eu-west-3.amazonaws.com/prod/docs
+- **Swagger UI (API Gateway):** https://ppmr69im5j.execute-api.eu-west-3.amazonaws.com/prod/docs
+
+### URLs internas del backend (Elastic Beanstalk)
+- **Backend Beanstalk base:** http://servicio-api-workers-env.eba-m5yrjv7b.eu-west-3.elasticbeanstalk.com/
+- **Endpoint GET /docs (para integración en API Gateway):** http://servicio-api-workers-env.eba-m5yrjv7b.eu-west-3.elasticbeanstalk.com/docs
 
 ## 6. Notas y buenas prácticas
 
@@ -105,6 +111,23 @@ Configura estas variables en Elastic Beanstalk para conectar con la base de dato
 - Mantén las claves y contraseñas fuera del código fuente.
 
 ---
+
+### Hacer público el endpoint /docs en API Gateway (sin API Key)
+
+Para que la documentación Swagger UI (/docs) sea accesible públicamente sin necesidad de API Key, asegúrate de que la configuración del método GET del recurso /docs en API Gateway sea la siguiente:
+
+1. Ve a la consola de AWS API Gateway.
+2. Selecciona tu API y entra en el panel de recursos.
+3. Haz clic en el recurso `/docs` y selecciona el método `GET`.
+4. En la sección "Configuración de solicitud de método", verifica que:
+	- **Autorización:** Ninguna
+	- **Validador de solicitudes:** Ninguna
+	- **Clave de API obligatoria:** NO
+	- **Nombre de la operación:** (vacío)
+5. Si es necesario, cambia la opción "Clave de API obligatoria" a NO.
+6. Guarda los cambios y vuelve a desplegar la API en el stage correspondiente.
+
+Con esto, cualquier usuario podrá acceder a la documentación en `/docs` sin necesidad de autenticación ni API Key.
 
 
 ## 7. Depuración de errores en producción (logging y debug)
@@ -158,3 +181,27 @@ Para conectarte por SSH a la instancia EC2 y ver el log de errores:
 ---
 
 Este manual unifica los pasos y configuraciones clave para desplegar y mantener la API en AWS de forma segura y documentada.
+
+## 8. Publicar la API en API Gateway y verificar acceso público
+
+Una vez configurados los recursos y métodos en API Gateway, sigue estos pasos para publicar los cambios y comprobar que el endpoint /docs es accesible públicamente:
+
+### Publicar (Deploy) la API
+1. En la consola de AWS API Gateway, selecciona tu API.
+2. Haz clic en "Acciones" > "Implementar API" (Deploy API).
+3. Selecciona el stage correspondiente (por ejemplo, `prod`).
+4. Confirma la publicación.
+
+### Verificar acceso público a /docs
+1. Abre un navegador y accede a la URL pública de Swagger UI, por ejemplo:
+	- https://ppmr69im5j.execute-api.eu-west-3.amazonaws.com/prod/docs
+2. Deberías ver la interfaz Swagger UI sin que se solicite API Key.
+3. Alternativamente, puedes comprobar con curl:
+	```sh
+	curl -i https://ppmr69im5j.execute-api.eu-west-3.amazonaws.com/prod/docs
+	```
+	La respuesta debe ser 200 OK y mostrar el HTML de Swagger UI.
+
+Si ves un error 403 o se solicita API Key, revisa la configuración del método GET de /docs y vuelve a desplegar la API.
+
+---
