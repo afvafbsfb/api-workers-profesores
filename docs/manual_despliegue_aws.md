@@ -23,7 +23,7 @@ Puedes automatizar los tres pasos con este comando (ejecuta en la raíz del proy
 
 ```sh
 cp docs/openapi-rest.yaml openapi-rest.yaml; \
-zip -r deploy.zip main.py models.py auth.py requirements.txt openapi-rest.yaml Procfile vlodeiro wsgi.py passenger_wsgi.py; \
+zip -r deploy.zip main.py models.py auth.py requirements.txt openapi-rest.yaml Procfile vlodeiro wsgi.py passenger_wsgi.py docs/index.html; \
 rm openapi-rest.yaml
 ```
 
@@ -92,15 +92,65 @@ Esta ruta, junto con `/openapi.yml`, es pública y no requiere API Key. Desde ah
 Configura estas variables en Elastic Beanstalk para conectar con la base de datos de producción y proteger la API.
 
 
+### Configuración de CORS en S3 para servir openapi-rest.yaml a Swagger UI
+
+Para que Swagger UI pueda cargar la especificación OpenAPI desde S3 sin errores de CORS, configura la política CORS del bucket de la siguiente manera:
+
+1. Ve a la consola de AWS S3 y selecciona el bucket donde está `openapi-rest.yaml`.
+2. Haz clic en la pestaña "Permisos" y busca la sección "Configuración de CORS".
+3. Añade la siguiente política:
+
+[
+    {
+        "AllowedHeaders": [
+            "*"
+        ],
+        "AllowedMethods": [
+            "GET"
+        ],
+        "AllowedOrigins": [
+            "*"
+        ],
+        "ExposeHeaders": []
+    }
+]
+
+
+4. Guarda los cambios.
+5. Asegúrate de que el archivo `openapi-rest.yaml` es público o tiene permisos de lectura pública.
+
+Con esto, Swagger UI podrá cargar la especificación OpenAPI desde cualquier origen, tanto en desarrollo como en producción.
+
+
 ## 5. URLs y Documentación
 
 - **API REST Producción (API Gateway):** https://ppmr69im5j.execute-api.eu-west-3.amazonaws.com/prod
+
 - **OpenAPI YAML:** https://api-workers-plugins.s3.eu-west-3.amazonaws.com/openapi-rest.yaml
-- **Swagger UI (API Gateway):** https://ppmr69im5j.execute-api.eu-west-3.amazonaws.com/prod/docs
+
+**Swagger UI (API Gateway):** https://ppmr69im5j.execute-api.eu-west-3.amazonaws.com/prod/docs
+
+> Para exponer correctamente la documentación Swagger UI a través de API Gateway, asegúrate de:
+
+(ver en los recursos del api gateway todas sus pestañas y como quedan parametrizadas)
+
+> - Crear el recurso `/docs` explícitamente en API Gateway (no como proxy).
+> - Añadir el método GET con integración HTTP (NO proxy) apuntando a la URL interna de Beanstalk `/docs`.
+> - Marcar la opción de CORS al crear el recurso para permitir peticiones desde cualquier origen.
+> - En la configuración de “Respuesta de método” y “Respuesta de integración” para el código 200, añadir el encabezado `Content-Type` para que API Gateway reenvíe correctamente el tipo de contenido HTML.
+> - No usar plantillas de mapeo ni parámetros extra.
+> - Desplegar la API tras cada cambio.
+
+Si ves un error 500 en la URL de API Gateway, revisa la integración, los encabezados y la configuración de CORS como se describe arriba. Una vez todo esté correcto, la URL pública mostrará Swagger UI sin requerir autenticación ni API Key.
+
+**Nota:** Si ves un error 500 en la URL de API Gateway, revisa la integración, los encabezados y la configuración de CORS como se describe arriba.
 
 ### URLs internas del backend (Elastic Beanstalk)
-- **Backend Beanstalk base:** http://servicio-api-workers-env.eba-m5yrjv7b.eu-west-3.elasticbeanstalk.com/
-- **Endpoint GET /docs (para integración en API Gateway):** http://servicio-api-workers-env.eba-m5yrjv7b.eu-west-3.elasticbeanstalk.com/docs
+
+- **Endpoint GET /docs (para integración en API Gateway):** http://servicio-api-workers-env.eba-m5yrjv7b.eu-west-3.elasticbeanstalk.com/docs 
+               
+          esta url ahora si que me la carga bien el swagger: http://servicio-api-workers-env.eba-m5yrjv7b.eu-west-3.elasticbeanstalk.com/docs     
+          ¡Perfecto! El hecho de que la URL interna de Beanstalk ya muestre correctamente Swagger UI confirma que el backend y la configuración de S3/CORS están bien.
 
 ## 6. Notas y buenas prácticas
 
