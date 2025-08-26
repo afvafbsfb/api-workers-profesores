@@ -4,7 +4,10 @@ info:
   title: Workers API (REST)
   version: "1.0.0"
 servers:
+  - url: http://localhost:5000
+    description: Servidor local de desarrollo
   - url: https://ppmr69im5j.execute-api.eu-west-3.amazonaws.com/prod
+    description: Servidor de producción (AWS)
 security:
   - api_key: []
 paths:
@@ -184,10 +187,62 @@ paths:
   /vlodeiro/secretaria/alumnos:
     get:
       operationId: getAlumnos
-      summary: Lista todos los alumnos
+      summary: Lista paginada de alumnos
+      description: |
+        Devuelve una lista paginada de alumnos. Usa los parámetros `page` (número de página, empezando en 0) y `size` (número de elementos por página).
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Número de página (empezando en 0)
+        - in: query
+          name: size
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+          description: Tamaño de página (número de alumnos por página)
       responses:
         "200":
-          description: Lista de alumnos
+          description: Respuesta paginada con alumnos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    description: Lista de alumnos en la página actual
+                    items:
+                      $ref: '#/components/schemas/Alumno'
+                  page:
+                    type: integer
+                    description: Página actual (empezando en 0)
+                  size:
+                    type: integer
+                    description: Tamaño de página solicitado
+                  total_elements:
+                    type: integer
+                    description: Total de alumnos en la base de datos
+                  total_pages:
+                    type: integer
+                    description: Total de páginas disponibles
+              example:
+                content:
+                  - id: 1
+                    nombre: "Juan"
+                    apellidos: "Pérez"
+                  - id: 2
+                    nombre: "Ana"
+                    apellidos: "García"
+                page: 0
+                size: 2
+                total_elements: 12
+                total_pages: 6
 
   /vlodeiro/secretaria/alumnos/{alumno_id}:
     get:
@@ -281,4 +336,14 @@ components:
       type: apiKey
       in: header
       name: X-Api-Key
-  schemas: {}
+  schemas:
+    Alumno:
+      type: object
+      properties:
+        id:
+          type: integer
+        nombre:
+          type: string
+        apellidos:
+          type: string
+        # Añade aquí otros campos relevantes del modelo Alumno

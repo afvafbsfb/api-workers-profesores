@@ -15,8 +15,12 @@
 
     <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js" crossorigin></script>
     <script>
-      // Cargar la especificación OpenAPI REST desde S3 (plugin OpenAI)
-      const specUrl = 'https://api-workers-plugins.s3.eu-west-3.amazonaws.com/openapi-rest.yaml';
+      // Cargar la especificación OpenAPI REST local en desarrollo y S3 en producción
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const specUrl = isLocalhost
+        ? 'http://localhost:5000/openapi-rest.yaml'
+        : 'https://api-workers-plugins.s3.eu-west-3.amazonaws.com/openapi-rest.yaml';
+
       window.ui = SwaggerUIBundle({
         url: specUrl,
         dom_id: '#swagger-ui',

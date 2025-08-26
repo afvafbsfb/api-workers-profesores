@@ -246,9 +246,16 @@ def alumnos_en_turno(turno_id: int):
 @secretaria_bp.route('/inscripciones/<int:inscripcion_id>/baja', methods=['POST'])
 def baja_inscripcion(inscripcion_id: int):
     try:
+        from models import Inscripcion, db
+        ins = Inscripcion.query.filter_by(id=inscripcion_id).first()
+        if not ins:
+            return jsonify({"error": "Inscripción no encontrada"}), 404
+        if ins.fecha_fin is not None:
+            return jsonify({"error": "Inscripción ya estaba dada de baja"}), 409
         ok = turno_repo.baja_inscripcion(inscripcion_id)
         if not ok:
-            return jsonify({"error": "Inscripción no encontrada o ya dada de baja"}), 404
+            # Si el repo falla, pero ya comprobamos arriba, es error interno
+            return jsonify({"error": "Error al dar de baja la inscripción"}), 500
         return jsonify({"message": "Inscripción dada de baja"})
     except Exception as e:
         import traceback
@@ -258,18 +265,39 @@ def baja_inscripcion(inscripcion_id: int):
 
 
 # --- NUEVOS ENDPOINTS: ALUMNOS ---
+
 @secretaria_bp.route('/alumnos', methods=['GET'])
 def listar_alumnos():
     try:
         from models import Alumno
-        alumnos = Alumno.query.all()
-        return jsonify([
+        # Obtener parámetros de paginación
+        try:
+            page = int(request.args.get('page', 0))
+            size = int(request.args.get('size', 50))
+            if page < 0: page = 0
+            if size <= 0: size = 50
+        except Exception:
+            page = 0
+            size = 50
+
+        # Consulta paginada
+        total = Alumno.query.count()
+        alumnos = Alumno.query.order_by(Alumno.id).offset(page * size).limit(size).all()
+        alumnos_list = [
             {
                 "id": a.id,
                 "nombre": a.nombre,
                 "email": a.email,
             } for a in alumnos
-        ])
+        ]
+        result = {
+            "list": alumnos_list,
+            "total": total,
+            "page": page,
+            "size": size,
+            "hasMore": (page + 1) * size < total
+        }
+        return jsonify(result)
     except Exception as e:
         import traceback
         if current_app.config.get("ENV") == "production":

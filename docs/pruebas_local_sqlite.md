@@ -1,3 +1,4 @@
+
 # Pruebas locales de la API REST con base de datos SQLite
 
 Este documento describe los pasos para lanzar y probar la API REST en local usando SQLite como base de datos.
@@ -53,20 +54,70 @@ La API estará disponible en `http://localhost:5000`.
 Invoke-WebRequest -Uri "http://localhost:5000/health" -Headers @{ "X-Api-Key" = "devkey-change-me" }
 ```
 
-### Ejemplo: Listar alumnos
+### Ejemplo: Listar alumnos (sin paginación)
 ```powershell
 Invoke-WebRequest -Uri "http://localhost:5000/vlodeiro/secretaria/alumnos" -Headers @{ "X-Api-Key" = "devkey-change-me" }
 ```
-
 O usando curl (Git Bash):
 ```sh
 curl -X GET "http://localhost:5000/vlodeiro/secretaria/alumnos" -H "X-Api-Key: devkey-change-me"
 ```
 
-## 6. Notas
+### Ejemplo: Listar alumnos con paginación (página inicial)
+```powershell
+Invoke-WebRequest -Uri "http://localhost:5000/vlodeiro/secretaria/alumnos?page=0&size=2" -Headers @{ "X-Api-Key" = "devkey-change-me" }
+```
+O usando curl (Git Bash):
+```sh
+curl -X GET "http://localhost:5000/vlodeiro/secretaria/alumnos?page=0&size=2" -H "X-Api-Key: devkey-change-me"
+```
+
+### Ejemplo: Listar alumnos con paginación (página 1)
+```powershell
+Invoke-WebRequest -Uri "http://localhost:5000/vlodeiro/secretaria/alumnos?page=1&size=2" -Headers @{ "X-Api-Key" = "devkey-change-me" }
+```
+O usando curl (Git Bash):
+```sh
+curl -X GET "http://localhost:5000/vlodeiro/secretaria/alumnos?page=1&size=2" -H "X-Api-Key: devkey-change-me"
+```
+
+En todos los casos, la respuesta incluye los campos `list`, `total`, `page`, `size` y `hasMore`.
+
+
+## 6. Notas y pruebas automáticas en distintos entornos
+
 - La base de datos SQLite se crea en `instance/local.db`.
 - Puedes modificar o poblar más datos usando los scripts de inicialización.
 - Si cambias la API Key, actualízala en el archivo `.env` y en los headers de tus peticiones.
+
+### Pruebas automáticas (`tests/test_endpoints.py`)
+
+Este fichero de tests funciona igual para:
+- SQLite local (por defecto)
+- MySQL local/remoto
+- Producción (API remota)
+
+**¿Cómo lanzar los tests?**
+
+- Por defecto (SQLite local):
+
+.\.venv\Scripts\Activate
+pip install pytest
+
+	```powershell
+	pytest
+	```
+- Contra una API remota (MySQL o producción):
+	```powershell
+	$env:USE_LIVE=1; $env:BASE_URL="https://tu-api-remota.com"; pytest
+	```
+	O en Linux/macOS:
+	```sh
+	USE_LIVE=1 BASE_URL="https://tu-api-remota.com" pytest
+	```
+
+Si `USE_LIVE=1`, los tests usan peticiones HTTP reales y no manipulan la base de datos local.
+Si no, usan el cliente Flask y la base de datos local (SQLite o la que tengas configurada).
 
 ---
 

@@ -65,3 +65,24 @@ Realiza tus pruebas: la API usará automáticamente la base de datos MySQL de de
         (Invoke-WebRequest -Uri "http://localhost:5000/vlodeiro/secretaria/alumnos" -Headers @{ "X-Api-Key" = "devkey-change-me" }).Content
 
 No necesitas tocar el código fuente, solo el archivo .env y reiniciar la API.
+
+## Ejecutar tests automáticos contra MySQL
+
+Una vez que la API está configurada para usar MySQL (como se describe arriba), puedes lanzar los tests automáticos igual que con SQLite:
+
+1. Activa el entorno virtual:
+        ```powershell
+        .\.venv\Scripts\Activate
+        ```
+2. Instala pytest si no lo tienes:
+        ```powershell
+        pip install pytest
+        ```
+3. Ejecuta los tests:
+        ```powershell
+        pytest
+        ```
+
+Esto ejecutará todos los tests usando la base de datos MySQL de desarrollo configurada en tu `.env`.
+
+**Nota:** Si quieres probar contra una API remota (no local), usa la variable `USE_LIVE=1` y define `BASE_URL` como en el ejemplo de SQLite.

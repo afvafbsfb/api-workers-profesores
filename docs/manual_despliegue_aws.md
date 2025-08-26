@@ -14,18 +14,16 @@
 1. Empaqueta el proyecto en un archivo ZIP (incluye app.py, requirements.txt, openapi-rest.yaml, Procfile, y la carpeta vlodeiro/).
 
 
-Abre Git Bash en la raíz del proyecto.
-
-
 ### Automatización del empaquetado para despliegue
 
-Puedes automatizar los tres pasos con este comando (ejecuta en la raíz del proyecto):
+Abre Git Bash en la raíz del proyecto.
+cd "/c/Users/Angel FV/Desktop/FORMACION/api-workers-profesores"
 
-```sh
-cp docs/openapi-rest.yaml openapi-rest.yaml; \
-zip -r deploy.zip main.py models.py auth.py requirements.txt openapi-rest.yaml Procfile vlodeiro wsgi.py passenger_wsgi.py docs/index.html; \
+cp docs/openapi-rest.yaml openapi-rest.yaml
+
+zip -r deploy.zip main.py models.py auth.py requirements.txt openapi-rest.yaml Procfile vlodeiro wsgi.py passenger_wsgi.py docs/index.html
+
 rm openapi-rest.yaml
-```
 
 Esto copiará el YAML, generará el ZIP y eliminará el archivo temporal automáticamente.
 

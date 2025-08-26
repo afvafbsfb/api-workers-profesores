@@ -34,5 +34,6 @@ def enforce_api_key_globally():
         return None
     api_key = request.headers.get('X-Api-Key')
     if api_key != API_KEY:
+        print(f"[DEBUG][AUTH] Falta o incorrecta X-Api-Key: '{api_key}' (esperada: '{API_KEY}')", flush=True)
         return jsonify({'ok': False, 'error': 'unauthorized'}), 401
     return None

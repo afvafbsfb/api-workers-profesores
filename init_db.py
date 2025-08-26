@@ -1,4 +1,4 @@
-from app import app
+from main import app
 
 from models import db, Empresa, Turno, Tarifa, Inscripcion, Sesion, Asistencia, Pago, Alumno
 from datetime import date

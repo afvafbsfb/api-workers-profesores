@@ -129,9 +129,11 @@ try:
     @app.before_request
     def _enforce_api_key_globally():
         public_paths = ["/docs", "/openapi.yml", "/openapi-rest.yaml", "/health", "/"]
+        print(f"[DEBUG][AUTH] before_request ejecutado. Path: {request.path} | Method: {request.method}", flush=True)
         if request.path in public_paths or request.path.startswith("/static/"):
+            print(f"[DEBUG][AUTH] Ruta pública: {request.path}", flush=True)
             return None  # Permite acceso público
-        print(f"[DEBUG] Path recibido: {request.path}", flush=True)
+        print(f"[DEBUG][AUTH] Ruta protegida: {request.path}", flush=True)
         return auth.enforce_api_key_globally()
 
     def _build():
