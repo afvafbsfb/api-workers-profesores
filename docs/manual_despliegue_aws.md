@@ -16,7 +16,8 @@
 
 ### Automatización del empaquetado para despliegue
 
-Abre Git Bash en la raíz del proyecto.
+Abre Git Bash y sutuarse en la raíz del proyecto.
+
 cd "/c/Users/Angel FV/Desktop/FORMACION/api-workers-profesores"
 
 cp docs/openapi-rest.yaml openapi-rest.yaml
@@ -253,3 +254,29 @@ Una vez configurados los recursos y métodos en API Gateway, sigue estos pasos p
 Si ves un error 403 o se solicita API Key, revisa la configuración del método GET de /docs y vuelve a desplegar la API.
 
 ---
+
+-- cosas a tener en cuenta en nuevas subidas de api y/o de yaml:
+
+Problema de caché en S3:
+Al subir el nuevo YAML, la URL pública seguía mostrando la versión antigua debido a la caché de S3 y/o del navegador.
+Se probó recargar en modo incógnito y con Ctrl+F5.
+Se subió el archivo con el mismo nombre, pero la caché persistía.
+Gestión de versiones en S3:
+El bucket tenía versionado activado, por lo que coexistían la versión antigua y la nueva del YAML.
+Se eliminó la versión antigua de openapi-rest.yaml desde la pestaña “Versiones” del bucket, dejando solo la nueva.
+Tras esto, la URL pública sirvió correctamente la versión actualizada.
+4. (Opcional) CloudFront y permisos
+Se revisó la configuración de CloudFront (si aplica) y se realizaron invalidaciones para forzar la actualización de la caché CDN.
+Se comprobó que los permisos del archivo y la política del bucket permitían el acceso público o el acceso desde CloudFront.
+5. Actualización en ChatGPT Plugin (“Mi Secretaria”)
+Se subió la nueva URL del YAML a la configuración del plugin en ChatGPT.
+Se resolvió un posible conflicto de dominio duplicado asegurando que se actualizaba la acción existente y no se creaba una nueva.
+6. Verificación final
+Se comprobó que la API funcionaba correctamente en producción.
+Se verificó que la URL pública de S3 servía el YAML actualizado.
+Se validó que Swagger UI y ChatGPT interpretaban correctamente la nueva especificación, incluyendo la paginación.
+Notas clave:
+
+El versionado de S3 puede causar que la URL pública sirva una versión antigua si no se eliminan las versiones previas.
+La caché de CloudFront y del navegador puede retrasar la visualización de los cambios.
+Es fundamental revisar permisos públicos y políticas del bucket tras cada subida.
