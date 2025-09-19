@@ -12,12 +12,17 @@ Ampliación del proyecto — Resumen de cambios propuestos
 
 2. Nuevos usuarios y casos especiales
 
-- Cada usuario de la plataforma tendrá una cuenta en `users` y podrá vincularse a uno o varios roles mediante `user_roles`.
+Cada usuario de la plataforma tendrá una cuenta en `users` y estará vinculado a un único rol (representado en `user_roles` o en la tabla de usuarios según la implementación).
 
-- Caso especial: academias con una sola persona. Esta persona podrá recibir múltiples roles (Company_Admin + Staff_secretaria + Staff_profesores) para evitar crear múltiples cuentas. Reglas operativas:
+-- Caso especial: academias con una sola persona. Aunque técnicamente es posible asignar varios roles, la recomendación operativa es asignar únicamente el rol `Company_Admin` al usuario único de la academia. Motivos:
 
-  - Un único usuario puede tener varias asociaciones en `user_roles` (por ejemplo, Company_Admin y Staff_secretaria para la misma academia).
+  - `Company_Admin` engloba las capacidades necesarias para gestionar la academia (crear cursos, gestionar turnos, administrar usuarios y tareas operativas), evitando la necesidad de múltiples cuentas.
+  - Simplifica la gestión de permisos y evita ambigüedades en la UX cuando un mismo usuario actúa con varios perfiles.
 
+Reglas operativas:
+
+  - Por diseño operativo, cada usuario tendrá un único rol; en academias de una sola persona ese rol será `Company_Admin`.
+  
   - La capacidad real para hacer una acción vendrá determinada en tiempo de ejecución por la comprobación del rol relevante y el `academy_id` en el `user_roles`.
 
   - La creación de nuevas academias estará restringida a `System_Admin` (o a un flujo de onboarding controlado que cree la primera academia y asigne roles iniciales).
@@ -97,3 +102,23 @@ Propuesta resumen - trabajador virtual por plataforma
 
 Proponemos un único trabajador virtual para la plataforma que actúe como servicio común y, al mismo tiempo, se presente de forma personalizada para cada academia: mismo motor, pero con nombre, foto y voz propia (por ejemplo “Juan” para la academia A, “Ana” para la B). Esto nos permite ofrecer una experiencia local y familiar para cada centro sin multiplicar la complejidad operativa; las academias que necesiten capacidades muy específicas podrán disponer de workers personalizados, pero la regla general será un worker común con perfiles por academia. Además, el trabajador responderá en función de quién pregunta: un administrador verá respuestas globales, mientras que un profesor o una secretaria recibirá respuestas acotadas a su academia y sus permisos.
 
+
+Sección: Visión de la App Android (alto nivel)
+
+La App Android será la interfaz móvil principal para la mayoría de usuarios. A alto nivel funcionará así:
+
+- Pantalla de inicio / login: el usuario se autentica con su cuenta de la plataforma.
+
+- Chat siempre disponible: tras iniciar sesión el usuario tendrá un acceso directo al trabajador virtual de la plataforma (chat permanente). El trabajador se presenta de forma personalizada según la academia (nombre, foto) y responde en función del rol y la academia del usuario.
+
+- Vistas de academia: además del chat, la App ofrece las pantallas clásicas de gestión y operativa según rol:
+
+  - System_Admin: listado de academias y posibilidad de seleccionar una para gestionar sus recursos.
+
+  - Company_Admin: acceso a las herramientas propias de su academia (crear cursos, gestionar turnos, usuarios, etc.).
+
+  - Staff_secretaria: pantallas para registrar alumnos, gestionar inscripciones y agenda administrativa.
+
+  - Staff_profesores: acceso a sus cursos y clases, posibilidad de ver y marcar asistencia y registrar notas durante la clase.
+
+Esta descripción es de alto nivel y no entra en detalles técnicos; su objetivo es dejar constancia de la experiencia de usuario prevista para la App móvil.
