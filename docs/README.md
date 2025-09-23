@@ -15,6 +15,14 @@
 ## Introducción
 `workers-api` es una API desarrollada en Python con Flask, orientada a la gestión de alumnos, clases y pagos para la secretaría de una empresa educativa. Utiliza SQLAlchemy para la persistencia en MySQL y sigue una arquitectura modular por dominios.
 
+Este proyecto aplica principios de Domain-Driven Design (DDD): el código está organizado por dominios y capas (domain, application, infrastructure, interfaces). Cada dominio agrupa su modelo, casos de uso, repositorios y rutas, lo que facilita el mantenimiento y la escalabilidad.
+
+Dominios principales:
+- `vlodeiro/empresa`: dominio responsable de la organización (empresas/academias). Aquí se gestiona el registro de empresas, la configuración global y los usuarios/roles asociados a una academia. Es el punto de entrada para operaciones de onboarding y configuración organizativa.
+- `vlodeiro/secretaria`: dominio responsable de la operativa diaria de la academia (alumnos, turnos/clases, inscripciones, pagos, tarifas). Implementa los casos de uso y endpoints que realizan operaciones transaccionales y reglas de negocio.
+
+La separación en estos dominios permite que la lógica de negocio de la secretaría evolucione independientemente de la gestión organizativa, y facilita la introducción de nuevos dominios (por ejemplo: facturación, reporting) sin mezclar responsabilidades.
+
 ## Arquitectura general
 - **Flask** como framework web principal. Flask es un framework ligero de Python que permite definir rutas, manejar peticiones HTTP y construir aplicaciones web de forma sencilla y modular.
 En este proyecto, toda la lógica de la API y la gestión de peticiones se basa en Flask.
