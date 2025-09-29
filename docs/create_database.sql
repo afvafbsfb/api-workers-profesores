@@ -17,6 +17,9 @@ CREATE TABLE Tarifa (
     academia_id INT NOT NULL,
     descripcion VARCHAR(255),
     precio_base FLOAT NOT NULL,
+    fecha_alta DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    fecha_baja DATETIME,
+    fecha_ultima_modificacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (academia_id) REFERENCES Academia(id)
 );
 
@@ -25,6 +28,7 @@ CREATE TABLE Curso (
     id INT AUTO_INCREMENT PRIMARY KEY,
     academia_id INT NOT NULL,
     nombre VARCHAR(100) NOT NULL,
+    anio_academico VARCHAR(20) NOT NULL,
     fecha_inicio DATE NOT NULL,
     fecha_fin DATE NOT NULL,
     acepta_nuevos_alumnos BOOLEAN NOT NULL,
@@ -92,20 +96,9 @@ CREATE TABLE Inscripcion (
 -- Tabla Rol_Usuario
 CREATE TABLE Rol_Usuario (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(50) NOT NULL UNIQUE -- Ejemplos: 'Admin_plataforma', 'Admin_academia', 'Profesor_academia'
+    nombre VARCHAR(50) NOT NULL UNIQUE -- Ejemplos: 'Admin_plataforma', 'Admin_academia', 'Profesor_academia', 'Admin_y_profesor_academia'
 );
 
--- rol_id	recurso	  accion
--- 1	       academia	   crear
--- 1	       academia	eliminar
--- 1	       academia	actualizar
--- 1	       academia	leer
--- 2	       curso	crear
--- 2	       curso	eliminar
--- 2	       curso	actualizar
--- 2	       curso	leer
--- 3	       sesion	leer
--- 3	       sesion	actualizar
 
 -- Tabla Usuario
 CREATE TABLE Usuario (
@@ -123,6 +116,22 @@ CREATE TABLE Usuario (
     FOREIGN KEY (rol_id) REFERENCES Rol_Usuario(id)
 );
 
+-- Ensure email is indexed uniquely
+CREATE UNIQUE INDEX idx_usuario_email ON Usuario(email);
+
+-- rol_id	recurso	  accion
+-- 1	       academia	   crear
+-- 1	       academia	eliminar
+-- 1	       academia	actualizar
+-- 1	       academia	leer
+-- 2	       curso	crear
+-- 2	       curso	eliminar
+-- 2	       curso	actualizar
+-- 2	       curso	leer
+-- 3	       sesion	leer
+-- 3	       sesion	actualizar
+
+
 CREATE TABLE PermisosRol (
     id INT AUTO_INCREMENT PRIMARY KEY,
     rol_id INT NOT NULL,
@@ -132,6 +141,65 @@ CREATE TABLE PermisosRol (
     FOREIGN KEY (rol_id) REFERENCES Rol_Usuario(id)
 );
 
+
+-- === 1) HISTORIAL DE LOGIN/LOGOUT ===
+CREATE TABLE IF NOT EXISTS UserLoginLog (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id INT NOT NULL,
+  login_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  logout_at DATETIME NULL,
+  success BOOLEAN NOT NULL,
+  fail_reason VARCHAR(100) NULL,           -- BAD_CREDENTIALS | LOCKED | MFA_FAIL | ...
+  ip VARBINARY(16) NULL,                   -- IPv4/IPv6 con INET6_ATON/NTON a nivel app
+  user_agent VARCHAR(255) NULL,
+  device_id VARCHAR(100) NULL,             -- opcional
+  client VARCHAR(50) NULL,                  -- web | android | ios | ...
+  FOREIGN KEY (usuario_id) REFERENCES Usuario(id),
+  INDEX idx_ull_usuario_login (usuario_id, login_at),
+  INDEX idx_ull_success_login (success, login_at)
+) ENGINE=InnoDB;
+
+-- === 2) REFRESH TOKENS (rotación y revocación) ===
+CREATE TABLE IF NOT EXISTS RefreshToken (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id INT NOT NULL,
+  token_hash CHAR(64) NOT NULL,            -- SHA-256 del refresh token (no guardar el token plano)
+  issued_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  expires_at DATETIME NOT NULL,            -- ahora() + 30 días, p. ej.
+  revoked_at DATETIME NULL,
+  replaced_by_id BIGINT NULL,              -- encadenar rotaciones
+  ip VARBINARY(16) NULL,
+  user_agent VARCHAR(255) NULL,
+  device_id VARCHAR(100) NULL,
+  scope VARCHAR(200) NULL,                 -- opcional (p. ej. "offline_access")
+  FOREIGN KEY (usuario_id) REFERENCES Usuario(id),
+  FOREIGN KEY (replaced_by_id) REFERENCES RefreshToken(id),
+  UNIQUE KEY uk_refreshtoken_hash (token_hash),
+  INDEX idx_refreshtoken_usuario_exp (usuario_id, expires_at),
+  INDEX idx_refreshtoken_revoked (revoked_at)
+) ENGINE=InnoDB;
+
+-- === 3) CONTROL GLOBAL DE REVOCACIÓN (token_version) & ANTI-FUERZA BRUTA ===
+ALTER TABLE Usuario
+  ADD COLUMN token_version INT NOT NULL DEFAULT 0,
+  ADD COLUMN failed_login_count INT NOT NULL DEFAULT 0,
+  ADD COLUMN last_failed_login_at DATETIME NULL,
+  ADD COLUMN locked_until DATETIME NULL,
+  ADD INDEX idx_usuario_token_version (token_version);
+
+-- === 4) RECUPERACIÓN DE CONTRASEÑA (password reset) ===
+CREATE TABLE IF NOT EXISTS PasswordResetToken (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id INT NOT NULL,
+  token_hash CHAR(64) NOT NULL,            -- SHA-256 del token de reset
+  expires_at DATETIME NOT NULL,
+  used_at DATETIME NULL,
+  ip VARBINARY(16) NULL,
+  user_agent VARCHAR(255) NULL,
+  FOREIGN KEY (usuario_id) REFERENCES Usuario(id),
+  UNIQUE KEY uk_pwdreset_hash (token_hash),
+  INDEX idx_pwdreset_usuario_exp (usuario_id, expires_at)
+) ENGINE=InnoDB;
 
 -- Tabla Curso_Profesores (nueva)
 CREATE TABLE Curso_Profesores (
@@ -154,6 +222,8 @@ CREATE TABLE Sesion (
     timestamp_alta DATETIME NOT NULL,
     hora_inicio TIME NOT NULL,
     hora_fin TIME NOT NULL,
+    timestamp_baja DATETIME,
+    motivo_baja VARCHAR(255),
     notas_sesion TEXT,
     notas_materia TEXT,
     FOREIGN KEY (curso_profesor_id) REFERENCES Curso_Profesores(id),
@@ -164,7 +234,8 @@ CREATE TABLE Sesion (
 CREATE TABLE Descuentos_tarifa (
     id INT AUTO_INCREMENT PRIMARY KEY,
     tarifa_id INT NOT NULL,
-    tipo_descuento CHAR(1) NOT NULL,
+    motivo_descuento CHAR(1) NOT NULL, -- 'F' por familiares en el centro, 'M' por periodo menor a 15 dias.
+    tipo_descuento CHAR(1) NOT NULL, -- 'P' para porcentaje, 'F' para fijo
     porcentaje_descuento FLOAT,
     importe_descuento FLOAT,
     FOREIGN KEY (tarifa_id) REFERENCES Tarifa(id)
@@ -184,23 +255,78 @@ CREATE TABLE familias_alumnos (
 CREATE TABLE AnotacionesAlumnoSesion (
     id INT AUTO_INCREMENT PRIMARY KEY,
     sesion_id INT NOT NULL,
+    inscripcion_id INT NOT NULL,
+    curso_id INT NOT NULL,
+    curso_profesor_id INT NOT NULL,
     alumno_id INT NOT NULL,
     tipo_anotacion ENUM('Ausencia', 'Evaluacion', 'Comportamiento') NOT NULL,
     texto VARCHAR(255),
+    timestamp_alta DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    timestamp_baja DATETIME,
+    motivo_baja VARCHAR(255),
     FOREIGN KEY (sesion_id) REFERENCES Sesion(id),
+    FOREIGN KEY (alumno_id) REFERENCES Alumno(id),
+    FOREIGN KEY (inscripcion_id) REFERENCES Inscripcion(id),
+    FOREIGN KEY (curso_id) REFERENCES Curso(id),
+    FOREIGN KEY (curso_profesor_id) REFERENCES Curso_Profesores(id)
+);
+
+-- Tabla Extractos (nueva)
+CREATE TABLE Extractos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    inscripcion_id INT NOT NULL,
+    curso_id INT NOT NULL,
+    alumno_id INT NOT NULL,
+    numero_extracto INT NOT NULL,
+    saldo_ingreso_cuenta_anterior FLOAT,
+    estado_liquidacion_extracto ENUM('1', '2') NOT NULL COMMENT '1: Pendiente de liquidación, 2: Liquidado',
+    fecha_alta DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    fecha_ini_periodo DATE NOT NULL,
+    fecha_fin_periodo DATE NOT NULL,
+    id_dcto_tarifa_1 INT,
+    motivo_dcto1 VARCHAR(255),
+    tipo_dcto_1 CHAR(1),
+    porcentaje_dcto_1 FLOAT,
+    importe_descuento_1 FLOAT,
+    id_dcto_tarifa_2 INT,
+    motivo_dcto2 VARCHAR(255),
+    tipo_dcto_2 CHAR(1),
+    porcentaje_dcto_2 FLOAT,
+    importe_descuento_2 FLOAT,
+    id_dcto_tarifa_3 INT,
+    motivo_dcto3 VARCHAR(255),
+    tipo_dcto_3 CHAR(1),
+    porcentaje_dcto_3 FLOAT,
+    importe_descuento_3 FLOAT,
+    importe_cuota FLOAT NOT NULL,
+    total_descuentos FLOAT NOT NULL,
+    importe_cuota_mensual_sin_descuentos FLOAT NOT NULL, -- cuota mensual sin descuentos
+    importe_cuota_mensual_con_descuentos FLOAT NOT NULL, -- cuota mensual con descuentos
+    importe_exceso_ingresos FLOAT,
+    total_importe_a_cobrar FLOAT NOT NULL,
+    FOREIGN KEY (inscripcion_id) REFERENCES Inscripcion(id),
+    FOREIGN KEY (curso_id) REFERENCES Curso(id),
     FOREIGN KEY (alumno_id) REFERENCES Alumno(id)
 );
 
--- Tabla Pago
-CREATE TABLE Pago (
+-- Tabla Movimientos_Extracto (antes Pago)
+CREATE TABLE Movimientos_Extracto (
     id INT AUTO_INCREMENT PRIMARY KEY,
     inscripcion_id INT NOT NULL,
-    fecha_pago DATE NOT NULL,
-    periodo VARCHAR(50) NOT NULL,
-    importe_corresponde_pagar FLOAT NOT NULL,
-    importe_pagado FLOAT NOT NULL,
+    curso_id INT NOT NULL,
+    alumno_id INT NOT NULL,
+    extracto_id INT NOT NULL,
+    fecha_movimiento DATE NOT NULL,
+    tipo_movimiento ENUM('Ingreso', 'Anulacion_Ingreso') NOT NULL,
+    estado_liquidacion_movimiento ENUM('1', '2') NOT NULL COMMENT '1: Pendiente, 2: Cobrado',
+    importe FLOAT NOT NULL,
+    descripcion_movimiento VARCHAR(255),
     metodo_pago VARCHAR(50) NOT NULL,
-    FOREIGN KEY (inscripcion_id) REFERENCES Inscripcion(id)
+    indicador_movimiento_anulado ENUM('S', 'N') NOT NULL DEFAULT 'N' COMMENT 'S: Anulado, N: No Anulado',
+    FOREIGN KEY (inscripcion_id) REFERENCES Inscripcion(id),
+    FOREIGN KEY (curso_id) REFERENCES Curso(id),
+    FOREIGN KEY (alumno_id) REFERENCES Alumno(id),
+    FOREIGN KEY (extracto_id) REFERENCES Extractos(id)
 );
 
 
@@ -299,5 +425,5 @@ INSERT INTO PermisosRol (rol_id, recurso, accion) VALUES
 (3, 'trabajador_virtual', 'leer');
 
 -- Crear usuario administrador de la plataforma para pruebas
-INSERT INTO Usuario (id, academia_id, nombre, email, password, rol_id) VALUES
-(1, NULL, 'ADMIN', 'afvafbsfb@gmail.com', 'ADMIN', 1);
+
+

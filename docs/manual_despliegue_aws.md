@@ -1,4 +1,3 @@
-
 # Manual de Despliegue y Configuración en AWS
 
 ## 1. Infraestructura AWS
@@ -11,7 +10,7 @@
 
 ## 2. Despliegue en Elastic Beanstalk
 
-1. Empaqueta el proyecto en un archivo ZIP (incluye app.py, requirements.txt, openapi-rest.yaml, Procfile, y la carpeta vlodeiro/).
+1. Empaqueta el proyecto en un archivo ZIP (incluye app.py, requirements.txt, openapi-rest.yaml, Procfile).
 
 
 ### Automatización del empaquetado para despliegue
@@ -22,7 +21,7 @@ cd "/c/Users/Angel FV/Desktop/FORMACION/api-workers-profesores"
 
 cp docs/openapi-rest.yaml openapi-rest.yaml
 
-zip -r deploy.zip main.py models.py auth.py requirements.txt openapi-rest.yaml Procfile vlodeiro wsgi.py passenger_wsgi.py docs/index.html
+zip -r deploy.zip main.py models.py auth.py requirements.txt openapi-rest.yaml Procfile wsgi.py passenger_wsgi.py docs/index.html
 
 rm openapi-rest.yaml
 

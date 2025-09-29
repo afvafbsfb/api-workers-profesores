@@ -31,21 +31,17 @@ Reglas operativas:
 
 3. Renombrado de carpetas y nuevas subcarpetas
 
-- Cambiar la carpeta raíz del dominio de `vlodeiro` a `plataforma`.
+- eliminaremos la carpeta raíz del dominio de `vlodeiro`
 
-- Dentro de `plataforma` proponemos la siguiente estructura DDD. Para más detalles, consulta el archivo `documentacion/estructura_ddd.md`.
+- Dentro de `plataforma` proponemos la siguiente estructura DDD. Para más detalles, consulta el archivo `documentacion/dominios_ddd.md`.
 
-  - `plataforma/academia/creation`: Módulo responsable de la creación y gestión de academias, onboarding y asignación inicial de roles y permisos.
-
-  - `plataforma/operativa/administradores`: Módulo responsable de las funcionalidades específicas de los administradores de la academia (gestión de horarios, contenidos y demás operaciones propias de la operativa administrativa).
-
-  - `plataforma/operativa/profesores`: Módulo responsable de las funcionalidades específicas de los profesores (gestión de clases, contenidos y demás operaciones propias de la operativa del profesor).
+  
 
 4. Modificaciones y ampliación del modelo de datos
 
 - la definicion y creacion de la bbdd la tenemos en el fichero "create_database.sql"
 
-- de acuerdo con la base de datos, los recursos api rest que vamos a necesitar y los reoles con permiso a ellos son:
+- de acuerdo con la base de datos, los recursos api rest que vamos a necesitar y los roles con permiso a ellos son:
 
   Lista actualizada de recursos y acciones por rol
   
@@ -55,28 +51,8 @@ Reglas operativas:
       Usaremos el comodín * para representar acceso global.
 
   Company_Admin (ID: 2)
+    Acceso completo a los recursos a nivel de la academia con la que este vinculado.
 
-    Recursos:
-      academia: Leer, actualizar.
-
-      tarifa: Crear, leer, actualizar, eliminar.
-      curso: Crear, leer, actualizar, eliminar.
-      aula: Crear, leer, actualizar, eliminar.
-      horario_curso: Crear, leer, actualizar, eliminar.
-      alumno: Crear, leer, actualizar, eliminar.
-      inscripcion: Crear, leer, actualizar, eliminar.
-
-      rol_usuario: Leer.
-      usuario: Crear, leer, actualizar, eliminar.
-      permisosrol: Leer.
-
-      sesion: Crear, leer, actualizar, eliminar.
-      descuentos_tarifa: Crear, leer, actualizar, eliminar.
-      familias_alumnos: Crear, leer, actualizar, eliminar.
-      anotaciones_alumno_sesion: Crear, leer, actualizar, eliminar.
-      pago: Crear, leer, actualizar, eliminar.
-
-      trabajador_virtual: leer, actualizar.
 
   Staff_profesores (ID: 3)
 
@@ -86,62 +62,6 @@ Reglas operativas:
       alumno: Leer.
       sesion: Crear, leer, actualizar.
       anotaciones_alumno_sesion: Crear, leer, actualizar, eliminar.
-
-
-
-
-
-Estructura DDD propuesta (layout de carpetas)
-
-La siguiente estructura muestra cómo organizar los límites de contexto y los módulos según DDD. Cada carpeta representa un contexto con su propia capa de API, servicios, repositorios, modelos y pruebas.
-
-plataforma/
-  academia/
-    creation/                # Creación de academias
-      api/                    # Controllers / Blueprints / Endpoints
-      service/                # Lógica de dominio y casos de uso (crear, editar, asignar roles)
-      repository/             # Repositorios / DAOs / persistence
-      model/                  # Entidades del dominio (Academia)
-      tests/                  # Unit/integration tests
-    management/               # Operaciones administrativas de plataforma (listas, búsqueda, auditoría)
-      api/
-      service/
-      repository/
-      tests/
-
-  usuarios/                  # Gestión global de usuarios y autenticación
-    api/                      # login, logout, refresh token, endpoints de perfil
-    service/                  # creación de usuarios, reset password, verificación
-    repository/
-    model/                    # User, Role (si no están en el bounded context de datos compartidos)
-    tests/
-
-operativa/
-  profesores/               # Funcionalidad operativa del profesorado
-    api/                     # Endpoints para profesores (horarios, contenidos, evaluaciones)
-    service/                 # Casos de uso (gestionar horario, subir contenido, evaluar)
-    repository/
-    model/                   # Entidades propias del profesor (Profile, Availability, CourseMaterial)
-    tests/
-  administrativos/               # Operativa administrativa de la academia
-    api/
-    service/
-    repository/
-    model/                   # Entidades para administrativos (Inscripcion, Comunicacion, Agenda)
-    tests/
-
-shared/                     # Componentes reutilizables y librerías internas
-  auth/                      # Middleware de autenticación, JWT helpers
-  db/                        # Migrations, shared repositories o helpers de persistencia
-  events/                    # Event bus, integración entre contextos
-  dto/                       # DTOs compartidos entre módulos
-  utils/                     # Utilidades comunes
-
-Notas sobre la organización
-- Cada bounded context contiene su propia carpeta `api`, `service`, `repository`, `model` y `tests` para mantener las responsabilidades separadas.
-- `shared` contiene infraestructuras que se usan transversalmente (auth, migraciones, utilidades).
-- El renombrado físico en el repo moverá `vlodeiro/empresa` y `vlodeiro/secretaria` a `plataforma/academia` y `operativa/administrativo` respectivamente, y añadirá `plataforma/academia/creation` y `operativa/profesores` como nuevas carpetas.
-- Mantener interfaces claras entre contextos (ej: contratos HTTP o eventos). Evitar acoplamientos directos a las entidades de otro contexto; usar DTOs o repositorios compartidos en `shared/db`.
 
 Propuesta resumen - trabajador virtual por plataforma
 
