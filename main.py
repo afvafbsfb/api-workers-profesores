@@ -4,6 +4,11 @@ init_error = None
 try:
     import os
     from flask import Flask, request, jsonify, send_from_directory, current_app
+    from flask_cors import CORS  # Para manejar CORS
+    from flask_jwt_extended import JWTManager  # Para manejar JWT
+    from dotenv import load_dotenv  # Para cargar variables de entorno desde un archivo .env
+    from auth_module import enforce_jwt_globally, require_jwt  # Importa funciones específicas para la validación de JWT
+    from config import Config  # Importa la clase Config para la configuración de la base de datos
     from datetime import datetime, timezone
     # from vlodeiro.secretaria.infrastructure.repositorio_mysql import TurnoMySQLRepository
     # Dotenv: opcional en desarrollo. Si no está instalado, usa no-op
@@ -14,30 +19,10 @@ try:
             return False
     from functools import wraps
     import models  # Importa SQLAlchemy y modelos
-    # Validación de entrada
-    from marshmallow import Schema, fields, ValidationError
-    # Esquema de validación para /v1/command
-    class CommandSchema(Schema):
-        action = fields.Str(required=True)
-        args = fields.Dict(load_default={})
-    # Seguridad: CORS y headers
-    from flask_cors import CORS
-    # Autenticación API Key modularizada
-    import auth
-    from src.usuarios.interfaces.usuarios_routes import usuarios_bp
-    from src.usuarios.login_routes import login_bp
-    from flask_jwt_extended import JWTManager, verify_jwt_in_request, get_jwt_identity
-    from config import Config
-
-    # Carga variables desde .env si existe, sin sobrescribir variables del proceso
-    # Seguro en producción (no hay .env en el servidor y override=False)
-    try:
-        _load_dotenv(override=False)
-    except Exception:
-        pass
-
+    from models import db
 
     app = Flask(__name__)
+
 
     # --- LOGGING DE ERRORES ---
     import logging
@@ -102,17 +87,10 @@ try:
 
     db_config = Config.get_database_config()
 
-    # Configuración de la base de datos para pruebas
-    if APP_ENV == 'testing':
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-        app.config['SQLALCHEMY_BINDS'] = None  # Desactiva binds adicionales
-        print(f"[DEBUG] Configuración de pruebas: {app.config['SQLALCHEMY_DATABASE_URI']}", flush=True)
-    else:
-        # Generar la cadena de conexión a partir de db_config solo si no es testing
-        app.config['SQLALCHEMY_DATABASE_URI'] = (
-            f"mysql+pymysql://{db_config['DB_USER']}:{db_config['DB_PASS']}@"
-            f"{db_config['DB_HOST']}:{db_config['DB_PORT']}/{db_config['DB_NAME']}"
-        )
+    # Configuración de la base de datos: usar Config para construir/leer la URL
+    from config import Config as _Config
+    _Config.set_environment_variables()
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 
     # Log adicional para verificar si se sobrescribe SQLALCHEMY_DATABASE_URI en algún punto
     print(f"[DEBUG] SQLALCHEMY_DATABASE_URI después de configuración inicial: {app.config['SQLALCHEMY_DATABASE_URI']}", flush=True)
@@ -145,14 +123,14 @@ try:
             print(f"[DEBUG][AUTH] Ruta pública: {request.path}", flush=True)
             return None  # Permite acceso público sin validar el encabezado Authorization
         print(f"[DEBUG][AUTH] Ruta protegida: {request.path}", flush=True)
-        return auth.enforce_jwt_globally()
+        return enforce_jwt_globally()
 
     # Configurar JWT
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'default-secret-key')
     jwt = JWTManager(app)
 
     # Middleware para validar JWT globalmente
-    app.before_request(auth.enforce_jwt_globally)
+    app.before_request(enforce_jwt_globally)
 
     def _build():
         try:
@@ -234,11 +212,10 @@ try:
     logging.basicConfig(filename='tmp/flask_error.log', level=logging.ERROR)
 
 
-    # Registrar el blueprint de usuarios
-    app.register_blueprint(usuarios_bp, url_prefix='/usuarios')
-    # Registrar el blueprint de login
-    app.register_blueprint(login_bp, url_prefix='/auth')
-    print("[DEBUG] Blueprint 'login_bp' registrado con prefijo '/auth'")
+    # Nota: el registro de blueprints se realiza más abajo una vez que
+    # se importan `usuarios_bp` y `login_bp`. Evitamos hacerlo aquí
+    # para que `main` pueda ser importado por scripts (como init_db.py)
+    # sin intentar registrar blueprints antes de sus importaciones.
 
     # Agregar log para listar todas las rutas registradas
     # Forzar el log a la consola con flush=True
@@ -294,10 +271,7 @@ try:
     # Add a log after app.config is set
     print(f"[DEBUG] Final SQLALCHEMY_DATABASE_URI in app.config: {app.config['SQLALCHEMY_DATABASE_URI']}", flush=True)
 
-    # Add safeguard to ensure SQLite is used during testing
-    if APP_ENV == 'testing':
-        SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
-        print(f"[DEBUG] Forced SQLALCHEMY_DATABASE_URI for testing: {SQLALCHEMY_DATABASE_URI}", flush=True)
+    # No forzamos SQLite en testing: la URL viene de Config/DATABASE_URL
 
     # Add a final debug log to confirm the database URI
     print(f"[DEBUG] Final SQLALCHEMY_DATABASE_URI before app initialization: {SQLALCHEMY_DATABASE_URI}", flush=True)
@@ -321,12 +295,12 @@ try:
     app.register_blueprint(login_bp, url_prefix='/auth')
     print("[DEBUG] Blueprints registrados en main.py.", flush=True)
 
-    # Inicializar la base de datos
-    print("[DEBUG] Inicializando la base de datos en main.py.", flush=True)
-    db.init_app(app)
-    with app.app_context():
-        db.create_all()
-        print("[DEBUG] Tablas creadas en main.py.", flush=True)
+    # Inicialización de la base de datos:
+    # La instancia `db` ya se inicializó más arriba (si no estaba inicializada).
+    # No ejecutamos `create_all()` en el momento de importar `main` para
+    # evitar efectos secundarios cuando otros scripts (p. ej. init_db.py)
+    # importan este módulo. La creación de tablas debe hacerse explícitamente
+    # por los scripts de mantenimiento o desde el bloque `if __name__ == '__main__'`.
 
     if __name__ == "__main__":
         app.run(host="0.0.0.0", port=5000, debug=True)

@@ -2,15 +2,20 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 import os
+from config import Config
 
 # Crear instancia de SQLAlchemy
 from models import db
 
+
 def create_app():
     app = Flask(__name__)
 
-    # Configuración de la base de datos
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///local.db')
+    # asegurar que las variables de entorno de DB estén establecidas
+    Config.set_environment_variables()
+
+    # Configuración de la base de datos: usar explícitamente la URL definida en Config
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # Configuración de la clave secreta para JWT

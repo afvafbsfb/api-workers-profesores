@@ -1,3 +1,23 @@
+"""
+Compatibility shim: original module was renamed to auth_module.py to avoid
+shadowing problems during development. This file re-exports the public
+symbols so code importing `auth` keeps working.
+"""
+from auth_module import (
+    login_bp,
+    require_jwt,
+    generar_tokens,
+    renovar_token,
+    enforce_jwt_globally,
+)
+
+__all__ = [
+    'login_bp',
+    'require_jwt',
+    'generar_tokens',
+    'renovar_token',
+    'enforce_jwt_globally',
+]
 import os
 from flask import request, jsonify, Blueprint
 from functools import wraps
