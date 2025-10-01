@@ -1,0 +1,38 @@
+name: CI - Tests
+
+on:
+  push:
+    branches: [ main, master, ampliacion-proyecto ]
+  pull_request:
+    branches: [ main, master, ampliacion-proyecto ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+
+      - name: Prepare environment
+        run: |
+          # Use a local sqlite DB for CI tests to avoid external services
+          echo "DB_ENV=ci" >> $GITHUB_ENV
+          echo "DATABASE_URL=sqlite:///./test_ci.db" >> $GITHUB_ENV
+
+      - name: Run DB seeder (idempotente)
+        run: |
+          python init_db_pruebas_test.py --reset || true
+
+      - name: Run tests
+        run: |
+          python -m pytest -q
