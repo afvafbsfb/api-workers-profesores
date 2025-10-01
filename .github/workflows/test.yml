@@ -41,7 +41,35 @@ jobs:
 
       - name: Run DB seeder (idempotente)
         run: |
-          python init_db_pruebas_test.py --reset || true
+          echo "Running DB seeder (this will fail the job if seeder raises an error)"
+          python init_db_pruebas_test.py --reset
+
+      - name: Verify seeded data (counts)
+        run: |
+          python - <<'PY'
+          from config import Config
+          Config.set_environment_variables()
+          from main import app
+          from models import db, Usuario, Rol, Academia
+          with app.app_context():
+              print('DB URL:', Config.get_database_config())
+              try:
+                  usuarios = db.session.query(Usuario).count()
+              except Exception as e:
+                  print('Error counting Usuario:', e)
+                  raise
+              try:
+                  roles = db.session.query(Rol).count()
+              except Exception as e:
+                  print('Error counting Rol:', e)
+                  raise
+              try:
+                  academias = db.session.query(Academia).count()
+              except Exception as e:
+                  print('Error counting Academia:', e)
+                  raise
+              print(f'Counts -> Usuario: {usuarios}, Rol: {roles}, Academia: {academias}')
+          PY
 
       - name: Run tests
         run: |

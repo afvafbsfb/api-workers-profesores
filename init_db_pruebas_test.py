@@ -1,5 +1,4 @@
 from config import Config
-from werkzeug.security import generate_password_hash
 
 # Este script sólo gestiona datos de prueba (DML).
 # Nunca crea ni borra tablas, índices ni modifica la estructura de la BD.
@@ -334,8 +333,8 @@ def seed():
 
     # Crear usuarios administradores de la plataforma
     usuarios_plataforma = [
-        dict(email='admin_plataforma_1@academia.com', nombre='Admin Plataforma 1', password=generate_password_hash('password_admin_plataforma_1'), rol_id=rol.id, estado='activo', academia_id=None),
-        dict(email='admin_plataforma_2@academia.com', nombre='Admin Plataforma 2', password=generate_password_hash('password_admin_plataforma_2'), rol_id=rol.id, estado='bloqueado', academia_id=None),
+        dict(email='admin_plataforma_1@academia.com', nombre='Admin Plataforma 1', password=hash_password('password_admin_plataforma_1'), rol_id=rol.id, estado='activo', academia_id=None),
+        dict(email='admin_plataforma_2@academia.com', nombre='Admin Plataforma 2', password=hash_password('password_admin_plataforma_2'), rol_id=rol.id, estado='bloqueado', academia_id=None),
     ]
 
     for u in usuarios_plataforma:
@@ -363,9 +362,9 @@ def seed():
 
     # Crear usuarios de Academia 1
     usuarios_academia_1 = [
-        dict(email='admin_academia_1@academia.com', nombre='Admin Academia 1', password=generate_password_hash('password_admin_academia_1'), rol_id=rol_academia.id, estado='activo', academia_id=academia_1.id),
-        dict(email='user_academia_1_1@academia.com', nombre='User Academia 1.1', password=generate_password_hash('password_user_academia_1_1'), rol_id=rol_administrativo.id, estado='bloqueado', academia_id=academia_1.id),
-        dict(email='user_academia_1_2@academia.com', nombre='User Academia 1.2', password=generate_password_hash('password_user_academia_1_2'), rol_id=rol_administrativo.id, estado='bloqueado', academia_id=academia_1.id),
+        dict(email='admin_academia_1@academia.com', nombre='Admin Academia 1', password=hash_password('password_admin_academia_1'), rol_id=rol_academia.id, estado='activo', academia_id=academia_1.id),
+        dict(email='user_academia_1_1@academia.com', nombre='User Academia 1.1', password=hash_password('password_user_academia_1_1'), rol_id=rol_administrativo.id, estado='bloqueado', academia_id=academia_1.id),
+        dict(email='user_academia_1_2@academia.com', nombre='User Academia 1.2', password=hash_password('password_user_academia_1_2'), rol_id=rol_administrativo.id, estado='bloqueado', academia_id=academia_1.id),
     ]
 
     for u in usuarios_academia_1:
@@ -393,10 +392,27 @@ def seed():
 
     # Crear usuarios de Academia 2
     usuarios_academia_2 = [
-        dict(email='admin_academia_2@academia.com', nombre='Admin Academia 2', password=generate_password_hash('password_admin_academia_2'), rol_id=rol_academia.id, estado='activo', academia_id=academia_2.id),
-        dict(email='user_academia_2_1@academia.com', nombre='User Academia 2.1', password=generate_password_hash('password_user_academia_2_1'), rol_id=rol_administrativo.id, estado='activo', academia_id=academia_2.id),  # Changed to activo
-        dict(email='user_academia_2_2@academia.com', nombre='User Academia 2.2', password=generate_password_hash('password_user_academia_2_2'), rol_id=rol_administrativo.id, estado='activo', academia_id=academia_2.id),  # Changed to activo
+        dict(email='admin_academia_2@academia.com', nombre='Admin Academia 2', password=hash_password('password_admin_academia_2'), rol_id=rol_academia.id, estado='activo', academia_id=academia_2.id),
+        dict(email='user_academia_2_1@academia.com', nombre='User Academia 2.1', password=hash_password('password_user_academia_2_1'), rol_id=rol_administrativo.id, estado='activo', academia_id=academia_2.id),  # Changed to activo
+        dict(email='user_academia_2_2@academia.com', nombre='User Academia 2.2', password=hash_password('password_user_academia_2_2'), rol_id=rol_administrativo.id, estado='activo', academia_id=academia_2.id),  # Changed to activo
     ]
+
+    # After seeding, ensure critical test users exist — fail loudly if not
+    def verify_expected_users():
+        expected = [
+            'activo@academia.com', 'bloqueado@academia.com', 'baja@academia.com',
+            'admin_plataforma@academia.com', 'admin_academia@academia.com',
+            'admin_plataforma_1@academia.com', 'admin_plataforma_2@academia.com',
+            'admin_academia_1@academia.com', 'user_academia_1_1@academia.com', 'user_academia_1_2@academia.com',
+            'admin_academia_2@academia.com', 'user_academia_2_1@academia.com', 'user_academia_2_2@academia.com',
+        ]
+        missing = []
+        for e in expected:
+            if not Usuario.query.filter_by(email=e).first():
+                missing.append(e)
+        if missing:
+            print('[init_db_pruebas_test] ERROR: Missing expected seeded users:', missing)
+            raise Exception(f'Missing expected seeded users: {missing}')
 
     for u in usuarios_academia_2:
         user_filters = dict(email=u['email'])
