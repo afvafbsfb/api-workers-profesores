@@ -30,6 +30,74 @@ El entorno se define mediante la variable `DB_ENV`. Por defecto, está configura
 ```bash
 export DB_ENV=development  # En Linux/Mac
 set DB_ENV=development     # En Windows
+
+#####################################################################
+## Recrear la base de datos desde cero (procedimiento recomendado)
+#####################################################################
+
+Archivo canónico
+- El fichero `docs/create_database.sql` del repositorio es la fuente de verdad del DDL. Contiene `DROP DATABASE IF EXISTS` y todas las instrucciones necesarias para crear el esquema (tablas, índices, constraints, etc.).
+
+Secuencia segura recomendada (PowerShell)
+1. Hacer un backup (mysqldump). Si tu usuario no tiene privilegios PROCESS, usa `--no-tablespaces`:
+
+```powershell
+mysqldump --no-tablespaces -u <usuario> -p -h <host> -P <puerto> api_workers > C:\temp\backup_api_workers.sql
+```
+
+2. Ejecutar el script SQL que recrea la base de datos (DROP + CREATE + DDL):
+
+```powershell
+mysql -u <usuario> -p -h <host> -P <puerto> < .\docs\create_database.sql
+```
+
+3. Marcar Alembic como sincronizado (si ejecutaste el SQL manualmente):
+
+```powershell
+& .\.venv\Scripts\Activate.ps1
+alembic stamp head
+```
+
+Alternativa: en lugar del paso 2/3 puedes dejar que Alembic aplique las migraciones desde cero:
+
+```powershell
+# DROP/CREATE database vacía (si procede), luego:
+& .\.venv\Scripts\Activate.ps1
+alembic upgrade head
+```
+
+4. Ejecutar el seeder idempotente (DML-only) para poblar datos de prueba:
+
+```powershell
+& .\.venv\Scripts\Activate.ps1
+python init_db_pruebas_test.py
+```
+
+5. Ejecutar los tests:
+
+```powershell
+& .\.venv\Scripts\Activate.ps1
+pytest -q
+```
+
+Comprobaciones rápidas (sin modificar nada)
+- Ver si existen las tablas añadidas (`RefreshToken`, `UserLoginLog`):
+
+```powershell
+mysql -u <usuario> -p -h <host> -P <puerto> -e "SHOW TABLES FROM api_workers LIKE 'RefreshToken'; SHOW TABLES FROM api_workers LIKE 'UserLoginLog';"
+```
+
+- Ver columnas añadidas en `Usuario`:
+
+```powershell
+mysql -u <usuario> -p -h <host> -P <puerto> -e "SELECT COLUMN_NAME FROM information_schema.columns WHERE table_schema='api_workers' AND table_name='Usuario';"
+```
+
+Notas y precauciones
+- Ejecutar `docs/create_database.sql` borra la base de datos (DROP DATABASE IF EXISTS). Haz el backup antes si hay datos a conservar.
+- Si ejecutas el SQL manualmente y OLVIDAS hacer `alembic stamp head`, la próxima ejecución de `alembic upgrade head` intentará reaplicar migraciones y puede causar errores. Por eso recomendamos `alembic stamp head` cuando aplicas el SQL directamente.
+- Si prefieres que Alembic sea la única fuente de verdad para el esquema, usa la ruta: DROP database → CREATE database vacía → `alembic upgrade head`.
+
 ```
 > **Nota:** No es necesario establecer esta variable manualmente, ya que el archivo `config.py` se encarga de configurarla automáticamente según el entorno definido en el programa.
 

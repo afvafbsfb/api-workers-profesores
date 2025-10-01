@@ -2,9 +2,10 @@ import os
 from flask import request, jsonify, Blueprint
 from functools import wraps
 from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity, create_access_token, create_refresh_token, jwt_required, get_jwt
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
+import hashlib
 from flask_sqlalchemy import SQLAlchemy
-from models import Usuario
+from models import Usuario, RefreshToken, db
 
 # Configuración de tiempos de expiración
 ACCESS_EXPIRES = timedelta(minutes=15)
@@ -31,8 +32,26 @@ def require_jwt(f):
 
 def generar_tokens(usuario_id):
     """Genera un token de acceso y un token de refrescado."""
-    access_token = create_access_token(identity=usuario_id, expires_delta=ACCESS_EXPIRES)
+    # Obtener token_version del usuario para incluirlo en el access token
+    # Use session.get(...) instead of Query.get(...) to avoid SQLAlchemy legacy warning
+    usuario = db.session.get(Usuario, usuario_id)
+    token_version = usuario.token_version if usuario else 0
+
+    # Incluir token_version en la identidad del access token
+    access_identity = {"usuario_id": usuario_id, "token_version": token_version}
+    access_token = create_access_token(identity=access_identity, expires_delta=ACCESS_EXPIRES)
     refresh_token = create_refresh_token(identity=usuario_id, expires_delta=REFRESH_EXPIRES)
+
+    # Persistir hash del refresh token (SHA-256) en la tabla RefreshToken
+    try:
+        token_hash = hashlib.sha256(refresh_token.encode('utf-8')).hexdigest()
+        expires_at = datetime.now(timezone.utc) + REFRESH_EXPIRES
+        rt = RefreshToken(usuario_id=usuario_id, token_hash=token_hash, expires_at=expires_at)
+        db.session.add(rt)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+
     return {
         "access_token": access_token,
         "refresh_token": refresh_token
@@ -46,8 +65,11 @@ def renovar_token():
     Requiere que el token de refresco sea enviado en el encabezado Authorization.
     """
     try:
-        current_user = get_jwt_identity()
-        nuevo_access_token = create_access_token(identity=current_user, expires_delta=ACCESS_EXPIRES)
+        current_user = get_jwt_identity()  # para refresh token identity es el usuario_id
+        usuario_id = current_user if isinstance(current_user, int) or isinstance(current_user, str) else current_user.get('usuario_id')
+        usuario = db.session.get(Usuario, usuario_id)
+        token_version = usuario.token_version if usuario else 0
+        nuevo_access_token = create_access_token(identity={"usuario_id": usuario_id, "token_version": token_version}, expires_delta=ACCESS_EXPIRES)
         return jsonify({"ok": True, "access_token": nuevo_access_token}), 200
     except Exception as e:
         return jsonify({"ok": False, "error": "No se pudo renovar el token", "message": str(e)}), 400

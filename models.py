@@ -1,8 +1,19 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import MetaData
 from werkzeug.security import check_password_hash
 from src.shared.security import verify_password
 
-db = SQLAlchemy()
+# Use a naming convention so Alembic generates stable, predictable constraint/index names
+naming_convention = {
+    "ix": "ix_%(table_name)s_%(column_0_name)s",
+    "uq": "uq_%(table_name)s_%(column_0_name)s",
+    "ck": "ck_%(table_name)s_%(constraint_name)s",
+    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+    "pk": "pk_%(table_name)s"
+}
+
+metadata = MetaData(naming_convention=naming_convention)
+db = SQLAlchemy(metadata=metadata)
 
 # Modelo para Academias
 class Academia(db.Model):
@@ -62,6 +73,12 @@ class Usuario(db.Model):
     fecha_alta = db.Column(db.DateTime, default=db.func.current_timestamp(), nullable=False)
     fecha_baja = db.Column(db.DateTime, nullable=True)
     fecha_ultima_modificacion = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp(), nullable=False)
+    # Control de versión de tokens (invalida access tokens antiguos cuando se incrementa)
+    token_version = db.Column(db.Integer, default=0, nullable=False)
+    # Anti-brute-force / bloqueo de cuenta
+    failed_login_count = db.Column(db.Integer, default=0, nullable=False)
+    last_failed_login_at = db.Column(db.DateTime, nullable=True)
+    locked_until = db.Column(db.DateTime, nullable=True)
 
     def check_password(self, password):
         """Verifica si la contraseña proporcionada coincide con el hash almacenado."""
@@ -86,6 +103,48 @@ class Token(db.Model):
     token_refresh = db.Column(db.String(500), nullable=False)
     fecha_creacion = db.Column(db.DateTime, nullable=False)
     fecha_expiracion = db.Column(db.DateTime, nullable=False)
+
+
+# Tabla para persistir refresh tokens (hash del token, rotación y revocación)
+class RefreshToken(db.Model):
+    __tablename__ = 'RefreshToken'
+    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('Usuario.id'), nullable=False)
+    token_hash = db.Column(db.String(64), nullable=False)  # SHA-256
+    issued_at = db.Column(db.DateTime, server_default=db.func.current_timestamp(), nullable=False)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    revoked_at = db.Column(db.DateTime, nullable=True)
+    replaced_by_id = db.Column(db.BigInteger, db.ForeignKey('RefreshToken.id'), nullable=True)
+    ip = db.Column(db.LargeBinary(16), nullable=True)
+    user_agent = db.Column(db.String(255), nullable=True)
+    device_id = db.Column(db.String(100), nullable=True)
+    scope = db.Column(db.String(200), nullable=True)
+
+    __table_args__ = (
+        db.UniqueConstraint('token_hash', name='uk_refreshtoken_hash'),
+        db.Index('idx_refreshtoken_usuario_exp', 'usuario_id', 'expires_at'),
+        db.Index('idx_refreshtoken_revoked', 'revoked_at'),
+    )
+
+
+# Historial de intentos de login
+class UserLoginLog(db.Model):
+    __tablename__ = 'UserLoginLog'
+    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('Usuario.id'), nullable=False)
+    login_at = db.Column(db.DateTime, server_default=db.func.current_timestamp(), nullable=False)
+    logout_at = db.Column(db.DateTime, nullable=True)
+    success = db.Column(db.Boolean, nullable=False)
+    fail_reason = db.Column(db.String(100), nullable=True)
+    ip = db.Column(db.LargeBinary(16), nullable=True)
+    user_agent = db.Column(db.String(255), nullable=True)
+    device_id = db.Column(db.String(100), nullable=True)
+    client = db.Column(db.String(50), nullable=True)
+
+    __table_args__ = (
+        db.Index('idx_ull_usuario_login', 'usuario_id', 'login_at'),
+        db.Index('idx_ull_success_login', 'success', 'login_at'),
+    )
 
 # Modelo para Tarifas
 class Tarifa(db.Model):
