@@ -333,8 +333,8 @@ def seed():
 
     # Crear usuarios administradores de la plataforma
     usuarios_plataforma = [
-        dict(email='admin_plataforma_1@academia.com', nombre='Admin Plataforma 1', password=hash_password('password_admin_plataforma_1'), rol_id=rol.id, estado='activo', academia_id=None),
-        dict(email='admin_plataforma_2@academia.com', nombre='Admin Plataforma 2', password=hash_password('password_admin_plataforma_2'), rol_id=rol.id, estado='bloqueado', academia_id=None),
+        dict(email='admin_plataforma_1@academia.com', nombre='Admin Plataforma 1', password=hash_password('password_admin_plataforma_1'), rol_id=rol.id, estado='Activo', academia_id=None),
+        dict(email='admin_plataforma_2@academia.com', nombre='Admin Plataforma 2', password=hash_password('password_admin_plataforma_2'), rol_id=rol.id, estado='Bloqueado', academia_id=None),
     ]
 
     for u in usuarios_plataforma:
@@ -362,9 +362,9 @@ def seed():
 
     # Crear usuarios de Academia 1
     usuarios_academia_1 = [
-        dict(email='admin_academia_1@academia.com', nombre='Admin Academia 1', password=hash_password('password_admin_academia_1'), rol_id=rol_academia.id, estado='activo', academia_id=academia_1.id),
-        dict(email='user_academia_1_1@academia.com', nombre='User Academia 1.1', password=hash_password('password_user_academia_1_1'), rol_id=rol_administrativo.id, estado='bloqueado', academia_id=academia_1.id),
-        dict(email='user_academia_1_2@academia.com', nombre='User Academia 1.2', password=hash_password('password_user_academia_1_2'), rol_id=rol_administrativo.id, estado='bloqueado', academia_id=academia_1.id),
+        dict(email='admin_academia_1@academia.com', nombre='Admin Academia 1', password=hash_password('password_admin_academia_1'), rol_id=rol_academia.id, estado='Activo', academia_id=academia_1.id),
+        dict(email='user_academia_1_1@academia.com', nombre='User Academia 1.1', password=hash_password('password_user_academia_1_1'), rol_id=rol_administrativo.id, estado='Bloqueado', academia_id=academia_1.id),
+        dict(email='user_academia_1_2@academia.com', nombre='User Academia 1.2', password=hash_password('password_user_academia_1_2'), rol_id=rol_administrativo.id, estado='Bloqueado', academia_id=academia_1.id),
     ]
 
     for u in usuarios_academia_1:
@@ -392,9 +392,9 @@ def seed():
 
     # Crear usuarios de Academia 2
     usuarios_academia_2 = [
-        dict(email='admin_academia_2@academia.com', nombre='Admin Academia 2', password=hash_password('password_admin_academia_2'), rol_id=rol_academia.id, estado='activo', academia_id=academia_2.id),
-        dict(email='user_academia_2_1@academia.com', nombre='User Academia 2.1', password=hash_password('password_user_academia_2_1'), rol_id=rol_administrativo.id, estado='activo', academia_id=academia_2.id),  # Changed to activo
-        dict(email='user_academia_2_2@academia.com', nombre='User Academia 2.2', password=hash_password('password_user_academia_2_2'), rol_id=rol_administrativo.id, estado='activo', academia_id=academia_2.id),  # Changed to activo
+        dict(email='admin_academia_2@academia.com', nombre='Admin Academia 2', password=hash_password('password_admin_academia_2'), rol_id=rol_academia.id, estado='Activo', academia_id=academia_2.id),
+        dict(email='user_academia_2_1@academia.com', nombre='User Academia 2.1', password=hash_password('password_user_academia_2_1'), rol_id=rol_administrativo.id, estado='Activo', academia_id=academia_2.id),  # Changed to activo
+        dict(email='user_academia_2_2@academia.com', nombre='User Academia 2.2', password=hash_password('password_user_academia_2_2'), rol_id=rol_administrativo.id, estado='Activo', academia_id=academia_2.id),  # Changed to activo
     ]
 
     # After seeding, ensure critical test users exist — fail loudly if not
