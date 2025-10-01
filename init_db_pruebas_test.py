@@ -1,4 +1,5 @@
 from config import Config
+from werkzeug.security import generate_password_hash
 
 # Este script sólo gestiona datos de prueba (DML).
 # Nunca crea ni borra tablas, índices ni modifica la estructura de la BD.
@@ -13,6 +14,7 @@ from config import Config
 
 #python init_db_pruebas_test.py    --> # 3) ejecutar el seeder idempotente (no hace CREATE/DROP)
 #python init_db_pruebas_test.py --delete   (Ejecutar el script pidiendo además que borre las filas (DELETE ordenado) y luego vuelva a insertar los datos de prueba)
+#python init_db_pruebas_test.py --reset    (Alias de --delete: borra filas y vuelve a insertar los datos de prueba. IMPORTANTE: solo borra datos, no hace DROP de tablas ni altera el esquema.)
 #python init_db_pruebas_test.py --delete --force (Si alguna vez lanzas --delete contra producción, el script denegará la operación a menos que añadas --force. No lo uses en production salvo que estés absolutamente seguro)
 
 #ejecutar los test de login  (salida -s para mostrar prints)
@@ -110,8 +112,17 @@ def delete_all_rows(force=False):
     try:
         for t in table_names:
             stmt = text(f"DELETE FROM `{t}`;")
-            with db.engine.begin() as conn:
-                conn.execute(stmt)
+            try:
+                with db.engine.begin() as conn:
+                    conn.execute(stmt)
+            except Exception as e:
+                # Si la tabla no existe, lo ignoramos y continuamos con las demás.
+                msg = str(e)
+                if 'doesn\'t exist' in msg or 'does not exist' in msg or '1146' in msg:
+                    print(f"[init_db_pruebas_test] Tabla no encontrada, se omite DELETE: {t}")
+                    continue
+                # Para otros errores, relanzamos
+                raise
         print('[init_db_pruebas_test] Borrado ordenado completado.')
         return
     except Exception as e:
@@ -120,7 +131,14 @@ def delete_all_rows(force=False):
             with db.engine.begin() as conn:
                 conn.execute(text("SET FOREIGN_KEY_CHECKS=0;"))
                 for t in table_names:
-                    conn.execute(text(f"DELETE FROM `{t}`;"))
+                    try:
+                        conn.execute(text(f"DELETE FROM `{t}`;"))
+                    except Exception as e2:
+                        msg2 = str(e2)
+                        if 'doesn\'t exist' in msg2 or 'does not exist' in msg2 or '1146' in msg2:
+                            print(f"[init_db_pruebas_test] (FK off) Tabla no encontrada, se omite DELETE: {t}")
+                            continue
+                        raise
                 conn.execute(text("SET FOREIGN_KEY_CHECKS=1;"))
             print('[init_db_pruebas_test] Borrado con FOREIGN_KEY_CHECKS=0 completado.')
             return
@@ -133,7 +151,15 @@ def delete_all_rows(force=False):
                 print('[init_db_pruebas_test] Forzando borrado final (último recurso).')
                 with db.engine.begin() as conn:
                     for t in table_names:
-                        conn.execute(text(f"DELETE FROM `{t}`;"))
+                        try:
+                            conn.execute(text(f"DELETE FROM `{t}`;"))
+                        except Exception as e3:
+                            msg3 = str(e3)
+                            if 'doesn\'t exist' in msg3 or 'does not exist' in msg3 or '1146' in msg3:
+                                print(f"[init_db_pruebas_test] (force) Tabla no encontrada, omitiendo: {t}")
+                                continue
+                            # Si aún falla por otra razón, relanzar para que sea visible
+                            raise
 
 
 def seed():
@@ -191,11 +217,27 @@ def seed():
     else:
         print(f"[init_db_pruebas_test] Rol existente usado id={rol.id}")
 
+    # Crear roles adicionales
+    rol_academia, created = get_or_create(Rol, nombre="Admin_academia")
+    if created:
+        print(f"[init_db_pruebas_test] Rol creado con id={rol_academia.id}")
+    else:
+        print(f"[init_db_pruebas_test] Rol existente usado id={rol_academia.id}")
+
+    # Rol administrativo
+    rol_administrativo, created = get_or_create(Rol, nombre="Administrativo")
+    if created:
+        print(f"[init_db_pruebas_test] Rol creado con id={rol_administrativo.id}")
+    else:
+        print(f"[init_db_pruebas_test] Rol existente usado id={rol_administrativo.id}")
+
     # Usuarios de prueba: crear solo si email no existe
     usuarios_prueba = [
         dict(nombre="Usuario Activo", email="activo@academia.com", password=hash_password("password_activo"), rol_id=rol.id, estado="Activo", academia_id=academia.id),
         dict(nombre="Usuario Bloqueado", email="bloqueado@academia.com", password=hash_password("password_bloqueado"), rol_id=rol.id, estado="Bloqueado", academia_id=academia.id),
         dict(nombre="Usuario Baja", email="baja@academia.com", password=hash_password("password_baja"), rol_id=rol.id, estado="Baja", academia_id=academia.id),
+        dict(nombre="Admin Plataforma", email="admin_plataforma@academia.com", password=hash_password("password_admin_plataforma"), rol_id=rol.id, estado="Activo", academia_id=None),
+        dict(nombre="Admin Academia", email="admin_academia@academia.com", password=hash_password("password_admin_academia"), rol_id=rol_academia.id, estado="Activo", academia_id=academia.id),
     ]
     for u in usuarios_prueba:
         user_filters = dict(email=u['email'])
@@ -255,6 +297,100 @@ def seed():
         if created:
             print(f"[init_db_pruebas_test] Sesion creada id={ses.id}")
 
+    # Crear academias
+    academia_1, created = get_or_create(Academia, nombre='Academia 1')
+    if created:
+        print("[init_db_pruebas_test] Academia creada: Academia 1")
+    else:
+        print("[init_db_pruebas_test] Academia ya existe: Academia 1")
+
+    academia_2, created = get_or_create(Academia, nombre='Academia 2')
+    if created:
+        print("[init_db_pruebas_test] Academia creada: Academia 2")
+    else:
+        print("[init_db_pruebas_test] Academia ya existe: Academia 2")
+
+    # Crear usuarios administradores de la plataforma
+    usuarios_plataforma = [
+        dict(email='admin_plataforma_1@academia.com', nombre='Admin Plataforma 1', password=generate_password_hash('password_admin_plataforma_1'), rol_id=rol.id, estado='activo', academia_id=None),
+        dict(email='admin_plataforma_2@academia.com', nombre='Admin Plataforma 2', password=generate_password_hash('password_admin_plataforma_2'), rol_id=rol.id, estado='bloqueado', academia_id=None),
+    ]
+
+    for u in usuarios_plataforma:
+        user_filters = dict(email=u['email'])
+        defaults = {k: v for k, v in u.items() if k != 'email'}
+        user, created = get_or_create(Usuario, defaults=defaults, **user_filters)
+        if created:
+            print(f"[init_db_pruebas_test] Usuario creado: {user.email} (id={user.id})")
+        else:
+            print(f"[init_db_pruebas_test] Usuario ya existe: {user.email}")
+
+    # Crear usuarios de Academia 1
+    usuarios_academia_1 = [
+        dict(email='admin_academia_1@academia.com', nombre='Admin Academia 1', password=generate_password_hash('password_admin_academia_1'), rol_id=rol_academia.id, estado='activo', academia_id=academia_1.id),
+        dict(email='user_academia_1_1@academia.com', nombre='User Academia 1.1', password=generate_password_hash('password_user_academia_1_1'), rol_id=rol_administrativo.id, estado='bloqueado', academia_id=academia_1.id),
+        dict(email='user_academia_1_2@academia.com', nombre='User Academia 1.2', password=generate_password_hash('password_user_academia_1_2'), rol_id=rol_administrativo.id, estado='bloqueado', academia_id=academia_1.id),
+    ]
+
+    for u in usuarios_academia_1:
+        user_filters = dict(email=u['email'])
+        defaults = {k: v for k, v in u.items() if k != 'email'}
+        user, created = get_or_create(Usuario, defaults=defaults, **user_filters)
+        if created:
+            print(f"[init_db_pruebas_test] Usuario creado: {user.email} (id={user.id})")
+        else:
+            print(f"[init_db_pruebas_test] Usuario ya existe: {user.email}")
+
+    # Crear usuarios de Academia 2
+    usuarios_academia_2 = [
+        dict(email='admin_academia_2@academia.com', nombre='Admin Academia 2', password=generate_password_hash('password_admin_academia_2'), rol_id=rol_academia.id, estado='activo', academia_id=academia_2.id),
+        dict(email='user_academia_2_1@academia.com', nombre='User Academia 2.1', password=generate_password_hash('password_user_academia_2_1'), rol_id=rol_administrativo.id, estado='activo', academia_id=academia_2.id),  # Changed to activo
+        dict(email='user_academia_2_2@academia.com', nombre='User Academia 2.2', password=generate_password_hash('password_user_academia_2_2'), rol_id=rol_administrativo.id, estado='activo', academia_id=academia_2.id),  # Changed to activo
+    ]
+
+    for u in usuarios_academia_2:
+        user_filters = dict(email=u['email'])
+        defaults = {k: v for k, v in u.items() if k != 'email'}
+        user, created = get_or_create(Usuario, defaults=defaults, **user_filters)
+        if created:
+            print(f"[init_db_pruebas_test] Usuario creado: {user.email} (id={user.id})")
+        else:
+            print(f"[init_db_pruebas_test] Usuario ya existe: {user.email}")
+
+    # Mostrar resumen al final del seeding con roles primero
+    def mostrar_resumen():
+        print("\n[Resumen de datos creados]")
+
+        # Listar todos los roles
+        print("\nRoles:")
+        roles = Rol.query.all()
+        for rol in roles:
+            print(f"  Rol ID: {rol.id}, Nombre: {rol.nombre}")
+
+        # Listar usuarios administradores de la plataforma
+        print("\nUsuarios Administradores de la Plataforma:")
+        usuarios_plataforma = Usuario.query.filter_by(academia_id=None).all()
+        for usuario in usuarios_plataforma:
+            rol_usuario = db.session.get(Rol, usuario.rol_id)
+            rol_descripcion = rol_usuario.nombre if rol_usuario else "Sin rol"
+            print(f"  Usuario ID: {usuario.id}, Nombre: {usuario.nombre}, Estado: {usuario.estado}, Rol: {rol_descripcion}")
+
+        # Listar academias y sus usuarios
+        academias = Academia.query.all()
+        for academia in academias:
+            print(f"\nAcademia ID: {academia.id}, Nombre: {academia.nombre}")
+
+            # Listar usuarios de la academia con descripción del rol
+            usuarios = Usuario.query.filter_by(academia_id=academia.id).all()
+            print("  Usuarios:")
+            for usuario in usuarios:
+                rol_usuario = db.session.get(Rol, usuario.rol_id)
+                rol_descripcion = rol_usuario.nombre if rol_usuario else "Sin rol"
+                print(f"    Usuario ID: {usuario.id}, Nombre: {usuario.nombre}, Estado: {usuario.estado}, Rol: {rol_descripcion}")
+
+    # Llamar a la función de resumen después del seeding
+    mostrar_resumen()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Carga datos de prueba (solo DML). No modifica la estructura de la BD.")
@@ -262,6 +398,11 @@ if __name__ == "__main__":
         "--delete",
         action="store_true",
         help="ELIMINA (DELETE) todas las filas de las tablas configuradas y luego inserta los datos de prueba.",
+    )
+    parser.add_argument(
+        "--reset",
+        action="store_true",
+        help="ALIAS: igual que --delete. Borra filas y vuelve a insertar datos de prueba. NO borra tablas ni modifica esquema.",
     )
     parser.add_argument(
         "--force",
@@ -274,7 +415,7 @@ if __name__ == "__main__":
         # Configurar la base de datos según el entorno
         Config.set_environment_variables()
 
-        if args.delete:
+        if args.delete or args.reset:
             # Safety checks: no borrar en production a menos que se fuerce
             if Config.DB_ENV == 'production' and not args.force:
                 print("[init_db_pruebas_test] ERROR: --delete no está permitido en production sin --force. Abortando.")
