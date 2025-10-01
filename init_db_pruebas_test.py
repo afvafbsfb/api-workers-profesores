@@ -247,6 +247,28 @@ def seed():
             print(f"[init_db_pruebas_test] Usuario creado: {user.email} (id={user.id})")
         else:
             print(f"[init_db_pruebas_test] Usuario ya existe: {user.email}")
+            # Asegurar estado consistente para tests: actualizar campos críticos
+            try:
+                user.nombre = defaults.get('nombre', user.nombre)
+                user.password = defaults.get('password', user.password)
+                # Normalizar estado (usar valores capitalizados según modelo)
+                estado = defaults.get('estado', user.estado)
+                if isinstance(estado, str):
+                    estado = estado.capitalize()
+                user.estado = estado or user.estado
+                user.rol_id = defaults.get('rol_id', user.rol_id)
+                user.academia_id = defaults.get('academia_id', user.academia_id)
+                # Reset anti-brute-force fields
+                user.failed_login_count = 0
+                user.last_failed_login_at = None
+                user.locked_until = None
+                user.token_version = getattr(user, 'token_version', 0) or 0
+                db.session.add(user)
+                db.session.commit()
+                print(f"[init_db_pruebas_test] Usuario actualizado/normalizado para tests: {user.email}")
+            except Exception as e:
+                db.session.rollback()
+                print(f"[init_db_pruebas_test] No se pudo normalizar usuario existente {user.email}: {e}")
 
     # HorarioCurso
     horario_filters = dict(curso_id=curso.id, aula_id=aula.id, dia_semana="Lunes")
@@ -324,6 +346,20 @@ def seed():
             print(f"[init_db_pruebas_test] Usuario creado: {user.email} (id={user.id})")
         else:
             print(f"[init_db_pruebas_test] Usuario ya existe: {user.email}")
+            try:
+                user.password = defaults.get('password', user.password)
+                user.estado = defaults.get('estado', user.estado).capitalize() if isinstance(defaults.get('estado', user.estado), str) else user.estado
+                user.rol_id = defaults.get('rol_id', user.rol_id)
+                user.academia_id = defaults.get('academia_id', user.academia_id)
+                user.failed_login_count = 0
+                user.last_failed_login_at = None
+                user.locked_until = None
+                db.session.add(user)
+                db.session.commit()
+                print(f"[init_db_pruebas_test] Usuario plataforma normalizado: {user.email}")
+            except Exception as e:
+                db.session.rollback()
+                print(f"[init_db_pruebas_test] No se pudo normalizar usuario plataforma {user.email}: {e}")
 
     # Crear usuarios de Academia 1
     usuarios_academia_1 = [
@@ -340,6 +376,20 @@ def seed():
             print(f"[init_db_pruebas_test] Usuario creado: {user.email} (id={user.id})")
         else:
             print(f"[init_db_pruebas_test] Usuario ya existe: {user.email}")
+            try:
+                user.password = defaults.get('password', user.password)
+                user.estado = defaults.get('estado', user.estado).capitalize() if isinstance(defaults.get('estado', user.estado), str) else user.estado
+                user.rol_id = defaults.get('rol_id', user.rol_id)
+                user.academia_id = defaults.get('academia_id', user.academia_id)
+                user.failed_login_count = 0
+                user.last_failed_login_at = None
+                user.locked_until = None
+                db.session.add(user)
+                db.session.commit()
+                print(f"[init_db_pruebas_test] Usuario academia 1 normalizado: {user.email}")
+            except Exception as e:
+                db.session.rollback()
+                print(f"[init_db_pruebas_test] No se pudo normalizar usuario academia 1 {user.email}: {e}")
 
     # Crear usuarios de Academia 2
     usuarios_academia_2 = [
@@ -356,6 +406,20 @@ def seed():
             print(f"[init_db_pruebas_test] Usuario creado: {user.email} (id={user.id})")
         else:
             print(f"[init_db_pruebas_test] Usuario ya existe: {user.email}")
+            try:
+                user.password = defaults.get('password', user.password)
+                user.estado = defaults.get('estado', user.estado).capitalize() if isinstance(defaults.get('estado', user.estado), str) else user.estado
+                user.rol_id = defaults.get('rol_id', user.rol_id)
+                user.academia_id = defaults.get('academia_id', user.academia_id)
+                user.failed_login_count = 0
+                user.last_failed_login_at = None
+                user.locked_until = None
+                db.session.add(user)
+                db.session.commit()
+                print(f"[init_db_pruebas_test] Usuario academia 2 normalizado: {user.email}")
+            except Exception as e:
+                db.session.rollback()
+                print(f"[init_db_pruebas_test] No se pudo normalizar usuario academia 2 {user.email}: {e}")
 
     # Mostrar resumen al final del seeding con roles primero
     def mostrar_resumen():

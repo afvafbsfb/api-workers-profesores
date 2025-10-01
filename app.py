@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 import os
@@ -37,6 +37,22 @@ def create_app():
     @app.route('/health')
     def health():
         return {'status': 'ok'}
+
+    # Compatibilidad: exponer explícitamente /auth/login delegando en AuthService
+    try:
+        from src.autenticacion.application.services import AuthService
+        @app.route('/auth/login', methods=['POST'])
+        def auth_login_compat():
+            data = request.get_json() or {}
+            email = data.get('email')
+            password = data.get('password')
+            ok, result = AuthService.login(email, password)
+            if not ok:
+                return jsonify({"ok": False, **result}), 401
+            return jsonify({"ok": True, "tokens": result['tokens']}), 200
+    except Exception:
+        # Si por alguna razón el AuthService no está disponible, no romper la app
+        pass
 
     return app
 
