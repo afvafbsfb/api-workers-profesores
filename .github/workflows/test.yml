@@ -9,6 +9,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: sqlite:///./test_ci.db
+      DB_ENV: ci
     steps:
       - uses: actions/checkout@v4
 
@@ -23,12 +26,6 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
 
-      - name: Prepare environment
-        run: |
-          # Use a local sqlite DB for CI tests to avoid external services
-          echo "DB_ENV=ci" >> $GITHUB_ENV
-          echo "DATABASE_URL=sqlite:///./test_ci.db" >> $GITHUB_ENV
-
       - name: Run DB seeder (idempotente)
         run: |
           python init_db_pruebas_test.py --reset || true
@@ -36,3 +33,10 @@ jobs:
       - name: Run tests
         run: |
           python -m pytest -q
+      
+      - name: Upload sqlite DB for debugging
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test_ci_db
+          path: ./test_ci.db

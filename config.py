@@ -4,17 +4,10 @@ class Config:
     """
     Clase base para manejar configuraciones de la aplicación.
     """
-    DB_ENV = os.getenv('DB_ENV', 'development')  # Valores posibles: 'memory', 'development', 'production'
+    DB_ENV = os.getenv('DB_ENV', 'development')  # Valores posibles: 'development', 'production'
 
     # Configuración de bases de datos
     DATABASES = {
-        'memory': {
-            'DB_HOST': 'localhost',
-            'DB_PORT': '3306',
-            'DB_USER': 'root',
-            'DB_PASS': '',
-            'DB_NAME': 'memory_db',
-        },
         'development': {
             'DB_HOST': 'localhost',
             'DB_PORT': '3307',
@@ -36,7 +29,8 @@ class Config:
         """
         Retorna la configuración de la base de datos según el entorno actual.
         """
-        return cls.DATABASES.get(cls.DB_ENV, cls.DATABASES['memory'])
+        # Si el entorno no está en el listado, usar 'development' por defecto
+        return cls.DATABASES.get(cls.DB_ENV, cls.DATABASES['development'])
 
     @classmethod
     def set_environment_variables(cls):
@@ -50,9 +44,12 @@ class Config:
 
         db_config = cls.get_database_config()
 
-        if cls.DB_ENV == 'memory':
-            url = 'sqlite:///:memory:'
+        # If a DATABASE_URL env var was pre-set (e.g. in CI), prefer it.
+        env_database_url = os.getenv('DATABASE_URL')
+        if env_database_url:
+            url = env_database_url
         else:
+            # Construir URL a partir de la configuración correspondiente (development/production)
             url = f"mysql+pymysql://{db_config['DB_USER']}:{db_config['DB_PASS']}@{db_config['DB_HOST']}:{db_config['DB_PORT']}/{db_config['DB_NAME']}"
 
         # Exportar tanto DATABASE_URL (usado por la app/tests) como SQLALCHEMY_DATABASE_URI
