@@ -13,6 +13,9 @@
 #     bloqueado@academia.com / password_bloqueado (estado: Bloqueado)
 #     baja@academia.com      / password_baja      (estado: Baja)
 #
+
+#  python app.py    --> levanto el servidor (opcional, no es necesario para los tests)
+
 # Comandos PowerShell recomendados (ejecutar uno a uno):
 # 1) Activar el virtualenv (opcional si ya está activo):
 #    & .\.venv\Scripts\Activate.ps1
@@ -24,8 +27,8 @@
 #    python -c "from config import Config; Config.set_environment_variables(); import os; print('DATABASE_URL=', os.environ.get('DATABASE_URL'))"
 #
 # 4) Inicializar/asegurar los datos de prueba (idempotente):
-#    python init_db.py
-#    # (opcional y destructivo) python init_db.py --reset
+#    python init_db_pruebas_test.py
+#    # (opcional y destructivo) python init_db_pruebas_test.py --reset
 #
 # 5) Ejecutar únicamente este fichero de tests y ver los prints en consola:
 #    python -m pytest tests/usuarios/test_login.py -q -s

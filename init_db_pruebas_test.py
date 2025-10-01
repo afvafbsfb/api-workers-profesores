@@ -6,16 +6,20 @@ from config import Config
 # borrar filas de las tablas de datos de test con --delete (DELETE sólo).
 
 # Asegurar que las variables de entorno para la DB estén configuradas
+# & .\.venv\Scripts\Activate.ps1    --> activar entorno virtual
 
-#$env:DB_ENV='development'
+#$env:DB_ENV='development'     --> configurar entorno de DB (ejemplo)
 #& 'C:\Users\Angel FV\Desktop\FORMACION\api-workers-profesores\.venv\Scripts\python.exe' 'C:\Users\Angel FV\Desktop\FORMACION\api-workers-profesores\init_db_pruebas_test.py'
 
-#python init_db_pruebas_test.py
+#python init_db_pruebas_test.py    --> # 3) ejecutar el seeder idempotente (no hace CREATE/DROP)
 #python init_db_pruebas_test.py --delete   (Ejecutar el script pidiendo además que borre las filas (DELETE ordenado) y luego vuelva a insertar los datos de prueba)
 #python init_db_pruebas_test.py --delete --force (Si alguna vez lanzas --delete contra producción, el script denegará la operación a menos que añadas --force. No lo uses en production salvo que estés absolutamente seguro)
 
-#ejecutar los test
+#ejecutar los test de login  (salida -s para mostrar prints)
 #python -m pytest tests/usuarios/test_login.py -q -s
+
+# o ejecutar toda la suite
+#pytest -q
 
 Config.set_environment_variables()
 
