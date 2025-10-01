@@ -26,6 +26,19 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
 
+      - name: Create DB schema (for sqlite CI)
+        run: |
+          python - <<'PY'
+          # Create all tables using the Flask app context so the seeder can run DML
+          from config import Config
+          Config.set_environment_variables()
+          from main import app
+          from models import db
+          with app.app_context():
+              db.create_all()
+              print('Created DB schema via db.create_all()')
+          PY
+
       - name: Run DB seeder (idempotente)
         run: |
           python init_db_pruebas_test.py --reset || true
