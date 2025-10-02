@@ -23,18 +23,27 @@ depends_on = None
 
 def upgrade() -> None:
     # Defensive / idempotent creation: check whether tables/indexes exist first
-    conn = op.get_bind()
-    inspector = sa.inspect(conn)
-    try:
-        tables = inspector.get_table_names()
-    except Exception:
-        tables = []
-    # Build a case-insensitive mapping from lower-name -> actual name returned by inspector
-    tables_map = {t.lower(): t for t in tables}
+    # Check if Alembic is running in offline mode
+    if op.get_context().dialect.name == 'sqlite':
+        print("[DEBUG] Running in offline mode. Skipping database inspection.")
+        tables_map = {}
+    else:
+        conn = op.get_bind()
+        inspector = sa.inspect(conn)
+        try:
+            tables = inspector.get_table_names()
+        except Exception:
+            tables = []
+        # Build a case-insensitive mapping from lower-name -> actual name returned by inspector
+        tables_map = {t.lower(): t for t in tables}
+
+    # Debugging log to verify migration execution
+    print("[DEBUG] Starting migration: Creating RefreshToken table")
 
     # RefreshToken
     # MySQL table name casing may differ depending on server settings; compare lowercased
     if 'refreshtoken' not in tables_map:
+        print("[DEBUG] RefreshToken table does not exist. Proceeding with creation.")
         # Ensure compatibility with SQLite for autoincrement
         if op.get_bind().dialect.name == 'sqlite':
             id_column = sa.Column('id', INTEGER(), primary_key=True, autoincrement=True)
@@ -56,9 +65,11 @@ def upgrade() -> None:
             sa.Column('scope', sa.String(length=200), nullable=True),
             sa.UniqueConstraint('token_hash', name='uk_refreshtoken_hash')
         )
+        print("[DEBUG] RefreshToken table created successfully.")
         op.create_index('idx_refreshtoken_usuario_exp', 'RefreshToken', ['usuario_id', 'expires_at'])
         op.create_index('idx_refreshtoken_revoked', 'RefreshToken', ['revoked_at'])
     else:
+        print("[DEBUG] RefreshToken table already exists. Skipping creation.")
         # ensure indexes exist (use actual table name as returned by inspector)
         actual_rt_table = tables_map.get('refreshtoken')
         try:
@@ -97,6 +108,10 @@ def upgrade() -> None:
             op.create_index('idx_ull_usuario_login', actual_ull_table or 'UserLoginLog', ['usuario_id', 'login_at'])
         if 'idx_ull_success_login' not in idxs:
             op.create_index('idx_ull_success_login', actual_ull_table or 'UserLoginLog', ['success', 'login_at'])
+
+    # Ensure the Usuario table exists before modifying it
+    if 'usuario' not in tables_map:
+        raise RuntimeError("The Usuario table does not exist. Ensure the 0002_create_usuario_table migration is applied first.")
 
     # Refresh inspector for Usuario column checks (some DBs may require re-inspection)
     # Re-inspect tables/columns now; use actual Usuario table name if present
