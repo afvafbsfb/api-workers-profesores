@@ -1,6 +1,6 @@
 from typing import Tuple, Dict
 from src.autenticacion.infrastructure.repositories import UserRepository, RefreshTokenRepository
-from models import UserLoginLog, db
+from models import UserLoginLog, db, RefreshToken
 from src.autenticacion.infrastructure.hasher import Hasher
 from src.autenticacion.infrastructure.jwt_provider import JwtProvider
 from datetime import datetime, timezone, timedelta
@@ -46,15 +46,11 @@ class AuthService:
 
         # verificar password
         if not Hasher.verify(password, user.password):
-            # Registrar intento fallido BAD_CREDENTIALS
+            # Registrar intento fallido BAD_CREDENTIALS y aplicar política de bloqueo
             try:
                 ull = UserLoginLog(usuario_id=user.id, success=False, fail_reason='BAD_CREDENTIALS')
                 db.session.add(ull)
-                db.session.flush()
-            except Exception:
-                db.session.rollback()
-            # mantener la política de bloqueo del modelo existente
-            try:
+
                 user.failed_login_count = (user.failed_login_count or 0) + 1
                 user.last_failed_login_at = now
                 MAX_FAILED = 5
@@ -63,14 +59,13 @@ class AuthService:
                     user.locked_until = now + timedelta(minutes=LOCK_MINUTES)
                     user.estado = 'Bloqueado'
                     # registrar evento LOCKED cuando se alcanza el umbral
-                    try:
-                        ull2 = UserLoginLog(usuario_id=user.id, success=False, fail_reason='LOCKED')
-                        db.session.add(ull2)
-                    except Exception:
-                        db.session.rollback()
-                UserRepository.save(user)
+                    ull2 = UserLoginLog(usuario_id=user.id, success=False, fail_reason='LOCKED')
+                    db.session.add(ull2)
+
+                db.session.add(user)
+                db.session.commit()
             except Exception:
-                pass
+                db.session.rollback()
             return False, {"error": "credenciales inválidas"}
 
         # login correcto: reset campos temporales, no cambiar estado
@@ -78,20 +73,24 @@ class AuthService:
             user.failed_login_count = 0
             user.last_failed_login_at = None
             user.locked_until = None
-            UserRepository.save(user)
+            db.session.add(user)
+            db.session.commit()
         except Exception:
-            pass
+            db.session.rollback()
 
         # generar tokens
         token_version = user.token_version if user else 0
         access = JwtProvider.create_access(user.id, token_version)
         refresh = JwtProvider.create_refresh(user.id)
 
-        # persistir hash refresh token en repositorio
+        # persistir hash refresh token en la misma sesión para garantizar disponibilidad inmediata
         try:
             expires_at = datetime.now(timezone.utc) + timedelta(days=7)
-            RefreshTokenRepository.persist(refresh, user.id, expires_at)
+            token_hash = hashlib.sha256(refresh.encode('utf-8')).hexdigest()
+            rt = RefreshToken(usuario_id=user.id, token_hash=token_hash, expires_at=expires_at)
+            db.session.add(rt)
+            db.session.commit()
         except Exception:
-            pass
+            db.session.rollback()
 
         return True, {"tokens": {"access_token": access, "refresh_token": refresh}}
