@@ -97,6 +97,9 @@ class AuthService:
         try:
             expires_at = datetime.now(timezone.utc) + timedelta(days=7)
             token_hash = hashlib.sha256(refresh.encode('utf-8')).hexdigest()
+            # Depuración adicional para SQLite
+            print(f"[DEBUG] Intentando persistir RefreshToken para user_id={user.id}", flush=True)
+            print(f"[DEBUG] Valores: token_hash={token_hash}, expires_at={expires_at}", flush=True)
             # Validar valores antes de persistir
             if not user.id or not token_hash or not expires_at:
                 raise ValueError("Valores inválidos para persistir RefreshToken")
@@ -107,7 +110,7 @@ class AuthService:
             db.session.commit()
             print(f"[AuthService] Persisted refresh token hash for user_id={user.id}: {token_hash}", flush=True)
         except Exception as e:
+            print(f"[DEBUG] Error al persistir RefreshToken: {e}", flush=True)
             db.session.rollback()
-            print(f"[AuthService] Failed to persist refresh token for user_id={user.id}: {e}", flush=True)
 
         return True, {"tokens": {"access_token": access, "refresh_token": refresh}}
