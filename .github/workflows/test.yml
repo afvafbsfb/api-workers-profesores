@@ -10,7 +10,12 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      DB_ENV: ci
+      DB_ENV: developmentAWS
+      DB_HOST: api-workers-dev.cvwcguygomlv.eu-west-3.rds.amazonaws.com
+      DB_PORT: 3306
+      DB_USER: admin
+      DB_PASS: Abanca0795
+      DB_NAME: api_workers
     steps:
       - uses: actions/checkout@v4
 

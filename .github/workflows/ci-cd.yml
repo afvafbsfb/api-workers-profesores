@@ -26,6 +26,13 @@ jobs:
           python -m pytest tests/usuarios --disable-warnings --maxfail=5
       - name: Lint
         run: flake8 . || echo "Lint warnings"
+    env:
+      DB_ENV: developmentAWS
+      DB_HOST: api-workers-dev.cvwcguygomlv.eu-west-3.rds.amazonaws.com
+      DB_PORT: 3306
+      DB_USER: admin
+      DB_PASS: Abanca0795
+      DB_NAME: api_workers
 
   deploy:
     needs: test
