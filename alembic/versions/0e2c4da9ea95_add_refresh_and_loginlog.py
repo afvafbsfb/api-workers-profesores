@@ -35,7 +35,7 @@ def upgrade() -> None:
     # RefreshToken
     # MySQL table name casing may differ depending on server settings; compare lowercased
     if 'refreshtoken' not in tables_map:
-        # Modificar el tipo de columna para SQLite
+        # Ensure compatibility with SQLite for autoincrement
         if op.get_bind().dialect.name == 'sqlite':
             id_column = sa.Column('id', INTEGER(), primary_key=True, autoincrement=True)
         else:
