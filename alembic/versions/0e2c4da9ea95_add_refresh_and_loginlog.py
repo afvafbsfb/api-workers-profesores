@@ -12,6 +12,7 @@ because of naming mismatches.
 """
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.dialects.sqlite import INTEGER
 
 # revision identifiers, used by Alembic.
 revision = '0e2c4da9ea95'
@@ -34,9 +35,15 @@ def upgrade() -> None:
     # RefreshToken
     # MySQL table name casing may differ depending on server settings; compare lowercased
     if 'refreshtoken' not in tables_map:
+        # Modificar el tipo de columna para SQLite
+        if op.get_bind().dialect.name == 'sqlite':
+            id_column = sa.Column('id', INTEGER(), primary_key=True, autoincrement=True)
+        else:
+            id_column = sa.Column('id', sa.BigInteger(), primary_key=True, autoincrement=True)
+
         op.create_table(
             'RefreshToken',
-            sa.Column('id', sa.BigInteger(), primary_key=True, autoincrement=True),
+            id_column,
             sa.Column('usuario_id', sa.Integer(), sa.ForeignKey('Usuario.id'), nullable=False),
             sa.Column('token_hash', sa.String(length=64), nullable=False),
             sa.Column('issued_at', sa.DateTime(), server_default=sa.func.current_timestamp(), nullable=False),
