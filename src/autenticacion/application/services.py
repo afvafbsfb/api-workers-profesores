@@ -48,24 +48,34 @@ class AuthService:
         if not Hasher.verify(password, user.password):
             # Registrar intento fallido BAD_CREDENTIALS y aplicar política de bloqueo
             try:
+                # 1) Crear log de fallo y confirmar inmediatamente
                 ull = UserLoginLog(usuario_id=user.id, success=False, fail_reason='BAD_CREDENTIALS')
                 db.session.add(ull)
-
-                user.failed_login_count = (user.failed_login_count or 0) + 1
-                user.last_failed_login_at = now
-                MAX_FAILED = 5
-                LOCK_MINUTES = 15
-                if user.failed_login_count >= MAX_FAILED:
-                    user.locked_until = now + timedelta(minutes=LOCK_MINUTES)
-                    user.estado = 'Bloqueado'
-                    # registrar evento LOCKED cuando se alcanza el umbral
-                    ull2 = UserLoginLog(usuario_id=user.id, success=False, fail_reason='LOCKED')
-                    db.session.add(ull2)
-
-                db.session.add(user)
                 db.session.commit()
+                print(f"[AuthService] Logged BAD_CREDENTIALS for user_id={user.id}", flush=True)
             except Exception:
                 db.session.rollback()
+
+            # 2) Incrementar contador del usuario en una transacción separada
+            try:
+                # recargar usuario para tener un estado fresco
+                user_db = db.session.get(type(user), user.id)
+                user_db.failed_login_count = (user_db.failed_login_count or 0) + 1
+                user_db.last_failed_login_at = now
+                MAX_FAILED = 5
+                LOCK_MINUTES = 15
+                if user_db.failed_login_count >= MAX_FAILED:
+                    user_db.locked_until = now + timedelta(minutes=LOCK_MINUTES)
+                    user_db.estado = 'Bloqueado'
+                    # registrar evento LOCKED cuando se alcanza el umbral
+                    ull2 = UserLoginLog(usuario_id=user_db.id, success=False, fail_reason='LOCKED')
+                    db.session.add(ull2)
+                db.session.add(user_db)
+                db.session.commit()
+                print(f"[AuthService] Incremented failed_login_count for user_id={user_db.id} -> {user_db.failed_login_count}", flush=True)
+            except Exception:
+                db.session.rollback()
+
             return False, {"error": "credenciales inválidas"}
 
         # login correcto: reset campos temporales, no cambiar estado
@@ -90,7 +100,9 @@ class AuthService:
             rt = RefreshToken(usuario_id=user.id, token_hash=token_hash, expires_at=expires_at)
             db.session.add(rt)
             db.session.commit()
-        except Exception:
+            print(f"[AuthService] Persisted refresh token hash for user_id={user.id}: {token_hash}", flush=True)
+        except Exception as e:
             db.session.rollback()
+            print(f"[AuthService] Failed to persist refresh token for user_id={user.id}: {e}", flush=True)
 
         return True, {"tokens": {"access_token": access, "refresh_token": refresh}}
