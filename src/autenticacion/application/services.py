@@ -52,7 +52,7 @@ class AuthService:
                 ull = UserLoginLog(usuario_id=user.id, success=False, fail_reason='BAD_CREDENTIALS')
                 db.session.add(ull)
                 db.session.commit()
-                print(f"[AuthService] Logged BAD_CREDENTIALS for user_id={user.id}", flush=True)
+                # print(f"[AuthService] Logged BAD_CREDENTIALS for user_id={user.id}", flush=True)
             except Exception:
                 db.session.rollback()
 
@@ -61,7 +61,7 @@ class AuthService:
                 # recargar usuario para tener un estado fresco
                 user_db = db.session.get(type(user), user.id)
                 user_db.failed_login_count = (user_db.failed_login_count or 0) + 1
-                print(f"[DEBUG] Incremented failed_login_count for user_id={user_db.id} to {user_db.failed_login_count}")
+                # print(f"[DEBUG] Incremented failed_login_count for user_id={user_db.id} to {user_db.failed_login_count}")
                 user_db.last_failed_login_at = now
                 MAX_FAILED = 5
                 LOCK_MINUTES = 15
@@ -73,7 +73,7 @@ class AuthService:
                     db.session.add(ull2)
                 db.session.add(user_db)
                 db.session.commit()
-                print(f"[AuthService] Incremented failed_login_count for user_id={user_db.id} -> {user_db.failed_login_count}", flush=True)
+                # print(f"[AuthService] Incremented failed_login_count for user_id={user_db.id} -> {user_db.failed_login_count}", flush=True)
             except Exception:
                 db.session.rollback()
 
@@ -82,7 +82,7 @@ class AuthService:
         # login correcto: reset campos temporales, no cambiar estado
         try:
             user.failed_login_count = 0
-            print(f"[DEBUG] Reset failed_login_count for user_id={user.id}")
+            # print(f"[DEBUG] Reset failed_login_count for user_id={user.id}")
             user.last_failed_login_at = None
             user.locked_until = None
             db.session.add(user)
@@ -100,8 +100,8 @@ class AuthService:
             expires_at = datetime.now(timezone.utc) + timedelta(days=7)
             token_hash = hashlib.sha256(refresh.encode('utf-8')).hexdigest()
             # Depuración adicional para SQLite
-            print(f"[DEBUG] Intentando persistir RefreshToken para user_id={user.id}", flush=True)
-            print(f"[DEBUG] Valores: token_hash={token_hash}, expires_at={expires_at}", flush=True)
+            # print(f"[DEBUG] Intentando persistir RefreshToken para user_id={user.id}", flush=True)
+            # print(f"[DEBUG] Valores: token_hash={token_hash}, expires_at={expires_at}", flush=True)
             # Validar valores antes de persistir
             if not user.id or not token_hash or not expires_at:
                 raise ValueError("Valores inválidos para persistir RefreshToken")
@@ -110,9 +110,18 @@ class AuthService:
             rt = RefreshToken(usuario_id=user.id, token_hash=token_hash, expires_at=expires_at)
             db.session.add(rt)
             db.session.commit()
-            print(f"[AuthService] Persisted refresh token hash for user_id={user.id}: {token_hash}", flush=True)
+            # print(f"[AuthService] Persisted refresh token hash for user_id={user.id}: {token_hash}", flush=True)
         except Exception as e:
-            print(f"[DEBUG] Error al persistir RefreshToken: {e}", flush=True)
+            # print(f"[DEBUG] Error al persistir RefreshToken: {e}", flush=True)
             db.session.rollback()
 
-        return True, {"tokens": {"access_token": access, "refresh_token": refresh}}
+        # Obtener rol y nombre del usuario
+        role = user.rol.nombre if user.rol else None
+        name = user.nombre
+
+        return True, {
+            "tokens": {"access_token": access, "refresh_token": refresh},
+            "role": role,
+            "name": name,
+            "usuario": user
+        }

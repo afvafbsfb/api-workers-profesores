@@ -2,12 +2,13 @@ from models import Usuario, RefreshToken, db
 import hashlib
 from datetime import datetime, timezone
 from typing import Optional
+from sqlalchemy.orm import joinedload
 
 
 class UserRepository:
     @staticmethod
     def get_by_email(email: str):
-        return Usuario.query.filter_by(email=email).first()
+        return Usuario.query.options(joinedload(Usuario.rol)).filter_by(email=email).first()
 
     @staticmethod
     def get_by_id(uid: int):

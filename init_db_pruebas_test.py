@@ -482,6 +482,15 @@ def seed():
     # Llamar a la función de resumen después del seeding
     mostrar_resumen()
 
+    # Normalizar campos anti-brute-force para todos los usuarios (prevenir bloqueos residuales)
+    try:
+        print('[init_db_pruebas_test] Normalizando campos anti-brute-force para todos los usuarios...')
+        with db.engine.begin() as conn:
+            conn.execute(text("UPDATE Usuario SET failed_login_count = 0, last_failed_login_at = NULL, locked_until = NULL;"))
+        print('[init_db_pruebas_test] Normalización completada.')
+    except Exception as e:
+        print(f'[init_db_pruebas_test] No se pudo normalizar campos anti-brute-force globalmente: {e}')
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Carga datos de prueba (solo DML). No modifica la estructura de la BD.")

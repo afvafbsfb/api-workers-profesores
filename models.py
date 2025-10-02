@@ -1,3 +1,7 @@
+# IMPORTANTE: Este archivo debe mantenerse en sincronía con docs/create_database.sql.
+# Siempre que se realicen cambios en las tablas, campos, relaciones o formatos de campos,
+# asegúrate de actualizar ambos archivos para evitar inconsistencias.
+
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData
 from werkzeug.security import check_password_hash
@@ -85,6 +89,8 @@ class Usuario(db.Model):
         # Usar la implementación de verificación del proyecto (argon2)
         # verify_password(password_plain, hashed_password)
         return verify_password(password, self.password)
+
+    rol = db.relationship('Rol', backref='usuarios', lazy='joined')
 
 # Modelo para Roles
 class Rol(db.Model):

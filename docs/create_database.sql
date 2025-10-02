@@ -1,3 +1,7 @@
+-- IMPORTANTE: Este archivo debe mantenerse en sincronía con models.py.
+-- Siempre que se realicen cambios en las tablas, campos, relaciones o formatos de campos,
+-- asegúrate de actualizar ambos archivos para evitar inconsistencias.
+
 DROP DATABASE IF EXISTS api_workers;
 
 -- Script para crear la base de datos y las tablas actualizadas

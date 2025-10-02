@@ -43,6 +43,10 @@
 #   aquí porque la política actual es usar `init_db.py` para preparar datos).
 #
 
+# para lanzar todos los tests de usuarios:
+#$env:DB_ENV='developmentAWS'; pytest tests/usuarios
+
+
 import os
 os.environ['DB_ENV'] = 'developmentAWS'  # Asegurar el entorno de desarrollo AWS
 
@@ -84,6 +88,10 @@ def test_login_usuario_activo(client):
     assert 'tokens' in data
     assert 'access_token' in data['tokens']
     assert 'refresh_token' in data['tokens']
+    assert 'role' in data
+    assert 'name' in data
+    assert data['role'] == 'Admin_plataforma'  # Ajustar según el rol esperado
+    assert data['name'] == 'Usuario Activo'  # Ajustar según el nombre esperado
 
 def test_login_usuario_no_existente(client):
     """

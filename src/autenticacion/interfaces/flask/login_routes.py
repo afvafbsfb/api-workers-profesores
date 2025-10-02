@@ -32,7 +32,16 @@ def login():
             return jsonify({"ok": False, **result}), 403
         return jsonify({"ok": False, **result}), 401
 
-    return jsonify({"ok": True, "tokens": result['tokens']}), 200
+    usuario = result.get('usuario')
+    rol = usuario.rol.nombre if usuario and usuario.rol else None
+    nombre = usuario.nombre if usuario else None
+
+    return jsonify({
+        "ok": True,
+        "tokens": result['tokens'],
+        "role": rol,
+        "name": nombre
+    }), 200
 
 
 @login_bp.route('/refresh', methods=['POST'])
