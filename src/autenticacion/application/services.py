@@ -97,6 +97,11 @@ class AuthService:
         try:
             expires_at = datetime.now(timezone.utc) + timedelta(days=7)
             token_hash = hashlib.sha256(refresh.encode('utf-8')).hexdigest()
+            # Validar valores antes de persistir
+            if not user.id or not token_hash or not expires_at:
+                raise ValueError("Valores inválidos para persistir RefreshToken")
+
+            # Persistir hash del refresh token en la misma sesión
             rt = RefreshToken(usuario_id=user.id, token_hash=token_hash, expires_at=expires_at)
             db.session.add(rt)
             db.session.commit()

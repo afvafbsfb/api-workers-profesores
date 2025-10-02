@@ -22,6 +22,10 @@ class UserRepository:
 class RefreshTokenRepository:
     @staticmethod
     def persist(raw_token: str, usuario_id: int, expires_at: datetime):
+        # Validar valores antes de persistir
+        if not usuario_id or not raw_token or not expires_at:
+            raise ValueError("Valores inválidos para persistir RefreshToken")
+
         token_hash = hashlib.sha256(raw_token.encode('utf-8')).hexdigest()
         rt = RefreshToken(usuario_id=usuario_id, token_hash=token_hash, expires_at=expires_at)
         db.session.add(rt)

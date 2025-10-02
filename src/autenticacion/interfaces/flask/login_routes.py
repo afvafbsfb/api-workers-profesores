@@ -81,6 +81,11 @@ def refresh_tokens():
         nuevo_hash = hashlib.sha256(nuevo_refresh.encode('utf-8')).hexdigest()
         expires_at = now + timedelta(days=7)
 
+        # Validar valores antes de persistir
+        if not usuario_id or not nuevo_hash or not expires_at:
+            raise ValueError("Valores inválidos para persistir RefreshToken")
+
+        # Crear nuevo RefreshToken y persistir
         rt_new = RefreshToken(usuario_id=usuario_id, token_hash=nuevo_hash, expires_at=expires_at, ip=existing.ip, user_agent=existing.user_agent, device_id=existing.device_id)
         db.session.add(rt_new)
 
