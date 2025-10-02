@@ -47,9 +47,7 @@ else:
     # leave whatever is in alembic.ini (may be a valid URL set by the user)
     pass
 
-# Ensure SQLite configuration is applied last
-config.set_main_option("sqlalchemy.url", "sqlite:///./test_ci.db")
-
+# Eliminar configuración específica de SQLite
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")

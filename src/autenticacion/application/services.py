@@ -61,6 +61,7 @@ class AuthService:
                 # recargar usuario para tener un estado fresco
                 user_db = db.session.get(type(user), user.id)
                 user_db.failed_login_count = (user_db.failed_login_count or 0) + 1
+                print(f"[DEBUG] Incremented failed_login_count for user_id={user_db.id} to {user_db.failed_login_count}")
                 user_db.last_failed_login_at = now
                 MAX_FAILED = 5
                 LOCK_MINUTES = 15
@@ -81,6 +82,7 @@ class AuthService:
         # login correcto: reset campos temporales, no cambiar estado
         try:
             user.failed_login_count = 0
+            print(f"[DEBUG] Reset failed_login_count for user_id={user.id}")
             user.last_failed_login_at = None
             user.locked_until = None
             db.session.add(user)

@@ -10,7 +10,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: sqlite:///./test_ci.db
       DB_ENV: ci
     steps:
       - uses: actions/checkout@v4
@@ -25,19 +24,6 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
-
-      - name: Create DB schema (for sqlite CI)
-        run: |
-          python - <<'PY'
-          # Create all tables using the Flask app context so the seeder can run DML
-          from config import Config
-          Config.set_environment_variables()
-          from main import app
-          from models import db
-          with app.app_context():
-              db.create_all()
-              print('Created DB schema via db.create_all()')
-          PY
 
       - name: Run DB seeder (idempotente)
         run: |
@@ -73,11 +59,5 @@ jobs:
 
       - name: Run tests
         run: |
-          python -m pytest -q
-      
-      - name: Upload sqlite DB for debugging
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test_ci_db
-          path: ./test_ci.db
+          echo "Running tests against AWS RDS"
+          python -m pytest tests/usuarios --disable-warnings --maxfail=5

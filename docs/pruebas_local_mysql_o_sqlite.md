@@ -1,4 +1,3 @@
-
 # Pruebas locales de la API REST con MySQL o SQLite
 
 Este documento describe cómo lanzar y probar la API REST en local usando **MySQL** o **SQLite** como base de datos, según la configuración del archivo `.env`.

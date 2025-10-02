@@ -17,10 +17,17 @@ from config import Config
 #python init_db_pruebas_test.py --delete --force (Si alguna vez lanzas --delete contra producción, el script denegará la operación a menos que añadas --force. No lo uses en production salvo que estés absolutamente seguro)
 
 #ejecutar los test de login  (salida -s para mostrar prints)
+
+#$env:DB_ENV='developmentAWS'; 
 #python -m pytest tests/usuarios/test_login.py -q -s
+#                   pytest tests/usuarios  --> # para lanzar todos los tests de usuarios:
 
 # o ejecutar toda la suite
 #pytest -q
+
+# Set the default database environment to 'developmentAWS'
+import os
+os.environ['DB_ENV'] = 'developmentAWS'
 
 Config.set_environment_variables()
 
@@ -52,6 +59,10 @@ from datetime import date, time
 import argparse
 from sqlalchemy import text
 import sys
+
+# Configurar la base de datos para usar MySQL en lugar de SQLite
+Config.SQLALCHEMY_DATABASE_URI = "mysql+pymysql://angel:Abanca0795@localhost:3307/api_workers"
+app.config['SQLALCHEMY_DATABASE_URI'] = Config.SQLALCHEMY_DATABASE_URI
 
 app.app_context().push()
 

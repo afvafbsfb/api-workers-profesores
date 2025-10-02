@@ -11,6 +11,9 @@
 # - Credenciales usadas por los tests (provistas por `init_db_pruebas_test.py`):
 #     admin_plataforma@academia.com    / password_admin_plataforma    (estado: Activo)
 
+import os
+os.environ['DB_ENV'] = 'developmentAWS'
+
 import pytest
 from app import create_app
 from config import Config

@@ -15,8 +15,15 @@ jobs:
           python-version: '3.8'
       - name: Install dependencies
         run: pip install -r requirements.txt
+      - name: Install development dependencies
+        run: |
+          pip install -r requirements.txt
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+
       - name: Run tests
-        run: PYTHONPATH=. pytest || echo "No tests found"
+        run: |
+          echo "Running tests against AWS RDS"
+          python -m pytest tests/usuarios --disable-warnings --maxfail=5
       - name: Lint
         run: flake8 . || echo "Lint warnings"
 

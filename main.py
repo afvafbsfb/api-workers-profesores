@@ -82,7 +82,7 @@ try:
         or _env('SQLALCHEMY_DATABASE_URI')
         or (_db_uri_from_components('DB_PROD_') if APP_ENV in ('prod', 'production') else _db_uri_from_components('DB_DEV_'))
         or _db_uri_from_components('DB_')
-        or ("sqlite:////tmp/local.db" if is_lambda else "sqlite:///local.db")
+        or "mysql+pymysql://angel:Abanca0795@localhost:3307/api_workers"
     )
 
     db_config = Config.get_database_config()

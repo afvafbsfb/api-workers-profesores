@@ -44,6 +44,8 @@
 #
 
 import os
+os.environ['DB_ENV'] = 'developmentAWS'  # Asegurar el entorno de desarrollo AWS
+
 import pytest
 from flask.testing import FlaskClient
 from app import create_app

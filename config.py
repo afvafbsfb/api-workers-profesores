@@ -15,6 +15,13 @@ class Config:
             'DB_PASS': 'Abanca0795',
             'DB_NAME': 'api_workers',
         },
+        'developmentAWS': {
+            'DB_HOST': 'api-workers-dev.cvwcguygomlv.eu-west-3.rds.amazonaws.com',
+            'DB_PORT': '3306',
+            'DB_USER': 'admin',
+            'DB_PASS': 'Abanca0795',
+            'DB_NAME': 'api_workers',
+        },
         'production': {
             'DB_HOST': 'prod-host',
             'DB_PORT': '3306',
@@ -28,8 +35,10 @@ class Config:
     def get_database_config(cls):
         """
         Retorna la configuración de la base de datos según el entorno actual.
+        Si el entorno no está definido, muestra una advertencia y usa 'development' por defecto.
         """
-        # Si el entorno no está en el listado, usar 'development' por defecto
+        if cls.DB_ENV not in cls.DATABASES:
+            print(f"[WARNING] El entorno '{cls.DB_ENV}' no está definido en DATABASES. Usando 'development' por defecto.")
         return cls.DATABASES.get(cls.DB_ENV, cls.DATABASES['development'])
 
     @classmethod

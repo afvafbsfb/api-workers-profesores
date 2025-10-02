@@ -1,3 +1,6 @@
+import os
+os.environ['DB_ENV'] = 'developmentAWS'
+
 import pytest
 from models import db, Usuario
 from src.shared.security import hash_password
