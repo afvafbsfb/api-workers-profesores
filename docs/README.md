@@ -9,6 +9,7 @@
 - [Endpoints principales](#endpoints-principales)
 - [Base de datos](#base-de-datos)
 - [Despliegue y configuración](#despliegue-y-configuración)
+- [Documentación de la API](#documentación-de-la-api)
 
 ---
 
@@ -88,6 +89,37 @@ workers-api/
 - Documentación visual e interactiva (Swagger UI) usando la especificación pública de S3.
 - Variables de entorno para configuración sensible (API_KEY, credenciales DB, endpoints, etc).
 - Requiere instalar dependencias de `requirements.txt`.
+
+## Documentación de la API
+
+Este directorio contiene archivos generados a partir de la aplicación que describen la API en formato OpenAPI.
+
+Cómo generar la especificación OpenAPI (generada automáticamente desde el código)
+
+1. Instalar las dependencias de desarrollo (activar tu virtualenv):
+
+```powershell
+pip install -r requirements-dev.txt
+```
+
+2. Ejecutar el script de volcado (se generarán `docs/openapi-auto.json` y `docs/openapi-auto.yml`):
+
+```powershell
+python scripts/dump_openapi.py
+```
+
+3. Servir la aplicación localmente y abrir la interfaz:
+
+```powershell
+# iniciar la aplicación Flask
+python app.py
+# Abrir en tu navegador: http://127.0.0.1:5000/docs
+```
+
+Notas
+- La implementación actual construye una especificación OpenAPI mínima para dos endpoints (`POST /auth/login` y `GET /academias`) utilizando los esquemas de Marshmallow en `src/schemas`.
+- Extiende los esquemas y el script `scripts/dump_openapi.py` (o integra completamente `flask-smorest`) para cubrir más endpoints de forma incremental.
+
 ## Referencias rápidas
 
 - **API REST producción:** https://ppmr69im5j.execute-api.eu-west-3.amazonaws.com/prod

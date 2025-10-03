@@ -34,6 +34,12 @@ def create_app():
     app.register_blueprint(usuarios_bp, url_prefix='/usuarios')
     app.register_blueprint(usuarios_login_bp, url_prefix='/auth')
     app.register_blueprint(academias_bp, url_prefix='/academias')
+    # Register docs blueprint (serves /openapi.json and /docs)
+    try:
+        from src.docs.swagger import swagger_bp
+        app.register_blueprint(swagger_bp)
+    except Exception:
+        pass
 
     # Ruta de salud
     @app.route('/health')

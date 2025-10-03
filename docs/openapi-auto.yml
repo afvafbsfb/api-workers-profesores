@@ -1,0 +1,85 @@
+components:
+  schemas:
+    Academia:
+      additionalProperties: false
+      properties:
+        direccion:
+          type: string
+        id:
+          readOnly: true
+          type: integer
+        nombre:
+          type: string
+        telefono:
+          type: string
+      required:
+      - nombre
+      type: object
+    LoginRequest:
+      additionalProperties: false
+      properties:
+        email:
+          format: email
+          type: string
+        password:
+          type: string
+      required:
+      - email
+      - password
+      type: object
+    LoginResponse:
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        role:
+          type: string
+        tokens:
+          additionalProperties: {}
+          type: object
+      type: object
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
+info:
+  description: Spec generated from code (partial)
+  title: API Workers Profesores
+  version: 1.0.0
+openapi: 3.0.2
+paths:
+  /academias:
+    get:
+      description: Obtener lista de academias
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Academia'
+                type: array
+          description: Lista de academias
+      security:
+      - bearerAuth: []
+      summary: Listar academias
+  /auth/login:
+    post:
+      description: Inicio de sesión con email y password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+          description: Login exitoso
+        '401':
+          description: Credenciales inválidas
+      summary: Login usuario
