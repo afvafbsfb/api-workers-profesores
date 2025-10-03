@@ -63,6 +63,76 @@ Rutas útiles:
 - `/docs` → Swagger UI (si el blueprint está registrado).
 - `/openapi.json` → especificación OpenAPI (generada o dinámica).
 
+Detalles adicionales y pasos recomendados
+-------------------------------------
+
+1) Variables de entorno importantes
+
+- `DB_ENV` (opcional): controla qué bloque de `DATABASES` en `config.py` se usa. Valores: `development`, `developmentAWS`, `production`. Por defecto `development`.
+- `DATABASE_URL` (opcional): si la defines, tiene prioridad sobre la construcción automática desde `config.py`. Formato típico: `mysql+pymysql://user:pass@host:port/dbname`.
+- `JWT_SECRET_KEY`: la clave usada por `flask_jwt_extended` para firmar tokens (puedes exportarla antes de arrancar en desarrollo).
+
+Ejemplo (PowerShell) — establecer variables temporales para la sesión:
+
+```powershell
+$env:DB_ENV = 'development'
+$env:DATABASE_URL = 'mysql+pymysql://angel:Abanca0795@localhost:3307/api_workers'
+$env:JWT_SECRET_KEY = 'mi-clave-secreta-local'
+```
+
+Nota: `config.Config.set_environment_variables()` construye `DATABASE_URL` automáticamente si no está definido, usando los valores en `config.py` (por eso el puerto local por defecto en este repo es `3307`).
+
+2) Preparar el entorno y dependencias (PowerShell)
+
+```powershell
+# crear/activar virtualenv (si no existe)
+python -m venv .venv
+& ".\.venv\Scripts\Activate.ps1"
+
+# instalar dependencias
+python -m pip install -r requirements.txt
+python -m pip install -r requirements-dev.txt
+```
+
+3) (Recomendado) Poblar la base de datos de desarrollo / pruebas antes de arrancar
+
+```powershell
+& ".venv\Scripts\python.exe" init_db_pruebas_test.py --reset
+```
+
+4) Generar la especificación OpenAPI (opcional, pero útil para la UI)
+
+```powershell
+& ".venv\Scripts\python.exe" scripts/dump_openapi.py
+# Esto escribe: docs/openapi-auto.json y docs/openapi-auto.yml
+```
+
+5) Arrancar la aplicación
+
+Opción A — ejecutar `app.py` directamente (la fábrica crea la app y llama a `app.run`):
+
+```powershell
+& ".venv\Scripts\python.exe" app.py
+```
+
+Opción B — usar `flask run` (más flexible para desarrollo):
+
+```powershell
+$env:FLASK_APP = 'app:create_app'
+& ".venv\Scripts\python.exe" -m flask run --host=0.0.0.0 --port=5000 --debug
+```
+
+6) Acceder a la documentación y probar endpoints
+
+- Abre `http://127.0.0.1:5000/docs` para ver la Swagger UI (apunta a `/openapi.json`).
+- Para rutas protegidas: haz `POST /auth/login` desde la UI o con curl/Invoke-RestMethod, copia `access_token` y usa la opción "Authorize" en Swagger UI con `Bearer <ACCESS_TOKEN>`.
+
+Troubleshooting rápido
+----------------------
+- Si la app falla por conexión a la base de datos, revisa que `DATABASE_URL` apunta al host/puerto correctos (por defecto `localhost:3307` en `config.py` para `development`).
+- Si quieres probar con una base remota (RDS u otro), exporta `DATABASE_URL` con la cadena de conexión completa o ajusta `DB_ENV` a `developmentAWS`.
+- Si `src/docs/swagger.py` no muestra la UI, confirma que `docs/openapi-auto.json` existe o que la extensión `apispec` esté presente en la app (el blueprint intenta usar ambas opciones).
+
 ---
 
 ## Seeder de pruebas
