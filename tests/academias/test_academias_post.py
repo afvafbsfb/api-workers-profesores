@@ -16,7 +16,10 @@ def client() -> Generator[FlaskClient, None, None]:
     Config.set_environment_variables()
     app = create_app()
     app.config['TESTING'] = True
-    yield app.test_client()
+    # Run tests inside the Flask application context so that
+    # database model queries and other context-bound APIs work.
+    with app.app_context():
+        yield app.test_client()
 
 
 def login_and_get_token(client, email, password, expected_role='Admin_plataforma'):
@@ -54,6 +57,7 @@ VALID_USER_EMAIL = 'admin_plataforma@academia.com'  # Correo actualizado para co
 VALID_USER_PASSWORD = 'password_admin_plataforma'  # Contraseña actualizada para coincidir con init_db_pruebas_test.py
 
 
+@pytest.mark.meta(title='Crear academia (happy path)', desc='Login como Admin_plataforma y crear una nueva academia')
 def test_login_crear_academia_logout_happy_path(client):
     access_token, refresh_token = login_and_get_token(client, VALID_USER_EMAIL, VALID_USER_PASSWORD, expected_role='Admin_plataforma')
     rv = client.post('/academias', json={'nombre': 'Academia Test X'}, headers={'Authorization': f'Bearer {access_token}'},)
@@ -64,6 +68,7 @@ def test_login_crear_academia_logout_happy_path(client):
     logout(client, refresh_token)
 
 
+@pytest.mark.meta(title='Crear academia conflict', desc='Intentar crear academia duplicada y recibir 409')
 def test_login_crear_academia_logout_conflict(client):
     access_token, refresh_token = login_and_get_token(client, VALID_USER_EMAIL, VALID_USER_PASSWORD, expected_role='Admin_plataforma')
     rv1 = client.post('/academias', json={'nombre': 'Academia Conflict'}, headers={'Authorization': f'Bearer {access_token}'},)
@@ -73,6 +78,7 @@ def test_login_crear_academia_logout_conflict(client):
     logout(client, refresh_token)
 
 
+@pytest.mark.meta(title='Crear academia sin nombre', desc='Validación: nombre requerido devuelve 400')
 def test_login_crear_academia_logout_sin_nombre(client):
     access_token, refresh_token = login_and_get_token(client, VALID_USER_EMAIL, VALID_USER_PASSWORD, expected_role='Admin_plataforma')
     rv = client.post('/academias', json={}, headers={'Authorization': f'Bearer {access_token}'},)
@@ -80,6 +86,7 @@ def test_login_crear_academia_logout_sin_nombre(client):
     logout(client, refresh_token)
 
 
+@pytest.mark.meta(title='Crear academia prohibido por rol', desc='Admin_academia no puede crear academias')
 def test_crear_academia_forbidden_por_rol(client):
     # Usar un admin de academia (no plataforma) o un usuario normal
     token = login_and_get_token(client, 'admin_academia@academia.com', 'password_admin_academia', expected_role='Admin_academia')
@@ -87,6 +94,7 @@ def test_crear_academia_forbidden_por_rol(client):
     assert rv.status_code == 403
 
 
+@pytest.mark.meta(title='Crear academia sin autenticar', desc='Petición sin token devuelve 401')
 def test_crear_academia_unauthenticated(client):
     rv = client.post('/academias', json={'nombre': 'Academia NoAuth'})
     assert rv.status_code == 401

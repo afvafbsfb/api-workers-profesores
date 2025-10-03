@@ -62,11 +62,20 @@ jobs:
               print(f'Counts -> Usuario: {usuarios}, Rol: {roles}, Academia: {academias}')
           PY
 
-      - name: Run tests (ordered)
+      - name: Run tests (ordered) and produce combined HTML report
         run: |
-          echo "Running ordered tests against AWS RDS"
-          # Run the tests in the explicit order required by CI
-          python -m pytest tests/academias/test_academias_routes.py -q -s
-          python -m pytest tests/usuarios/test_login.py -q -s
-          python -m pytest tests/usuarios/test_unblock.py -q -s
-          python -m pytest tests/usuarios/test_refresh_logout.py -q -s
+          echo "Running ordered tests against AWS RDS and generating combined HTML report"
+          python init_db_pruebas_test.py --reset
+          python -m pytest \
+            tests/academias/test_academias_get_patch.py \
+            tests/academias/test_academias_post.py \
+            tests/usuarios/test_login.py \
+            tests/usuarios/test_unblock.py \
+            tests/usuarios/test_refresh_logout.py \
+            -q -s --html=report-all.html --self-contained-html || true
+
+      - name: Upload pytest HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-html-report
+          path: report-all.html

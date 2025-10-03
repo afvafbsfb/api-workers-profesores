@@ -24,9 +24,12 @@ def client():
     Config.set_environment_variables()
     app = create_app()
     app.config['TESTING'] = True
-    yield app.test_client()
+    # Ensure application context for DB access
+    with app.app_context():
+        yield app.test_client()
 
 
+@pytest.mark.meta(title='Rotación refresh', desc='Rotar refresh token y revocar el antiguo')
 def test_refresh_rotation_and_revocation(client):
     """
     Prueba: Rotación y revocación de refresh tokens.
@@ -57,6 +60,7 @@ def test_refresh_rotation_and_revocation(client):
     assert rv4.status_code == 200
 
 
+@pytest.mark.meta(title='Logout revoca refresh', desc='Logout debe revocar el refresh token utilizado')
 def test_logout_revokes_refresh(client):
     """
     Prueba: Logout revoca el refresh token usado.

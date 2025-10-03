@@ -65,10 +65,12 @@ def client() -> Generator[FlaskClient, None, None]:
     Config.set_environment_variables()
     app = create_app()
     app.config['TESTING'] = True
-
     # No tocar la base de datos en la fixture: init_db.py debe preparar los datos.
-    yield app.test_client()
+    # Ejecutar dentro del application context para permitir consultas al modelo.
+    with app.app_context():
+        yield app.test_client()
 
+@pytest.mark.meta(title='Login usuario activo', desc='Inicio de sesión con usuario activo devuelve 200 y tokens')
 def test_login_usuario_activo(client):
     """
     Prueba 1: Inicio de sesión con un usuario activo.
@@ -93,6 +95,7 @@ def test_login_usuario_activo(client):
     assert data['role'] == 'Admin_plataforma'  # Ajustar según el rol esperado
     assert data['name'] == 'Usuario Activo'  # Ajustar según el nombre esperado
 
+@pytest.mark.meta(title='Login usuario inexistente', desc='Inicio de sesión con usuario inexistente devuelve 401')
 def test_login_usuario_no_existente(client):
     """
     Prueba 2: Inicio de sesión con un usuario inexistente.
@@ -107,6 +110,7 @@ def test_login_usuario_no_existente(client):
     print("Respuesta obtenida:", response.get_json())
     assert response.status_code == 401
 
+@pytest.mark.meta(title='Login usuario bloqueado', desc='Usuario bloqueado devuelve 403')
 def test_login_usuario_bloqueado(client):
     """
     Prueba 3: Inicio de sesión con un usuario bloqueado.
@@ -122,6 +126,7 @@ def test_login_usuario_bloqueado(client):
     print("Respuesta obtenida:", response.get_json())
     assert response.status_code == 403
 
+@pytest.mark.meta(title='Ruta login disponible', desc="Verificar que la ruta '/auth/login' está registrada")
 def test_routes(client):
     """
     Prueba 4: Verificar que la ruta '/auth/login' está disponible en la aplicación.
@@ -134,6 +139,7 @@ def test_routes(client):
     print("Rutas disponibles:", routes)
     assert '/auth/login' in routes
 
+@pytest.mark.meta(title='Listar rutas', desc='Listar rutas disponibles en la aplicación')
 def test_list_routes(client):
     """
     Prueba 5: Listar todas las rutas disponibles en la aplicación.
@@ -153,6 +159,7 @@ def test_list_routes(client):
 # puedes dividirlas en diferentes blueprints, 
 # lo que facilita el mantenimiento y la escalabilidad de la aplicación.
 
+@pytest.mark.meta(title='Registro blueprint', desc="Comprobar que el blueprint 'login_bp' está registrado")
 def test_blueprint_registration(client):
     """
     Prueba 6: Verificar el registro de blueprints. El test 6 verifica que el blueprint 'login_bp' ha sido registrado correctamente en la aplicación. Esto asegura que las rutas y funcionalidades asociadas a ese blueprint están disponibles. Si el blueprint no está registrado, las rutas definidas en él no funcionarán.
@@ -165,6 +172,7 @@ def test_blueprint_registration(client):
     print("Blueprints registrados:", blueprints)
     assert 'login_bp' in blueprints
 
+@pytest.mark.meta(title='Login usuario baja', desc='Usuario dado de baja devuelve 403')
 def test_login_usuario_baja(client):
     """
     Prueba 8: Inicio de sesión con un usuario dado de baja.
@@ -179,6 +187,7 @@ def test_login_usuario_baja(client):
     print("Respuesta obtenida:", response.get_json())
     assert response.status_code == 403
 
+@pytest.mark.meta(title='Login administrador', desc='Inicio de sesión con usuario administrador devuelve 200 y tokens')
 def test_login_usuario_administrador(client):
     """
     Prueba 9: Inicio de sesión con un usuario administrador.
@@ -197,6 +206,7 @@ def test_login_usuario_administrador(client):
     assert 'access_token' in data['tokens']
     assert 'refresh_token' in data['tokens']
 
+@pytest.mark.meta(title='Bloqueo por intentos fallidos', desc='Simular fallos hasta que el usuario quede bloqueado')
 def test_login_blocking_after_failed_attempts(client):
     """
     Prueba 7: Bloqueo tras intentos fallidos.
@@ -208,12 +218,13 @@ def test_login_blocking_after_failed_attempts(client):
     Config.set_environment_variables()
 
     # Asegurar estado limpio: login correcto para resetear contadores
-    rv_ok = client.post('/auth/login', json={'email': 'activo@academia.com', 'password': 'password_activo'})
+    # Use reserve account for destructive blocking test
+    rv_ok = client.post('/auth/login', json={'email': 'reserve_activo@academia.com', 'password': 'password_reserve_activo'})
     assert rv_ok.status_code == 200
 
     # Obtener el usuario desde la BD para comprobar counters (necesita app context)
     with client.application.app_context():
-        usuario = Usuario.query.filter_by(email='activo@academia.com').first()
+        usuario = Usuario.query.filter_by(email='reserve_activo@academia.com').first()
         assert usuario is not None
         # tras login correcto el contador debe ser 0
         assert usuario.failed_login_count == 0 or usuario.failed_login_count is None
@@ -221,19 +232,19 @@ def test_login_blocking_after_failed_attempts(client):
     # 5 intentos con contraseña incorrecta -> 401 cada uno
     MAX_FAILED = 5
     for i in range(1, MAX_FAILED + 1):
-        rv = client.post('/auth/login', json={'email': 'activo@academia.com', 'password': 'wrong_password'})
+        rv = client.post('/auth/login', json={'email': 'reserve_activo@academia.com', 'password': 'wrong_password'})
         print(f"Intento incorrecto #{i}, status_code={rv.status_code}, body={rv.get_json()}")
         assert rv.status_code == 401
 
     # Refrescar usuario desde BD (dentro de app context)
     with client.application.app_context():
-        usuario = Usuario.query.filter_by(email='activo@academia.com').first()
+        usuario = Usuario.query.filter_by(email='reserve_activo@academia.com').first()
         assert usuario.failed_login_count >= MAX_FAILED
         # Comprobar que el estado del usuario es 'Bloqueado'
         assert usuario.estado == 'Bloqueado', f"Estado esperado: 'Bloqueado', estado actual: {usuario.estado}"
 
     # Intento adicional -> 403 (bloqueado)
-    rv_blocked = client.post('/auth/login', json={'email': 'activo@academia.com', 'password': 'wrong_password'})
+    rv_blocked = client.post('/auth/login', json={'email': 'reserve_activo@academia.com', 'password': 'wrong_password'})
     print("Intento después de alcanzar MAX_FAILED, status_code=", rv_blocked.status_code, "body=", rv_blocked.get_json())
     assert rv_blocked.status_code == 403
 
@@ -256,17 +267,17 @@ def test_login_blocking_after_failed_attempts_academia_user(client):
 
     # Asegurar estado limpio: resetear estado, contador y contraseña del usuario
     with client.application.app_context():
-        usuario = Usuario.query.filter_by(email='user_academia_1_1@academia.com').first()
+        usuario = Usuario.query.filter_by(email='reserve_user_academia_1_1@academia.com').first()
         assert usuario is not None, "El usuario user_academia_1_1@academia.com no existe en la base de datos."
         print(f"Estado inicial del usuario: {usuario.estado}, failed_login_count: {usuario.failed_login_count}, contraseña almacenada: {usuario.password}")
         usuario.estado = 'Activo'
         usuario.failed_login_count = 0
-        usuario.password = hash_password('password_user_academia_1_1')  # Restablecer la contraseña esperada (hasheada)
+        usuario.password = hash_password('password_reserve_user_academia_1_1')  # Restablecer la contraseña esperada (hasheada)
         db.session.commit()
         print("Estado del usuario después de resetear: Activo, failed_login_count: 0, contraseña actualizada.")
 
     # Asegurar estado limpio: login correcto para resetear contadores
-    rv_ok = client.post('/auth/login', json={'email': 'user_academia_1_1@academia.com', 'password': 'password_user_academia_1_1'})
+    rv_ok = client.post('/auth/login', json={'email': 'reserve_user_academia_1_1@academia.com', 'password': 'password_reserve_user_academia_1_1'})
     print(f"Respuesta del servidor al intentar login correcto: {rv_ok.get_json()}")
     assert rv_ok.status_code == 200, f"Error: Se esperaba 200 OK, pero se obtuvo {rv_ok.status_code}. Respuesta: {rv_ok.get_json()}"
 
@@ -280,18 +291,18 @@ def test_login_blocking_after_failed_attempts_academia_user(client):
     # 5 intentos con contraseña incorrecta -> 401 cada uno
     MAX_FAILED = 5
     for i in range(1, MAX_FAILED + 1):
-        rv = client.post('/auth/login', json={'email': 'user_academia_1_1@academia.com', 'password': 'wrong_password'})
+        rv = client.post('/auth/login', json={'email': 'reserve_user_academia_1_1@academia.com', 'password': 'wrong_password'})
         print(f"Intento incorrecto #{i}, status_code={rv.status_code}, body={rv.get_json()}")
         assert rv.status_code == 401
 
     # Refrescar usuario desde BD (dentro de app context)
     with client.application.app_context():
-        usuario = Usuario.query.filter_by(email='user_academia_1_1@academia.com').first()
+        usuario = Usuario.query.filter_by(email='reserve_user_academia_1_1@academia.com').first()
         assert usuario.failed_login_count >= MAX_FAILED
         # Comprobar que el estado del usuario es 'Bloqueado'
         assert usuario.estado == 'Bloqueado', f"Estado esperado: 'Bloqueado', estado actual: {usuario.estado}"
 
     # Intento adicional -> 403 (bloqueado)
-    rv_blocked = client.post('/auth/login', json={'email': 'user_academia_1_1@academia.com', 'password': 'wrong_password'})
+    rv_blocked = client.post('/auth/login', json={'email': 'reserve_user_academia_1_1@academia.com', 'password': 'wrong_password'})
     print("Intento después de alcanzar MAX_FAILED, status_code=", rv_blocked.status_code, "body=", rv_blocked.get_json())
     assert rv_blocked.status_code == 403

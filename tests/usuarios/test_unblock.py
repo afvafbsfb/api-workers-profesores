@@ -32,8 +32,9 @@ def test_block_and_unblock_flow(client):
     # Renombrar salida para numerar la prueba
     print("\nPrueba 1: Desbloqueo por admin")
 
-    target_email = 'bloqueado@academia.com'
-    admin_email = 'activo@academia.com'
+    # Use reserve users to avoid mutating canonical seeded users
+    target_email = 'reserve_activo@academia.com'  # will be set to Bloqueado for this test
+    admin_email = 'reserve_admin_plataforma@academia.com'
 
     # Garantizar estado inicial consistente (hacer el test idempotente)
     with client.application.app_context():
@@ -80,10 +81,11 @@ def test_block_and_unblock_flow(client):
         admin.estado = 'Activo'
         admin.failed_login_count = 0
         admin.locked_until = None
-        admin.password = hash_password('password_activo')
+        # Ensure reserve admin password matches the one we will use to login
+        admin.password = hash_password('password_reserve_admin_plataforma')
         db.session.commit()
 
-    admin_rv = client.post('/auth/login', json={'email': admin_email, 'password': 'password_activo'})
+    admin_rv = client.post('/auth/login', json={'email': admin_email, 'password': 'password_reserve_admin_plataforma'})
     print("Paso 3: login admin status=", admin_rv.status_code, "body=", admin_rv.get_json())
     try:
         assert admin_rv.status_code == 200
@@ -139,10 +141,11 @@ def test_admin_plataforma_unblock_academia1(client):
     print("\nPrueba 2: Admin plataforma desbloquea usuario Academia 1")
 
     # Login del admin de la plataforma
-    admin_email = 'admin_plataforma@academia.com'
-    target_email = 'user_academia_1_1@academia.com'
+    # Use reserve users
+    admin_email = 'reserve_admin_plataforma@academia.com'
+    target_email = 'reserve_user_academia_1_1@academia.com'
 
-    admin_rv = client.post('/auth/login', json={'email': admin_email, 'password': 'password_admin_plataforma'})
+    admin_rv = client.post('/auth/login', json={'email': admin_email, 'password': 'password_reserve_admin_plataforma'})
     assert admin_rv.status_code == 200
     # Generar un access token con 'sub' como string para evitar errores de decodificación
     with client.application.app_context():
@@ -156,7 +159,7 @@ def test_admin_plataforma_unblock_academia1(client):
         admin.estado = 'Activo'
         admin.failed_login_count = 0
         admin.locked_until = None
-        admin.password = hash_password('password_admin_plataforma')
+        admin.password = hash_password('password_reserve_admin_plataforma')
         # Asegurar que target admin bloqueado existe
         target = Usuario.query.filter_by(email=target_email).first()
         if target is not None:
@@ -164,7 +167,7 @@ def test_admin_plataforma_unblock_academia1(client):
             target.password = hash_password('password_admin_plataforma_2')
         db.session.commit()
 
-    admin_rv = client.post('/auth/login', json={'email': admin_email, 'password': 'password_admin_plataforma'})
+    admin_rv = client.post('/auth/login', json={'email': admin_email, 'password': 'password_reserve_admin_plataforma'})
     assert admin_rv.status_code == 200
     # Crear access token con 'sub' string (consistencia con otros tests)
     with client.application.app_context():
@@ -191,8 +194,9 @@ def test_admin_academia1_cannot_unblock_academia2(client):
     print("\nPrueba 3: Admin Academia1 no puede desbloquear Academia2")
 
     # Login del admin de Academia 1
-    admin_email = 'admin_academia_1@academia.com'
-    target_email = 'user_academia_2_1@academia.com'
+    # Use reserve users
+    admin_email = 'reserve_admin_academia_1@academia.com'
+    target_email = 'user_academia_2_1@academia.com'  # target remains canonical in this case to verify cross-academia restriction
 
     # Asegurar que el admin de academia 1 está activo y con password hasheada (argon2)
     with client.application.app_context():
@@ -201,7 +205,7 @@ def test_admin_academia1_cannot_unblock_academia2(client):
         admin.estado = 'Activo'
         admin.failed_login_count = 0
         admin.locked_until = None
-        admin.password = hash_password('password_admin_academia_1')
+        admin.password = hash_password('password_reserve_admin_academia_1')
         db.session.commit()
 
     # Asegurar que el objetivo está bloqueado (precondición para la prueba)
@@ -215,7 +219,7 @@ def test_admin_academia1_cannot_unblock_academia2(client):
         db.session.add(target)
         db.session.commit()
 
-    admin_rv = client.post('/auth/login', json={'email': admin_email, 'password': 'password_admin_academia_1'})
+    admin_rv = client.post('/auth/login', json={'email': admin_email, 'password': 'password_reserve_admin_academia_1'})
     assert admin_rv.status_code == 200
     # Evitar usar el access token devuelto por la app (puede contener una identidad dict).
     with client.application.app_context():
@@ -237,7 +241,8 @@ def test_admin_academia2_unblock_own_user(client):
     print("\nPrueba 4: Admin Academia2 desbloquea usuario propio")
 
     # Login del admin de Academia 2
-    admin_email = 'admin_academia_2@academia.com'
+    # Use reserve admin for Academia 2 but target remains a user in Academia 2
+    admin_email = 'reserve_admin_academia_2@academia.com'
     target_email = 'user_academia_2_1@academia.com'
 
     # Asegurar que el admin de academia 2 está activo y con password hasheada (argon2)
@@ -247,7 +252,7 @@ def test_admin_academia2_unblock_own_user(client):
         admin.estado = 'Activo'
         admin.failed_login_count = 0
         admin.locked_until = None
-        admin.password = hash_password('password_admin_academia_2')
+        admin.password = hash_password('password_reserve_admin_academia_2')
         db.session.commit()
 
     # Asegurar que el usuario objetivo está bloqueado antes del intento
@@ -261,7 +266,7 @@ def test_admin_academia2_unblock_own_user(client):
         db.session.add(target)
         db.session.commit()
 
-    admin_rv = client.post('/auth/login', json={'email': admin_email, 'password': 'password_admin_academia_2'})
+    admin_rv = client.post('/auth/login', json={'email': admin_email, 'password': 'password_reserve_admin_academia_2'})
     assert admin_rv.status_code == 200
     # Generar un access token con 'sub' string para evitar problemas de validación
     with client.application.app_context():
@@ -288,10 +293,10 @@ def test_admin_plataforma_unblock_admin_plataforma(client):
     print("\nPrueba 5: Admin plataforma desbloquea otro admin")
 
     # Login del admin de la plataforma
-    admin_email = 'admin_plataforma@academia.com'
-    target_email = 'admin_plataforma_2@academia.com'
+    admin_email = 'reserve_admin_plataforma@academia.com'
+    target_email = 'reserve_admin_plataforma_2@academia.com'
 
-    admin_rv = client.post('/auth/login', json={'email': admin_email, 'password': 'password_admin_plataforma'})
+    admin_rv = client.post('/auth/login', json={'email': admin_email, 'password': 'password_reserve_admin_plataforma'})
     assert admin_rv.status_code == 200
     # Crear access token con identidad string para llamadas internas de prueba
     with client.application.app_context():

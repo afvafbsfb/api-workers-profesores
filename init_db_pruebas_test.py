@@ -448,6 +448,39 @@ def seed():
                 db.session.rollback()
                 print(f"[init_db_pruebas_test] No se pudo normalizar usuario academia 2 {user.email}: {e}")
 
+    # Usuarios de reserva dedicados a pruebas destructivas (no tocar los usuarios canónicos)
+    usuarios_reserva = [
+        dict(email='reserve_activo@academia.com', nombre='Reserve Activo', password=hash_password('password_reserve_activo'), rol_id=rol.id, estado='Activo', academia_id=None),
+        dict(email='reserve_user_academia_1_1@academia.com', nombre='Reserve User A1.1', password=hash_password('password_reserve_user_academia_1_1'), rol_id=rol_administrativo.id, estado='Activo', academia_id=academia_1.id),
+        dict(email='reserve_admin_plataforma@academia.com', nombre='Reserve Admin Plataforma', password=hash_password('password_reserve_admin_plataforma'), rol_id=rol.id, estado='Activo', academia_id=None),
+        dict(email='reserve_admin_academia_1@academia.com', nombre='Reserve Admin Academia 1', password=hash_password('password_reserve_admin_academia_1'), rol_id=rol_academia.id, estado='Activo', academia_id=academia_1.id),
+        dict(email='reserve_admin_academia_2@academia.com', nombre='Reserve Admin Academia 2', password=hash_password('password_reserve_admin_academia_2'), rol_id=rol_academia.id, estado='Activo', academia_id=academia_2.id),
+        dict(email='reserve_admin_plataforma_2@academia.com', nombre='Reserve Admin Plataforma 2', password=hash_password('password_reserve_admin_plataforma_2'), rol_id=rol.id, estado='Bloqueado', academia_id=None),
+    ]
+
+    for u in usuarios_reserva:
+        user_filters = dict(email=u['email'])
+        defaults = {k: v for k, v in u.items() if k != 'email'}
+        user, created = get_or_create(Usuario, defaults=defaults, **user_filters)
+        if created:
+            print(f"[init_db_pruebas_test] Usuario reserva creado: {user.email} (id={user.id})")
+        else:
+            print(f"[init_db_pruebas_test] Usuario reserva ya existe: {user.email}")
+            try:
+                user.password = defaults.get('password', user.password)
+                user.estado = defaults.get('estado', user.estado).capitalize() if isinstance(defaults.get('estado', user.estado), str) else user.estado
+                user.rol_id = defaults.get('rol_id', user.rol_id)
+                user.academia_id = defaults.get('academia_id', user.academia_id)
+                user.failed_login_count = 0
+                user.last_failed_login_at = None
+                user.locked_until = None
+                db.session.add(user)
+                db.session.commit()
+                print(f"[init_db_pruebas_test] Usuario reserva normalizado: {user.email}")
+            except Exception as e:
+                db.session.rollback()
+                print(f"[init_db_pruebas_test] No se pudo normalizar usuario reserva {user.email}: {e}")
+
     # Mostrar resumen al final del seeding con roles primero
     def mostrar_resumen():
         print("\n[Resumen de datos creados]")
