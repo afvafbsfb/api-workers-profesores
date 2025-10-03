@@ -95,6 +95,37 @@ def test_login_usuario_activo(client):
     assert data['role'] == 'Admin_plataforma'  # Ajustar según el rol esperado
     assert data['name'] == 'Usuario Activo'  # Ajustar según el nombre esperado
 
+
+@pytest.mark.meta(title='Mi perfil tras login', desc='Después del login, GET /usuarios/me devuelve los datos del usuario')
+def test_obtener_mi_perfil_despues_login(client):
+    """
+    Prueba: Tras un login correcto, solicitar /usuarios/me con el access token devuelve los datos del usuario.
+    """
+    print("\nPrueba: Ejecutando test_obtener_mi_perfil_despues_login - Login y consulta de /usuarios/me")
+    # Realizar login primero
+    rv = client.post('/auth/login', json={
+        'email': 'activo@academia.com',
+        'password': 'password_activo'
+    })
+    print("Respuesta login:", rv.get_json())
+    assert rv.status_code == 200
+    tokens = rv.get_json().get('tokens') or {}
+    access = tokens.get('access_token')
+    assert access, "No se recibió access_token en la respuesta de login"
+
+    # Llamar al endpoint protegido /usuarios/me
+    headers = { 'Authorization': f'Bearer {access}' }
+    rv2 = client.get('/usuarios/me', headers=headers)
+    print("Respuesta /usuarios/me:", rv2.get_json())
+    assert rv2.status_code == 200
+    perfil = rv2.get_json()
+    # Comprobar campos esperados
+    assert perfil.get('email') == 'activo@academia.com'
+    assert perfil.get('nombre') == 'Usuario Activo'
+    assert perfil.get('rol') == 'Admin_plataforma'
+    assert 'id' in perfil
+    assert 'fecha_alta' in perfil
+
 @pytest.mark.meta(title='Login usuario inexistente', desc='Inicio de sesión con usuario inexistente devuelve 401')
 def test_login_usuario_no_existente(client):
     """

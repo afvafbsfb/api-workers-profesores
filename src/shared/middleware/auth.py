@@ -80,6 +80,13 @@ def require_auth(fn):
             print(f"[DEBUG] Usuario asignado a g.current_user: {g.current_user}")
         return fn(*args, **kwargs)
 
+    # Mark the wrapper so other tools (like OpenAPI generator) can detect
+    # that this view requires authentication.
+    try:
+        wrapper._requires_auth = True
+    except Exception:
+        pass
+
     return wrapper
 
 
@@ -115,6 +122,11 @@ def require_role(role_name: str):
                 return jsonify({"ok": False, "error": "forbidden"}), 403
 
             return fn(*args, **kwargs)
+        # Mark this wrapper as requiring auth as well (helpful if introspected)
+        try:
+            wrapper._requires_auth = True
+        except Exception:
+            pass
 
         return wrapper
 

@@ -38,6 +38,37 @@ components:
           additionalProperties: {}
           type: object
       type: object
+    Rol:
+      additionalProperties: false
+      properties:
+        id:
+          readOnly: true
+          type: integer
+        nombre:
+          type: string
+      type: object
+    Usuario:
+      additionalProperties: false
+      properties:
+        academia_id:
+          nullable: true
+          type: integer
+        email:
+          format: email
+          type: string
+        estado:
+          type: string
+        fecha_alta:
+          format: date-time
+          type: string
+        id:
+          readOnly: true
+          type: integer
+        nombre:
+          type: string
+        rol:
+          $ref: '#/components/schemas/Rol'
+      type: object
   securitySchemes:
     bearerAuth:
       bearerFormat: JWT
@@ -51,19 +82,86 @@ openapi: 3.0.2
 paths:
   /academias:
     get:
-      description: Obtener lista de academias
+      description: Auto-generated operation for academias.listar_academias
       responses:
         '200':
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/Academia'
-                type: array
-          description: Lista de academias
+          description: Successful response
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
       security:
       - bearerAuth: []
-      summary: Listar academias
+      summary: GET /academias
+      tags:
+      - Academias
+    post:
+      description: Auto-generated operation for academias.crear_academia
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Academia'
+        required: true
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+      - bearerAuth: []
+      summary: POST /academias
+      tags:
+      - Academias
+  /academias/{academia_id}:
+    get:
+      description: Auto-generated operation for academias.obtener_academia
+      parameters:
+      - in: path
+        name: academia_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+      - bearerAuth: []
+      summary: GET /academias/{academia_id}
+      tags:
+      - Academias
+    patch:
+      description: Auto-generated operation for academias.modificar_academia
+      parameters:
+      - in: path
+        name: academia_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Academia'
+        required: true
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+      - bearerAuth: []
+      summary: PATCH /academias/{academia_id}
+      tags:
+      - Academias
   /auth/login:
     post:
       description: Inicio de sesión con email y password
@@ -83,3 +181,317 @@ paths:
         '401':
           description: Credenciales inválidas
       summary: Login usuario
+      tags:
+      - login
+  /auth/logout:
+    post:
+      description: Auto-generated operation for login_bp.logout
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+      - bearerAuth: []
+      summary: POST /auth/logout
+      tags:
+      - oauth
+  /auth/refresh:
+    post:
+      description: Auto-generated operation for login_bp.refresh_tokens
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+      - bearerAuth: []
+      summary: POST /auth/refresh
+      tags:
+      - oauth
+  /auth/unblock:
+    post:
+      description: Auto-generated operation for login_bp.unblock_user
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+      - bearerAuth: []
+      summary: POST /auth/unblock
+      tags:
+      - oauth
+  /docs:
+    get:
+      description: Auto-generated operation for docs.docs_ui
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      summary: GET /docs
+      tags:
+      - Docs/Health
+  /health:
+    get:
+      description: Auto-generated operation for health
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      summary: GET /health
+      tags:
+      - Docs/Health
+  /openapi.json:
+    get:
+      description: Auto-generated operation for docs.openapi_json
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      summary: GET /openapi.json
+      tags:
+      - Docs/Health
+  /usuarios/:
+    get:
+      description: Auto-generated operation for usuarios.listar_usuarios
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+      - bearerAuth: []
+      summary: GET /usuarios/
+      tags:
+      - Usuarios
+    post:
+      description: Auto-generated operation for usuarios.crear_usuario
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Usuario'
+        required: true
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+      - bearerAuth: []
+      summary: POST /usuarios/
+      tags:
+      - Usuarios
+  /usuarios/me:
+    get:
+      description: Auto-generated operation for usuarios.obtener_mi_perfil
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Usuario'
+          description: Perfil del usuario autenticado
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+      - bearerAuth: []
+      summary: GET /usuarios/me
+      tags:
+      - Usuarios
+  /usuarios/recover:
+    get:
+      description: Auto-generated operation for usuarios.recuperar_credenciales
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+      - bearerAuth: []
+      summary: GET /usuarios/recover
+      tags:
+      - Usuarios
+  /usuarios/{usuario_id}:
+    delete:
+      description: Auto-generated operation for usuarios.eliminar_usuario
+      parameters:
+      - in: path
+        name: usuario_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+      - bearerAuth: []
+      summary: DELETE /usuarios/{usuario_id}
+      tags:
+      - Usuarios
+    get:
+      description: Auto-generated operation for usuarios.obtener_usuario
+      parameters:
+      - in: path
+        name: usuario_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+      - bearerAuth: []
+      summary: GET /usuarios/{usuario_id}
+      tags:
+      - Usuarios
+    put:
+      description: Auto-generated operation for usuarios.actualizar_usuario
+      parameters:
+      - in: path
+        name: usuario_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Usuario'
+        required: true
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+      - bearerAuth: []
+      summary: PUT /usuarios/{usuario_id}
+      tags:
+      - Usuarios
+  /usuarios/{usuario_id}/credentials:
+    put:
+      description: Auto-generated operation for usuarios.actualizar_credenciales
+      parameters:
+      - in: path
+        name: usuario_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Usuario'
+        required: true
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+      - bearerAuth: []
+      summary: PUT /usuarios/{usuario_id}/credentials
+      tags:
+      - Usuarios
+  /usuarios/{usuario_id}/role:
+    put:
+      description: Auto-generated operation for usuarios.actualizar_rol
+      parameters:
+      - in: path
+        name: usuario_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Usuario'
+        required: true
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+      - bearerAuth: []
+      summary: PUT /usuarios/{usuario_id}/role
+      tags:
+      - Usuarios
+  /usuarios/{usuario_id}/status:
+    put:
+      description: Auto-generated operation for usuarios.actualizar_estado
+      parameters:
+      - in: path
+        name: usuario_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Usuario'
+        required: true
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+      - bearerAuth: []
+      summary: PUT /usuarios/{usuario_id}/status
+      tags:
+      - Usuarios
+tags:
+- description: Inicio de sesión (email/password).
+  name: login
+- description: Refresh, logout y gestión de tokens.
+  name: oauth
+- description: Operaciones relacionadas con academias y su configuración.
+  name: Academias
+- description: Gestión de usuarios, perfiles y credenciales.
+  name: Usuarios
+- description: Documentación y endpoints de salud.
+  name: Docs/Health
