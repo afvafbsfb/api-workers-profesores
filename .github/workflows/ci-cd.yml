@@ -20,10 +20,14 @@ jobs:
           pip install -r requirements.txt
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
 
-      - name: Run tests
+      - name: Run tests (ordered)
         run: |
-          echo "Running tests against AWS RDS"
-          python -m pytest tests/usuarios --disable-warnings --maxfail=5
+          echo "Running ordered tests against AWS RDS"
+          # Run tests in the explicit order required by CI
+          python -m pytest tests/academias/test_academias_routes.py -q -s
+          python -m pytest tests/usuarios/test_login.py -q -s
+          python -m pytest tests/usuarios/test_unblock.py -q -s
+          python -m pytest tests/usuarios/test_refresh_logout.py -q -s
       - name: Lint
         run: flake8 . || echo "Lint warnings"
     env:

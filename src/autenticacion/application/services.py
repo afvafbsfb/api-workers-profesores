@@ -5,6 +5,7 @@ from src.autenticacion.infrastructure.hasher import Hasher
 from src.autenticacion.infrastructure.jwt_provider import JwtProvider
 from datetime import datetime, timezone, timedelta
 import hashlib
+from config import Config
 
 
 class AuthService:
@@ -17,8 +18,12 @@ class AuthService:
 
     @staticmethod
     def login(email: str, password: str) -> Tuple[bool, Dict]:
+        if Config.DEBUG:
+            print(f"[DEBUG] Intentando autenticar usuario: {email}")
         user = UserRepository.get_by_email(email)
         if not user:
+            if Config.DEBUG:
+                print(f"[DEBUG] Usuario no encontrado: {email}")
             return False, {"error": "credenciales inválidas"}
 
         now = datetime.now(timezone.utc)
@@ -90,10 +95,15 @@ class AuthService:
         except Exception:
             db.session.rollback()
 
+        if Config.DEBUG:
+            print(f"[DEBUG] Usuario autenticado: {user.id}, Rol: {user.rol.nombre}")
+
         # generar tokens
         token_version = user.token_version if user else 0
         access = JwtProvider.create_access(user.id, token_version)
         refresh = JwtProvider.create_refresh(user.id)
+        if Config.DEBUG:
+            print(f"[DEBUG] Tokens generados para usuario {user.id}: Access Token y Refresh Token")
 
         # persistir hash refresh token en la misma sesión para garantizar disponibilidad inmediata
         try:

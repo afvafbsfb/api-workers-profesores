@@ -29,9 +29,11 @@ def create_app():
     from src.usuarios.interfaces.usuarios_routes import usuarios_bp
     # Registrar el blueprint canónico de login desde src.usuarios para evitar colisiones
     from src.usuarios.login_routes import login_bp as usuarios_login_bp
+    from src.academias.interfaces.flask.academias_routes import academias_bp
 
     app.register_blueprint(usuarios_bp, url_prefix='/usuarios')
     app.register_blueprint(usuarios_login_bp, url_prefix='/auth')
+    app.register_blueprint(academias_bp, url_prefix='/academias')
 
     # Ruta de salud
     @app.route('/health')

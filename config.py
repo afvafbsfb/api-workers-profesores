@@ -31,6 +31,8 @@ class Config:
         },
     }
 
+    DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 't')
+
     @classmethod
     def get_database_config(cls):
         """

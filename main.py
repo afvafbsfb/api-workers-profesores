@@ -42,15 +42,9 @@ try:
     # --- FIN DEBUG ---
     # Permite CORS para cualquier origen (útil para pruebas, restringe en producción)
     CORS(app, resources={r"/*": {"origins": "*"}})
-    try:
-        if not os.path.exists('tmp'):
-            os.makedirs('tmp')
-        with open('tmp/blueprint_debug.log', 'a', encoding='utf-8') as f:
-            f.write("[DEBUG] Blueprint secretaria_bp registrado\n")
-            f.write("[DEBUG] Mapeo de rutas:\n")
-            f.write(str(app.url_map) + "\n")
-    except Exception as log_err:
-        print("[DEBUG] Error escribiendo blueprint_debug.log:", log_err)
+    # Asegurar directorio tmp para logs
+    if not os.path.exists('tmp'):
+        os.makedirs('tmp')
     db = models.db
 
     # Configuración por entorno y seguridad (dev/prod) + DB
@@ -58,6 +52,9 @@ try:
         return os.getenv(name, default)
 
     APP_ENV = (_env('APP_ENV', 'development') or 'development').strip().lower()
+
+    # Forcing APP_ENV to log its value for debugging purposes
+    print(f"[DEBUG] APP_ENV: {APP_ENV}", flush=True)
 
     def _db_uri_from_components(prefix: str = ''):
         """
@@ -80,17 +77,39 @@ try:
     SQLALCHEMY_DATABASE_URI = (
         _env('DATABASE_URL')
         or _env('SQLALCHEMY_DATABASE_URI')
-        or (_db_uri_from_components('DB_PROD_') if APP_ENV in ('prod', 'production') else _db_uri_from_components('DB_DEV_'))
+        or (
+            _db_uri_from_components('DB_PROD_')
+            if APP_ENV in ('prod', 'production')
+            else _db_uri_from_components('DB_DEV_')
+        )
         or _db_uri_from_components('DB_')
-        or "mysql+pymysql://angel:Abanca0795@localhost:3307/api_workers"
     )
+
+    # Log the selected database URI for debugging
+    print(f"[DEBUG] Selected SQLALCHEMY_DATABASE_URI: {SQLALCHEMY_DATABASE_URI}", flush=True)
 
     db_config = Config.get_database_config()
 
-    # Configuración de la base de datos: usar Config para construir/leer la URL
+    # Configuración de la base de datos: permitir que la clase Config
+    # establezca variables de entorno si es necesario, pero no depender
+    # únicamente de ello. Elegimos la URL en este orden de precedencia:
+    # 1) VARIABLE de entorno DATABASE_URL (más explícita)
+    # 2) la URI calculada en la variable SQLALCHEMY_DATABASE_URI
     from config import Config as _Config
-    _Config.set_environment_variables()
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+    try:
+        _Config.set_environment_variables()
+    except Exception:
+        # No fatal: seguir con variables de entorno ya presentes o con la URI calculada
+        pass
+
+    final_db_uri = os.getenv('DATABASE_URL') or SQLALCHEMY_DATABASE_URI
+    # Seguridad: exigir explicitamente una URL de conexión a la BBDD
+    if not final_db_uri:
+        raise RuntimeError(
+            "DATABASE_URL is required. Set the DATABASE_URL environment variable with your connection string."
+        )
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = final_db_uri
 
     # Log adicional para verificar si se sobrescribe SQLALCHEMY_DATABASE_URI en algún punto
     print(f"[DEBUG] SQLALCHEMY_DATABASE_URI después de configuración inicial: {app.config['SQLALCHEMY_DATABASE_URI']}", flush=True)
@@ -129,8 +148,9 @@ try:
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'default-secret-key')
     jwt = JWTManager(app)
 
-    # Middleware para validar JWT globalmente
-    app.before_request(enforce_jwt_globally)
+    # Nota: la validación JWT se realiza a través de la función
+    # `_enforce_api_key_globally` definida más arriba, que permite
+    # rutas públicas y llama a `enforce_jwt_globally` cuando procede.
 
     def _build():
         try:
@@ -145,12 +165,10 @@ try:
             "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
             "Pragma": "no-cache",
             "Expires": "0",
-            "X-LiteSpeed-Cache-Control": "no-store",
             "X-Frame-Options": "DENY",
             "X-Content-Type-Options": "nosniff",
             "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
             "Referrer-Policy": "no-referrer",
-            "Permissions-Policy": "geolocation=(), microphone=()",
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Headers": "Content-Type,Authorization",
             "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS"
@@ -217,15 +235,8 @@ try:
     # para que `main` pueda ser importado por scripts (como init_db.py)
     # sin intentar registrar blueprints antes de sus importaciones.
 
-    # Agregar log para listar todas las rutas registradas
-    # Forzar el log a la consola con flush=True
-    # Escribir el log de rutas tanto en la consola como en el archivo de depuración
-    # Agregar mensaje de depuración para confirmar ejecución
-    print("[DEBUG] Intentando escribir rutas registradas...", flush=True)
+    # Registrar blueprints y mostrar un par de mensajes de diagnóstico
     rutas = [rule.rule for rule in app.url_map.iter_rules()]
-    print("Rutas registradas:", rutas, flush=True)
-    with open('tmp/blueprint_debug.log', 'a', encoding='utf-8') as f:
-        f.write(f"Rutas registradas: {rutas}\n")
 
     # Configurar cabeceras de seguridad y CORS
     @app.after_request
@@ -246,54 +257,29 @@ try:
         })
         return resp
 
-    # Depuración para verificar el entorno y la URI de la base de datos
+    # Depuración mínima: entorno y URI final de BBDD
     print(f"APP_ENV: {APP_ENV}")
-    print(f"SQLALCHEMY_DATABASE_URI final: {app.config['SQLALCHEMY_DATABASE_URI']}")
-
-    # Agregar un log inicial para confirmar que main.py se está ejecutando
-    print("[DEBUG] main.py se está ejecutando", flush=True)
-
-    # Log the final SQLALCHEMY_DATABASE_URI for debugging
-    print(f"[DEBUG] Final SQLALCHEMY_DATABASE_URI: {app.config['SQLALCHEMY_DATABASE_URI']}", flush=True)
-
-    # Agregar un registro de depuración al inicio para verificar APP_ENV
-    print(f"[DEBUG] APP_ENV al inicio: {os.getenv('APP_ENV')}", flush=True)
+    print(f"SQLALCHEMY_DATABASE_URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
     # Asegurar que SQLALCHEMY_BINDS esté desactivado durante las pruebas
     if APP_ENV == 'testing':
         app.config['SQLALCHEMY_BINDS'] = None  # Desactiva cualquier configuración adicional de binds
-        print(f"[DEBUG] SQLALCHEMY_BINDS desactivado en pruebas: {app.config['SQLALCHEMY_BINDS']}", flush=True)
-
-    # Add debug logs to trace SQLALCHEMY_DATABASE_URI
-    print(f"[DEBUG] APP_ENV at start: {APP_ENV}", flush=True)
-    print(f"[DEBUG] Initial SQLALCHEMY_DATABASE_URI: {SQLALCHEMY_DATABASE_URI}", flush=True)
-
-    # Add a log after app.config is set
-    print(f"[DEBUG] Final SQLALCHEMY_DATABASE_URI in app.config: {app.config['SQLALCHEMY_DATABASE_URI']}", flush=True)
-
-    # No forzamos SQLite en testing: la URL viene de Config/DATABASE_URL
-
-    # Add a final debug log to confirm the database URI
-    print(f"[DEBUG] Final SQLALCHEMY_DATABASE_URI before app initialization: {SQLALCHEMY_DATABASE_URI}", flush=True)
-
-    # Add debug log for SQLALCHEMY_BINDS
-    print(f"[DEBUG] SQLALCHEMY_BINDS: {app.config.get('SQLALCHEMY_BINDS')}")
+        print(f"SQLALCHEMY_BINDS desactivado en pruebas: {app.config['SQLALCHEMY_BINDS']}")
 
     # Asegurar que SQLALCHEMY_BINDS sea un diccionario vacío si no está configurado
     if app.config.get('SQLALCHEMY_BINDS') is None:
         app.config['SQLALCHEMY_BINDS'] = {}
-
-    # Agregar registro para verificar el estado de db
-    print("[DEBUG] Verificando estado de db antes de inicializar.", flush=True)
-    print(f"[DEBUG] db: {db}", flush=True)
-    print(f"[DEBUG] app.config: {app.config}", flush=True)
-
     # Registrar blueprints al inicio
     from src.usuarios.interfaces.usuarios_routes import usuarios_bp
     from src.usuarios.login_routes import login_bp
+    from src.academias.interfaces.flask.academias_routes import academias_bp
     app.register_blueprint(usuarios_bp, url_prefix='/usuarios')
     app.register_blueprint(login_bp, url_prefix='/auth')
-    print("[DEBUG] Blueprints registrados en main.py.", flush=True)
+    app.register_blueprint(academias_bp, url_prefix='/academias')
+
+    # Log rutas registradas en un único punto (útil en desarrollo)
+    print(f"Rutas registradas: {rutas}")
+    print("Blueprints registrados en main.py.")
 
     # Inicialización de la base de datos:
     # La instancia `db` ya se inicializó más arriba (si no estaba inicializada).

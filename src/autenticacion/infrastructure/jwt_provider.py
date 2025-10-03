@@ -1,6 +1,7 @@
 from flask_jwt_extended import create_access_token, create_refresh_token
 from datetime import timedelta
 from typing import Dict
+import json
 
 ACCESS_EXPIRES = timedelta(minutes=15)
 REFRESH_EXPIRES = timedelta(days=7)
@@ -16,7 +17,8 @@ class JwtProvider:
 
     @staticmethod
     def create_access(usuario_id: int, token_version: int) -> str:
-        identity = {"usuario_id": usuario_id, "token_version": token_version}
+        # Convert identity to a JSON string to ensure the subject is a string
+        identity = json.dumps({"usuario_id": usuario_id, "token_version": token_version})
         return create_access_token(identity=identity, expires_delta=ACCESS_EXPIRES)
 
     @staticmethod

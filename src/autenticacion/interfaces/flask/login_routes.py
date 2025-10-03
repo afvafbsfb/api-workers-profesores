@@ -149,7 +149,7 @@ def logout():
                 db.session.rollback()
                 return jsonify({"ok": False, "error": "db_error"}), 500
 
-        return jsonify({"ok": True}), 204
+        return jsonify({"ok": True}), 200
     except Exception as e:
         return jsonify({"ok": False, "error": "logout_error", "message": str(e)}), 500
 
