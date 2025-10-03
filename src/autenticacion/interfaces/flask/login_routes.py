@@ -97,13 +97,14 @@ def refresh_tokens():
         # Crear nuevo RefreshToken y persistir
         rt_new = RefreshToken(usuario_id=usuario_id, token_hash=nuevo_hash, expires_at=expires_at, ip=existing.ip, user_agent=existing.user_agent, device_id=existing.device_id)
         db.session.add(rt_new)
-
-        existing.revoked_at = now
-        existing.replaced_by_id = None
-        db.session.add(existing)
+        # Flush to obtain rt_new.id without committing yet
         db.session.flush()
+
+        # Mark existing as revoked and link to new token atomically
+        existing.revoked_at = now
         existing.replaced_by_id = rt_new.id
         db.session.add(existing)
+
         db.session.commit()
 
     except Exception as e:
