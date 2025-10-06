@@ -97,6 +97,7 @@ class Rol(db.Model):
     __tablename__ = 'Rol_Usuario'
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(50), unique=True, nullable=False)
+    # Nota: la clasificación por permisos numéricos fue eliminada; usar el nombre del rol (nombre)
 
 
 # Modelo para Tokens de Sesión

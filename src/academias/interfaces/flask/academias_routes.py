@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify, g
 from src.shared.middleware.auth import require_role, require_auth
+from src.shared.auth_helpers import is_platform_admin, is_academy_admin
 from models import Academia, db
 from config import Config
 
@@ -57,8 +58,7 @@ def crear_academia():
 def listar_academias():
     # Solo Admin_plataforma puede listar todas las academias
     user = getattr(g, 'current_user', None)
-    rol_nombre = user.rol.nombre if user and user.rol else None
-    if rol_nombre != 'Admin_plataforma':
+    if not is_platform_admin(user):
         return jsonify({"ok": False, "error": "forbidden"}), 403
 
     academias = Academia.query.all()
@@ -78,11 +78,11 @@ def obtener_academia(academia_id):
         return jsonify({"ok": False, "error": "not_found"}), 404
 
     # Admin_plataforma puede ver cualquiera
-    if rol_nombre == 'Admin_plataforma':
+    if is_platform_admin(user):
         return jsonify({"ok": True, "result": {"id": a.id, "nombre": a.nombre}}), 200
 
-    # Otros roles sólo si el usuario está vinculado a la academia
-    if user and getattr(user, 'academia_id', None) == a.id:
+    # Otros roles sólo si el usuario está vinculado a la academia o es academy_admin
+    if is_academy_admin(user, academia_id=a.id):
         return jsonify({"ok": True, "result": {"id": a.id, "nombre": a.nombre}}), 200
 
     return jsonify({"ok": False, "error": "forbidden"}), 403
@@ -100,9 +100,9 @@ def modificar_academia(academia_id):
         return jsonify({"ok": False, "error": "not_found"}), 404
 
     # Authorization: Admin_plataforma puede modificar cualquiera; Admin_academia sólo la suya
-    if rol_nombre == 'Admin_plataforma':
+    if is_platform_admin(user):
         allowed = True
-    elif rol_nombre == 'Admin_academia' and getattr(user, 'academia_id', None) == a.id:
+    elif is_academy_admin(user, academia_id=a.id):
         allowed = True
     else:
         allowed = False

@@ -100,7 +100,7 @@ CREATE TABLE Inscripcion (
 -- Tabla Rol_Usuario
 CREATE TABLE Rol_Usuario (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(50) NOT NULL UNIQUE -- Ejemplos: 'Admin_plataforma', 'Admin_academia', 'Profesor_academia', 'Admin_y_profesor_academia'
+    nombre VARCHAR(50) NOT NULL UNIQUE -- Ejemplos: 'Admin_plataforma', 'Admin_academia', 'Profesor_academia'
 );
 
 
@@ -122,28 +122,6 @@ CREATE TABLE Usuario (
 
 -- Ensure email is indexed uniquely
 CREATE UNIQUE INDEX idx_usuario_email ON Usuario(email);
-
--- rol_id	recurso	  accion
--- 1	       academia	   crear
--- 1	       academia	eliminar
--- 1	       academia	actualizar
--- 1	       academia	leer
--- 2	       curso	crear
--- 2	       curso	eliminar
--- 2	       curso	actualizar
--- 2	       curso	leer
--- 3	       sesion	leer
--- 3	       sesion	actualizar
-
-
-CREATE TABLE PermisosRol (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    rol_id INT NOT NULL,
-    recurso ENUM('academia', 'tarifa', 'curso', 'aula', 'horario_curso', 'alumno', 'inscripcion', 'rol_usuario', 'usuario', 'permisosrol', 'sesion', 'descuentos_tarifa', 'familias_alumnos', 'anotaciones_alumno_sesion', 'pago', 'trabajador_virtual', '*') NOT NULL,
-    accion ENUM('crear', 'leer', 'actualizar', 'eliminar', '*') NOT NULL,
-    UNIQUE (rol_id, recurso, accion),
-    FOREIGN KEY (rol_id) REFERENCES Rol_Usuario(id)
-);
 
 
 -- === 1) HISTORIAL DE LOGIN/LOGOUT ===
@@ -348,86 +326,8 @@ CREATE TABLE TrabajadorVirtual (
 
 -- Inserciones en la tabla Rol_Usuario
 INSERT INTO Rol_Usuario (id, nombre) VALUES
-(1, 'System_Admin'),
-(2, 'Company_Admin'),
-(3, 'Staff_profesores');
-
--- Inserciones en la tabla PermisosRol
--- Permisos para System_Admin (ID: 1)
-INSERT INTO PermisosRol (rol_id, recurso, accion) VALUES
-(1, '*', '*');
-
--- Permisos para Company_Admin (ID: 2)
-INSERT INTO PermisosRol (rol_id, recurso, accion) VALUES
-(2, 'academia', 'leer'),
-(2, 'academia', 'actualizar'),
-(2, 'tarifa', 'crear'),
-(2, 'tarifa', 'leer'),
-(2, 'tarifa', 'actualizar'),
-(2, 'tarifa', 'eliminar'),
-(2, 'curso', 'crear'),
-(2, 'curso', 'leer'),
-(2, 'curso', 'actualizar'),
-(2, 'curso', 'eliminar'),
-(2, 'aula', 'crear'),
-(2, 'aula', 'leer'),
-(2, 'aula', 'actualizar'),
-(2, 'aula', 'eliminar'),
-(2, 'horario_curso', 'crear'),
-(2, 'horario_curso', 'leer'),
-(2, 'horario_curso', 'actualizar'),
-(2, 'horario_curso', 'eliminar'),
-(2, 'alumno', 'crear'),
-(2, 'alumno', 'leer'),
-(2, 'alumno', 'actualizar'),
-(2, 'alumno', 'eliminar'),
-(2, 'inscripcion', 'crear'),
-(2, 'inscripcion', 'leer'),
-(2, 'inscripcion', 'actualizar'),
-(2, 'inscripcion', 'eliminar'),
-(2, 'rol_usuario', 'leer'),
-(2, 'usuario', 'crear'),
-(2, 'usuario', 'leer'),
-(2, 'usuario', 'actualizar'),
-(2, 'usuario', 'eliminar'),
-(2, 'permisosrol', 'leer'),
-(2, 'sesion', 'crear'),
-(2, 'sesion', 'leer'),
-(2, 'sesion', 'actualizar'),
-(2, 'sesion', 'eliminar'),
-(2, 'descuentos_tarifa', 'crear'),
-(2, 'descuentos_tarifa', 'leer'),
-(2, 'descuentos_tarifa', 'actualizar'),
-(2, 'descuentos_tarifa', 'eliminar'),
-(2, 'familias_alumnos', 'crear'),
-(2, 'familias_alumnos', 'leer'),
-(2, 'familias_alumnos', 'actualizar'),
-(2, 'familias_alumnos', 'eliminar'),
-(2, 'anotaciones_alumno_sesion', 'crear'),
-(2, 'anotaciones_alumno_sesion', 'leer'),
-(2, 'anotaciones_alumno_sesion', 'actualizar'),
-(2, 'anotaciones_alumno_sesion', 'eliminar'),
-(2, 'pago', 'crear'),
-(2, 'pago', 'leer'),
-(2, 'pago', 'actualizar'),
-(2, 'pago', 'eliminar'),
-(2, 'trabajador_virtual', 'leer'),
-(2, 'trabajador_virtual', 'actualizar');
-
--- Permisos para Staff_profesores (ID: 3)
-INSERT INTO PermisosRol (rol_id, recurso, accion) VALUES
-(3, 'curso', 'leer'),
-(3, 'horario_curso', 'leer'),
-(3, 'alumno', 'leer'),
-(3, 'sesion', 'crear'),
-(3, 'sesion', 'leer'),
-(3, 'sesion', 'actualizar'),
-(3, 'anotaciones_alumno_sesion', 'crear'),
-(3, 'anotaciones_alumno_sesion', 'leer'),
-(3, 'anotaciones_alumno_sesion', 'actualizar'),
-(3, 'anotaciones_alumno_sesion', 'eliminar'),
-(3, 'trabajador_virtual', 'leer');
-
--- Crear usuario administrador de la plataforma para pruebas
+(1, 'Admin_plataforma'), 
+(2, 'Admin_academia'),
+(3, 'Profesor_academia');
 
 

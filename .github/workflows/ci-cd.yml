@@ -25,12 +25,12 @@ jobs:
           echo "Running ordered tests against AWS RDS and generating combined HTML report"
           python init_db_pruebas_test.py --reset
           python -m pytest \
-            tests/academias/test_academias_get_patch.py \
             tests/academias/test_academias_post.py \
+            tests/academias/test_academias_get_patch.py \
             tests/usuarios/test_login.py \
             tests/usuarios/test_unblock.py \
             tests/usuarios/test_refresh_logout.py \
-            -q -s --html=report-all.html --self-contained-html || true
+            -q -s --html=report-all.html --self-contained-html
 
       - name: Upload pytest HTML report
         uses: actions/upload-artifact@v4
