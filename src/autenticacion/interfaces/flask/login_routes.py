@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from marshmallow import Schema, fields, ValidationError
 from src.autenticacion.application.services import AuthService
+from src.autenticacion.infrastructure.jwt_provider import JwtProvider
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_refresh_token, create_access_token
 from models import RefreshToken, Usuario, db, UserLoginLog, Rol
 from src.shared.security import hash_password
@@ -113,7 +114,9 @@ def refresh_tokens():
 
     usuario = db.session.get(Usuario, usuario_id)
     token_version = usuario.token_version if usuario else 0
-    access_token = create_access_token(identity={"usuario_id": usuario_id, "token_version": token_version}, expires_delta=timedelta(minutes=15))
+    roles = [usuario.rol.nombre] if usuario and usuario.rol else []
+    academia_id = usuario.academia_id if usuario else None
+    access_token = JwtProvider.create_access(usuario_id, token_version, roles=roles, academia_id=academia_id)
 
     return jsonify({"ok": True, "access_token": access_token, "refresh_token": nuevo_refresh}), 200
 

@@ -98,10 +98,15 @@ class AuthService:
         if Config.DEBUG:
             print(f"[DEBUG] Usuario autenticado: {user.id}, Rol: {user.rol.nombre}")
 
-        # generar tokens
+        # generar tokens con claims adicionales (roles y academia_id)
         token_version = user.token_version if user else 0
-        access = JwtProvider.create_access(user.id, token_version)
+        roles = [user.rol.nombre] if getattr(user, 'rol', None) else []
+        academia_id = getattr(user, 'academia_id', None)
+        # profesor_id no está explícito en Usuario; si necesitas un id de profesor
+        # extrae del modelo correspondiente. Por ahora lo dejamos None.
+        access = JwtProvider.create_access(user.id, token_version, roles=roles, academia_id=academia_id)
         refresh = JwtProvider.create_refresh(user.id)
+
         if Config.DEBUG:
             print(f"[DEBUG] Tokens generados para usuario {user.id}: Access Token y Refresh Token")
 
@@ -109,9 +114,6 @@ class AuthService:
         try:
             expires_at = datetime.now(timezone.utc) + timedelta(days=7)
             token_hash = hashlib.sha256(refresh.encode('utf-8')).hexdigest()
-            # Depuración adicional para SQLite
-            # print(f"[DEBUG] Intentando persistir RefreshToken para user_id={user.id}", flush=True)
-            # print(f"[DEBUG] Valores: token_hash={token_hash}, expires_at={expires_at}", flush=True)
             # Validar valores antes de persistir
             if not user.id or not token_hash or not expires_at:
                 raise ValueError("Valores inválidos para persistir RefreshToken")
@@ -120,9 +122,7 @@ class AuthService:
             rt = RefreshToken(usuario_id=user.id, token_hash=token_hash, expires_at=expires_at)
             db.session.add(rt)
             db.session.commit()
-            # print(f"[AuthService] Persisted refresh token hash for user_id={user.id}: {token_hash}", flush=True)
         except Exception as e:
-            # print(f"[DEBUG] Error al persistir RefreshToken: {e}", flush=True)
             db.session.rollback()
 
         # Obtener rol y nombre del usuario
