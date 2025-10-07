@@ -16,6 +16,7 @@ jobs:
       DB_USER: admin
       DB_PASS: Abanca0795
       DB_NAME: api_workers
+      PYTHONPATH: '.'
     steps:
       - uses: actions/checkout@v4
 
@@ -85,3 +86,16 @@ jobs:
         with:
           name: pytest-html-report
           path: report-all.html
+      - name: Regenerate OpenAPI (dump_openapi.py)
+        run: |
+          python scripts/dump_openapi.py
+
+      - name: Sync root spec files (optional)
+        run: |
+          if [ -f docs/openapi-auto.json ]; then cp docs/openapi-auto.json openapi.json || true; fi
+          if [ -f docs/openapi-auto.yml ]; then cp docs/openapi-auto.yml openapi.yml || true; fi
+
+      - name: Check for uncommitted changes in spec files
+        run: |
+          git --no-pager status --porcelain
+          git diff --exit-code -- docs/openapi-auto.json docs/openapi-auto.yml openapi.json openapi.yml
