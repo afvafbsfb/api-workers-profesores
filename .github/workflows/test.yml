@@ -32,6 +32,8 @@ jobs:
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
           # Ensure apispec is available for generating OpenAPI
           python -m pip install "apispec[marshmallow]"
+          # PyYAML is used by scripts/compare_openapi.py for YAML parsing
+          python -m pip install pyyaml
 
       - name: Run DB seeder (idempotente)
         run: |
@@ -107,7 +109,8 @@ jobs:
             openapi.json
             openapi.yml
 
-      - name: Check for uncommitted changes in spec files
+      - name: Check OpenAPI semantic equality vs HEAD
         run: |
           git --no-pager status --porcelain
-          git diff --exit-code -- docs/openapi-auto.json docs/openapi-auto.yml openapi.json openapi.yml
+          # Compare working tree files vs committed HEAD using a semantic comparator
+          python scripts/compare_openapi.py docs/openapi-auto.json docs/openapi-auto.yml openapi.json openapi.yml || exit 1
