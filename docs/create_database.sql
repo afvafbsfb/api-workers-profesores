@@ -12,7 +12,11 @@ USE api_workers;
 -- Tabla Academia (antes Empresa)
 CREATE TABLE Academia (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL UNIQUE
+    nombre VARCHAR(100) NOT NULL UNIQUE,
+    fecha_alta DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    fecha_baja DATETIME NULL,
+    fecha_ultima_modificacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    usuario_id_ultima_modificacion INT NULL
 );
 
 -- Tabla Tarifa

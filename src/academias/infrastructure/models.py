@@ -7,6 +7,12 @@ class Academia(Base):
     __tablename__ = 'Academia'
     id = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(String(100), unique=True, nullable=False)
+    fecha_alta = Column(DateTime, nullable=False, server_default=func.current_timestamp())
+    fecha_baja = Column(DateTime, nullable=True)
+    fecha_ultima_modificacion = Column(DateTime, nullable=False, server_default=func.current_timestamp(), onupdate=func.current_timestamp())
+    # Not enforcing a SQLAlchemy ForeignKey here to avoid circular create-order issues.
+    # We keep the column to record the user id who last modified the academia.
+    usuario_id_ultima_modificacion = Column(Integer, nullable=True)
     cursos = relationship('Curso', back_populates='academia')
     aulas = relationship('Aula', back_populates='academia')
     tarifas = relationship('Tarifa', back_populates='academia')
