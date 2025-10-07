@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile>
+  <diagram name="Database Schema">
+    <mxGraphModel dx="1000" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Academia -->
+        <mxCell id="Academia" value="Academia" style="shape=swimlane;" vertex="1" parent="1">
+          <mxGeometry x="100" y="100" width="160" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="AcademiaFields" value="id (PK)\nnombre" style="text" vertex="1" parent="Academia">
+          <mxGeometry x="0" y="0" width="160" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Curso -->
+        <mxCell id="Curso" value="Curso" style="shape=swimlane;" vertex="1" parent="1">
+          <mxGeometry x="300" y="100" width="200" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CursoFields" value="id (PK)\nacademia_id (FK)\nnombre\nfecha_inicio\nfecha_fin\nacepta_nuevos_alumnos\ncapacidad_maxima\nduracion_clase_horas\nduracion_clase_minutos\ntarifa_id (FK)" style="text" vertex="1" parent="Curso">
+          <mxGeometry x="0" y="0" width="200" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- Aula -->
+        <mxCell id="Aula" value="Aula" style="shape=swimlane;" vertex="1" parent="1">
+          <mxGeometry x="550" y="100" width="160" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="AulaFields" value="id (PK)\nacademia_id (FK)\nnombre\ncapacidad_maxima" style="text" vertex="1" parent="Aula">
+          <mxGeometry x="0" y="0" width="160" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- HorarioCurso -->
+        <mxCell id="HorarioCurso" value="HorarioCurso" style="shape=swimlane;" vertex="1" parent="1">
+          <mxGeometry x="800" y="100" width="200" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="HorarioCursoFields" value="id (PK)\ncurso_id (FK)\naula_id (FK)\ndia_semana\nhora_inicio\nhora_fin" style="text" vertex="1" parent="HorarioCurso">
+          <mxGeometry x="0" y="0" width="200" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- Tarifa -->
+        <mxCell id="Tarifa" value="Tarifa" style="shape=swimlane;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="100" width="200" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="TarifaFields" value="id (PK)\nacademia_id (FK)\ndescripcion\nprecio_base\nadmite_descuento\nimporte_descuento\nporcentaje_descuento" style="text" vertex="1" parent="Tarifa">
+          <mxGeometry x="0" y="0" width="200" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- Alumno -->
+        <mxCell id="Alumno" value="Alumno" style="shape=swimlane;" vertex="1" parent="1">
+          <mxGeometry x="1300" y="100" width="160" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="AlumnoFields" value="id (PK)\nnombre\nemail" style="text" vertex="1" parent="Alumno">
+          <mxGeometry x="0" y="0" width="160" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Relaciones -->
+        <mxCell id="rel1" edge="1" source="Academia" target="Curso" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel2" edge="1" source="Academia" target="Aula" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel3" edge="1" source="Curso" target="HorarioCurso" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel4" edge="1" source="Curso" target="Tarifa" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel5" edge="1" source="Alumno" target="Curso" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

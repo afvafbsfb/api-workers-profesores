@@ -1,0 +1,1 @@
+# Este script ya no es necesario porque SQLite ha sido eliminado del proyecto.

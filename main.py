@@ -1,13 +1,14 @@
-
 # --- INICIALIZACIÓN SEGURA PARA DEBUG ---
 import traceback
 init_error = None
 try:
     import os
     from flask import Flask, request, jsonify, send_from_directory, current_app
-    from vlodeiro.secretaria.interfaces.flask_routes import secretaria_bp
-    # DDD: Importa blueprint de empresa
-    from vlodeiro.empresa.interfaces.empresa_routes import empresa_bp
+    from flask_cors import CORS  # Para manejar CORS
+    from flask_jwt_extended import JWTManager  # Para manejar JWT
+    from dotenv import load_dotenv  # Para cargar variables de entorno desde un archivo .env
+    from auth_module import enforce_jwt_globally, require_jwt  # Importa funciones específicas para la validación de JWT
+    from config import Config  # Importa la clase Config para la configuración de la base de datos
     from datetime import datetime, timezone
     # from vlodeiro.secretaria.infrastructure.repositorio_mysql import TurnoMySQLRepository
     # Dotenv: opcional en desarrollo. Si no está instalado, usa no-op
@@ -17,27 +18,15 @@ try:
         def _load_dotenv(*args, **kwargs):
             return False
     from functools import wraps
-    import models  # Importa SQLAlchemy y modelos
-    # Validación de entrada
-    from marshmallow import Schema, fields, ValidationError
-    # Esquema de validación para /v1/command
-    class CommandSchema(Schema):
-        action = fields.Str(required=True)
-        args = fields.Dict(load_default={})
-    # Seguridad: CORS y headers
-    from flask_cors import CORS
-    # Autenticación API Key modularizada
-    import auth
-
-    # Carga variables desde .env si existe, sin sobrescribir variables del proceso
-    # Seguro en producción (no hay .env en el servidor y override=False)
-    try:
-        _load_dotenv(override=False)
-    except Exception:
-        pass
-
+    # Importaciones actualizadas tras la refactorización
+    from src.shared.database import db
+    from src.academias.infrastructure.models import Academia, Aula, Curso, HorarioCurso
+    from src.usuarios.infrastructure.models import Usuario, Rol, RefreshToken, UserLoginLog
+    from src.alumnos.infrastructure.models import Alumno, Inscripcion
+    from src.profesores.infrastructure.models import CursoProfesores, Sesion
 
     app = Flask(__name__)
+
 
     # --- LOGGING DE ERRORES ---
     import logging
@@ -57,28 +46,19 @@ try:
     # --- FIN DEBUG ---
     # Permite CORS para cualquier origen (útil para pruebas, restringe en producción)
     CORS(app, resources={r"/*": {"origins": "*"}})
-    app.register_blueprint(secretaria_bp, url_prefix='/vlodeiro/secretaria')
-    try:
-        if not os.path.exists('tmp'):
-            os.makedirs('tmp')
-        with open('tmp/blueprint_debug.log', 'a', encoding='utf-8') as f:
-            f.write("[DEBUG] Blueprint secretaria_bp registrado\n")
-            f.write("[DEBUG] Mapeo de rutas:\n")
-            f.write(str(app.url_map) + "\n")
-    except Exception as log_err:
-        print("[DEBUG] Error escribiendo blueprint_debug.log:", log_err)
-    # DDD: Registra blueprint de empresa
-    app.register_blueprint(empresa_bp, url_prefix='/vlodeiro/empresa')
-    print(app.url_map)
-
-    db = models.db
-    Turno = models.Turno
+    # Asegurar directorio tmp para logs
+    if not os.path.exists('tmp'):
+        os.makedirs('tmp')
+    db = db
 
     # Configuración por entorno y seguridad (dev/prod) + DB
     def _env(name, default=None):
         return os.getenv(name, default)
 
     APP_ENV = (_env('APP_ENV', 'development') or 'development').strip().lower()
+
+    # Forcing APP_ENV to log its value for debugging purposes
+    print(f"[DEBUG] APP_ENV: {APP_ENV}", flush=True)
 
     def _db_uri_from_components(prefix: str = ''):
         """
@@ -101,17 +81,49 @@ try:
     SQLALCHEMY_DATABASE_URI = (
         _env('DATABASE_URL')
         or _env('SQLALCHEMY_DATABASE_URI')
-        or (_db_uri_from_components('DB_PROD_') if APP_ENV in ('prod', 'production') else _db_uri_from_components('DB_DEV_'))
+        or (
+            _db_uri_from_components('DB_PROD_')
+            if APP_ENV in ('prod', 'production')
+            else _db_uri_from_components('DB_DEV_')
+        )
         or _db_uri_from_components('DB_')
-        or ("sqlite:////tmp/local.db" if is_lambda else "sqlite:///local.db")
     )
 
+    # Log the selected database URI for debugging
+    print(f"[DEBUG] Selected SQLALCHEMY_DATABASE_URI: {SQLALCHEMY_DATABASE_URI}", flush=True)
 
+    db_config = Config.get_database_config()
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
+    # Configuración de la base de datos: permitir que la clase Config
+    # establezca variables de entorno si es necesario, pero no depender
+    # únicamente de ello. Elegimos la URL en este orden de precedencia:
+    # 1) VARIABLE de entorno DATABASE_URL (más explícita)
+    # 2) la URI calculada en la variable SQLALCHEMY_DATABASE_URI
+    from config import Config as _Config
+    try:
+        _Config.set_environment_variables()
+    except Exception:
+        # No fatal: seguir con variables de entorno ya presentes o con la URI calculada
+        pass
+
+    final_db_uri = os.getenv('DATABASE_URL') or SQLALCHEMY_DATABASE_URI
+    # Seguridad: exigir explicitamente una URL de conexión a la BBDD
+    if not final_db_uri:
+        raise RuntimeError(
+            "DATABASE_URL is required. Set the DATABASE_URL environment variable with your connection string."
+        )
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = final_db_uri
+
+    # Log adicional para verificar si se sobrescribe SQLALCHEMY_DATABASE_URI en algún punto
+    print(f"[DEBUG] SQLALCHEMY_DATABASE_URI después de configuración inicial: {app.config['SQLALCHEMY_DATABASE_URI']}", flush=True)
+
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    db.init_app(app)
+    # Evitar registrar SQLAlchemy varias veces
+    if not hasattr(db, '_is_initialized'):
+        db.init_app(app)
+        db._is_initialized = True
 
     # Debug solo si FLASK_DEBUG está activo explícitamente
     app.debug = str(os.getenv("FLASK_DEBUG", "0")).lower() in ("1", "true", "yes")
@@ -125,16 +137,24 @@ try:
             return jsonify({"ok": False, "error": code}), status
         return jsonify({"ok": False, "error": code, "hint": hint}), status
 
-    # Enforce global API Key salvo rutas públicas mínimas (docs y spec)
+    # Permitir acceso público al endpoint /auth/login
     @app.before_request
     def _enforce_api_key_globally():
-        public_paths = ["/docs", "/openapi.yml", "/openapi-rest.yaml", "/health", "/"]
+        public_paths = ["/auth/login", "/docs", "/openapi.yml", "/openapi-rest.yaml", "/health", "/"]
         print(f"[DEBUG][AUTH] before_request ejecutado. Path: {request.path} | Method: {request.method}", flush=True)
         if request.path in public_paths or request.path.startswith("/static/"):
             print(f"[DEBUG][AUTH] Ruta pública: {request.path}", flush=True)
-            return None  # Permite acceso público
+            return None  # Permite acceso público sin validar el encabezado Authorization
         print(f"[DEBUG][AUTH] Ruta protegida: {request.path}", flush=True)
-        return auth.enforce_api_key_globally()
+        return enforce_jwt_globally()
+
+    # Configurar JWT
+    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'default-secret-key')
+    jwt = JWTManager(app)
+
+    # Nota: la validación JWT se realiza a través de la función
+    # `_enforce_api_key_globally` definida más arriba, que permite
+    # rutas públicas y llama a `enforce_jwt_globally` cuando procede.
 
     def _build():
         try:
@@ -145,20 +165,18 @@ try:
 
     @app.after_request
     def set_security_and_cors_headers(resp):
-        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-        resp.headers["Pragma"] = "no-cache"
-        resp.headers["Expires"] = "0"
-        resp.headers["X-LiteSpeed-Cache-Control"] = "no-store"
-        # Headers de seguridad
-        resp.headers["X-Frame-Options"] = "DENY"
-        resp.headers["X-Content-Type-Options"] = "nosniff"
-        resp.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains; preload"
-        resp.headers["Referrer-Policy"] = "no-referrer"
-        resp.headers["Permissions-Policy"] = "geolocation=(), microphone=()"
-        # CORS
-        resp.headers["Access-Control-Allow-Origin"] = "*"
-        resp.headers["Access-Control-Allow-Headers"] = "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
-        resp.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS"
+        resp.headers.update({
+            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+            "Pragma": "no-cache",
+            "Expires": "0",
+            "X-Frame-Options": "DENY",
+            "X-Content-Type-Options": "nosniff",
+            "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
+            "Referrer-Policy": "no-referrer",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Headers": "Content-Type,Authorization",
+            "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS"
+        })
         return resp
 
     # Handler global para OPTIONS (catch-all)
@@ -205,8 +223,6 @@ try:
         return send_from_directory("docs", "index.html", mimetype="text/html")
 
 
-    # ...existing code...
-
     @app.route("/debug", methods=["GET"])
     def debug():
         return "Flask está vivo"
@@ -217,6 +233,64 @@ try:
         os.makedirs('tmp')
     logging.basicConfig(filename='tmp/flask_error.log', level=logging.ERROR)
 
+
+    # Nota: el registro de blueprints se realiza más abajo una vez que
+    # se importan `usuarios_bp` y `login_bp`. Evitamos hacerlo aquí
+    # para que `main` pueda ser importado por scripts (como init_db.py)
+    # sin intentar registrar blueprints antes de sus importaciones.
+
+    # Registrar blueprints y mostrar un par de mensajes de diagnóstico
+    rutas = [rule.rule for rule in app.url_map.iter_rules()]
+
+    # Configurar cabeceras de seguridad y CORS
+    @app.after_request
+    def set_security_and_cors_headers(resp):
+        resp.headers.update({
+            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+            "Pragma": "no-cache",
+            "Expires": "0",
+            "X-LiteSpeed-Cache-Control": "no-store",
+            "X-Frame-Options": "DENY",
+            "X-Content-Type-Options": "nosniff",
+            "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
+            "Referrer-Policy": "no-referrer",
+            "Permissions-Policy": "geolocation=(), microphone=()",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Headers": "Content-Type,Authorization",
+            "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS"
+        })
+        return resp
+
+    # Depuración mínima: entorno y URI final de BBDD
+    print(f"APP_ENV: {APP_ENV}")
+    print(f"SQLALCHEMY_DATABASE_URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
+
+    # Asegurar que SQLALCHEMY_BINDS esté desactivado durante las pruebas
+    if APP_ENV == 'testing':
+        app.config['SQLALCHEMY_BINDS'] = None  # Desactiva cualquier configuración adicional de binds
+        print(f"SQLALCHEMY_BINDS desactivado en pruebas: {app.config['SQLALCHEMY_BINDS']}")
+
+    # Asegurar que SQLALCHEMY_BINDS sea un diccionario vacío si no está configurado
+    if app.config.get('SQLALCHEMY_BINDS') is None:
+        app.config['SQLALCHEMY_BINDS'] = {}
+    # Registrar blueprints al inicio
+    from src.usuarios.interfaces.usuarios_routes import usuarios_bp
+    from src.usuarios.login_routes import login_bp
+    from src.academias.interfaces.flask.academias_routes import academias_bp
+    app.register_blueprint(usuarios_bp, url_prefix='/usuarios')
+    app.register_blueprint(login_bp, url_prefix='/auth')
+    app.register_blueprint(academias_bp, url_prefix='/academias')
+
+    # Log rutas registradas en un único punto (útil en desarrollo)
+    print(f"Rutas registradas: {rutas}")
+    print("Blueprints registrados en main.py.")
+
+    # Inicialización de la base de datos:
+    # La instancia `db` ya se inicializó más arriba (si no estaba inicializada).
+    # No ejecutamos `create_all()` en el momento de importar `main` para
+    # evitar efectos secundarios cuando otros scripts (p. ej. init_db.py)
+    # importan este módulo. La creación de tablas debe hacerse explícitamente
+    # por los scripts de mantenimiento o desde el bloque `if __name__ == '__main__'`.
 
     if __name__ == "__main__":
         app.run(host="0.0.0.0", port=5000, debug=True)

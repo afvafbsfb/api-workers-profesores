@@ -1,188 +1,218 @@
-# workers-api (staging)
+# API Workers Profesores
 
-## Arquitectura y Estado Actual
+Repositorio de desarrollo de la API para gestión de academias, usuarios y operaciones relacionadas.
 
-### Descripción General
-API RESTful para gestión de inscripciones y pagos en una academia, siguiendo DDD y Screaming Architecture. Desplegada en cPanel con Flask y SQLAlchemy.
+Este README está centrado en el flujo actual de desarrollo (seeders, pruebas, generación de OpenAPI y uso de Swagger UI).
 
 ---
 
-## Diagrama de Componentes
-```mermaid
-graph TD
-    A[Flask App]
-    B[Blueprint: secretaria]
-    C[Repositorio MySQL]
-    D[Modelos SQLAlchemy]
-    E[Base de Datos]
-    F[Endpoints REST]
-    G[Casos de Uso]
-    A --> B
-    B --> F
-    F --> G
-    G --> C
-    C --> D
-    D --> E
+## Estructura relevante
+
+- `app.py` - fábrica de la aplicación Flask y registro de blueprints.
+- `main.py` - entrada auxiliar (si procede).
+- `src/` - código de la aplicación (blueprints, servicios, esquemas, etc.).
+  - `src/schemas/` - esquemas Marshmallow para validación y documentación.
+  - `src/docs/` - blueprint para servir `/openapi.json` y `/docs` (Swagger UI).
+- `scripts/dump_openapi.py` - script que vuelca la especificación OpenAPI a `docs/openapi-auto.json` / `.yml`.
+- `docs/` - artefactos y documentación generada.
+- `init_db_pruebas_test.py` - seeder idempotente para poblar datos de prueba.
+- `tests/` - tests automatizados (pytest).
+
+---
+
+## Requisitos y virtualenv
+
+Recomendado: usar la virtualenv del repo o crear una nueva.
+
+PowerShell (ejemplos):
+
+```powershell
+# Activar venv existente
+& ".\.venv/Scripts/Activate.ps1"
+
+# O crear uno nuevo
+python -m venv .venv
+& ".\.venv/Scripts/Activate.ps1"
+
+# Instalar dependencias
+python -m pip install -r requirements.txt
+python -m pip install -r requirements-dev.txt
 ```
 
 ---
 
-## Endpoints Principales
+## Ejecutar la aplicación (desarrollo)
 
-- `GET /vlodeiro/secretaria/turnos_libres` — Consulta turnos y plazas libres
-- `GET /vlodeiro/secretaria/turnos` — Lista todos los turnos
-- `POST /vlodeiro/secretaria/inscribir` — Inscribe un alumno en un turno
-- `POST /vlodeiro/secretaria/registrar_pago` — Registra un pago para un alumno inscrito
+Opciones comunes:
 
-### Ejemplo de Inscripción
-```json
-{
-  "alumno_id": 2,
-  "turno_id": 1
-}
+1) Ejecutar directamente el script que contiene la fábrica:
+
+```powershell
+& ".venv/Scripts/python.exe" app.py
 ```
 
-### Ejemplo de Pago
-```json
-{
-  "alumno_id": 2,
-  "importe": 1000,
-  "concepto": "Matricula"
-}
+2) Usar la CLI de Flask (si prefieres):
+
+```powershell
+$env:FLASK_APP = "app:create_app"
+& ".venv/Scripts/python.exe" -m flask run --host=0.0.0.0 --port=5000 --debug
+```
+
+Rutas útiles:
+- `/health` → comprobación de estado.
+- `/docs` → Swagger UI (si el blueprint está registrado).
+- `/openapi.json` → especificación OpenAPI (generada o dinámica).
+
+Detalles adicionales y pasos recomendados
+-------------------------------------
+
+1) Variables de entorno importantes
+
+- `DB_ENV` (opcional): controla qué bloque de `DATABASES` en `config.py` se usa. Valores: `development`, `developmentAWS`, `production`. Por defecto `development`.
+- `DATABASE_URL` (opcional): si la defines, tiene prioridad sobre la construcción automática desde `config.py`. Formato típico: `mysql+pymysql://user:pass@host:port/dbname`.
+- `JWT_SECRET_KEY`: la clave usada por `flask_jwt_extended` para firmar tokens (puedes exportarla antes de arrancar en desarrollo).
+
+Ejemplo (PowerShell) — establecer variables temporales para la sesión:
+
+```powershell
+$env:DB_ENV = 'development'
+$env:DATABASE_URL = 'mysql+pymysql://angel:Abanca0795@localhost:3307/api_workers'
+$env:JWT_SECRET_KEY = 'mi-clave-secreta-local'
+```
+
+Nota: `config.Config.set_environment_variables()` construye `DATABASE_URL` automáticamente si no está definido, usando los valores en `config.py` (por eso el puerto local por defecto en este repo es `3307`).
+
+2) Preparar el entorno y dependencias (PowerShell)
+
+```powershell
+# crear/activar virtualenv (si no existe)
+python -m venv .venv
+& ".\.venv\Scripts\Activate.ps1"
+
+# instalar dependencias
+python -m pip install -r requirements.txt
+python -m pip install -r requirements-dev.txt
+```
+
+3) (Recomendado) Poblar la base de datos de desarrollo / pruebas antes de arrancar
+
+```powershell
+& ".venv\Scripts\python.exe" init_db_pruebas_test.py --reset
+```
+
+4) Generar la especificación OpenAPI (opcional, pero útil para la UI)
+
+```powershell
+& ".venv\Scripts\python.exe" scripts/dump_openapi.py
+# Esto escribe: docs/openapi-auto.json y docs/openapi-auto.yml
+```
+
+5) Arrancar la aplicación
+
+Opción A — ejecutar `app.py` directamente (la fábrica crea la app y llama a `app.run`):
+
+```powershell
+& ".venv\Scripts\python.exe" app.py
+```
+
+Opción B — usar `flask run` (más flexible para desarrollo):
+
+```powershell
+$env:FLASK_APP = 'app:create_app'
+& ".venv\Scripts\python.exe" -m flask run --host=0.0.0.0 --port=5000 --debug
+```
+
+6) Acceder a la documentación y probar endpoints
+
+- Abre `http://127.0.0.1:5000/docs` para ver la Swagger UI (apunta a `/openapi.json`).
+- Para rutas protegidas: haz `POST /auth/login` desde la UI o con curl/Invoke-RestMethod, copia `access_token` y usa la opción "Authorize" en Swagger UI con `Bearer <ACCESS_TOKEN>`.
+
+Troubleshooting rápido
+----------------------
+- Si la app falla por conexión a la base de datos, revisa que `DATABASE_URL` apunta al host/puerto correctos (por defecto `localhost:3307` en `config.py` para `development`).
+- Si quieres probar con una base remota (RDS u otro), exporta `DATABASE_URL` con la cadena de conexión completa o ajusta `DB_ENV` a `developmentAWS`.
+- Si `src/docs/swagger.py` no muestra la UI, confirma que `docs/openapi-auto.json` existe o que la extensión `apispec` esté presente en la app (el blueprint intenta usar ambas opciones).
+
+---
+
+## Seeder de pruebas
+
+El seeder `init_db_pruebas_test.py` inserta datos de prueba de forma idempotente y normaliza campos importantes para tests.
+
+Para reset completo (DELETE + INSERT):
+
+```powershell
+& ".venv/Scripts/python.exe" init_db_pruebas_test.py --reset
+```
+
+Nota: el seeder crea usuarios `reserve_*` para pruebas destructivas; úsalos en tests que modifiquen datos.
+
+---
+
+## Documentación OpenAPI / Swagger
+
+Flujo actual (code-first incremental):
+
+- Generar spec desde el código:
+
+```powershell
+& ".venv/Scripts/python.exe" scripts/dump_openapi.py
+```
+
+- El script vuelca `docs/openapi-auto.json` y `docs/openapi-auto.yml`.
+- `src/docs/swagger.py` sirve `/openapi.json` (usa la extensión apispec si está disponible) y `/docs` (página Swagger UI básica usando CDN).
+
+Autorización en Swagger UI
+- El spec incluye un security scheme `bearerAuth` (JWT). Para probar rutas protegidas:
+  1. Ejecuta `POST /auth/login` desde la UI o con curl/PowerShell.
+  2. Copia el `access_token` de la respuesta.
+  3. Pulsa "Authorize" en Swagger UI e introduce: `Bearer <ACCESS_TOKEN>`.
+
+Ejemplo (PowerShell):
+
+```powershell
+# Login y petición protegida
+$body = @{ email = "reserve_activo@academia.com"; password = "password_reserve_activo" } | ConvertTo-Json
+$response = Invoke-RestMethod -Uri "http://127.0.0.1:5000/auth/login" -Method POST -Body $body -ContentType "application/json"
+$access = $response.tokens.access_token
+Invoke-RestMethod -Uri "http://127.0.0.1:5000/academias" -Headers @{ Authorization = "Bearer $access" } -Method GET
 ```
 
 ---
 
-## Estado de la Base de Datos
+## Tests (pytest)
 
-### Alumnos
-```json
-[1, 2, 3, ..., 50]
+Ejecutar la suite completa:
+
+```powershell
+& ".venv/Scripts/python.exe" -m pytest -q -s
 ```
 
-### Turnos
-```json
-[1, 2, 3, ..., 13]
-```
-
-### Inscripciones
-```json
-[
-  {"id": 1, "alumno_id": 1, "turno_id": 1},
-  {"id": 2, "alumno_id": 2, "turno_id": 1}
-]
-```
-
-### Pagos
-```json
-[
-  {"id": 1, "inscripcion_id": 2, "importe": 1000.0, "metodo": "Matricula"},
-  {"id": 2, "inscripcion_id": 2, "importe": -100.0, "metodo": "Matricula"},
-  {"id": 3, "inscripcion_id": 2, "importe": -100.0, "metodo": "Matricula"}
-]
-```
+Los tests se encuentran en `tests/` y usan fixtures y cuentas `reserve_*` para evitar interferencias.
 
 ---
 
-## Validaciones y Comportamiento
-- No se permite inscribir dos veces al mismo alumno en el mismo turno.
-- No se permite inscribir alumnos inexistentes o en turnos inexistentes.
-- El campo `importe` en pagos acepta valores negativos (no validado).
-- Los endpoints devuelven mensajes de error detallados en JSON.
+## CI / GitHub Actions
+
+El workflow actual ejecuta el seeder antes de los tests, corre los tests en orden y genera un reporte HTML (`report-all.html`) que se sube como artifact.
+
+Recomendación: ejecutar `scripts/dump_openapi.py` en CI si quieres publicar la especificación generada como parte del build.
 
 ---
 
-## Flujo de Inscripción y Pago
-```mermaid
-sequenceDiagram
-    participant U as Usuario
-    participant API as API REST
-    participant DB as Base de Datos
-    U->>API: POST /inscribir {alumno_id, turno_id}
-    API->>DB: Verifica alumno y turno, capacidad, inscripción previa
-    API-->>U: Respuesta éxito/error
-    U->>API: POST /registrar_pago {alumno_id, importe, concepto}
-    API->>DB: Busca inscripción activa, registra pago
-    API-->>U: Respuesta éxito/error
-```
+## Buenas prácticas y notas
+
+- No exponer `Swagger UI` en producción: registra el blueprint solo en entornos `development`/`staging` o protege la ruta.
+- Mantén los schemas en `src/schemas/` y reutilízalos en rutas y en el script de volcado.
+- Usa las cuentas `reserve_*` para tests destructivos; no modificar los usuarios canónicos.
+- Si mueves la base de datos o credenciales, usa variables de entorno o secrets en CI en lugar de valores en workflows.
 
 ---
 
-## Ejemplo de Respuesta de Error
-```json
-{
-  "error": "No se pudo inscribir al alumno",
-  "debug": {"motivo": "alumno_ya_inscrito"}
-}
-```
+Si quieres, puedo:
 
----
+- Crear `docs/README.md` con los pasos exactos y ejemplos para desarrolladores.
+- Proteger el blueprint `/docs` para que solo se registre fuera de `production`.
 
-## Seguridad y Despliegue
-- Autenticación por API Key (`X-Api-Key`)
-- Despliegue en cPanel, reinicio automático por `.cpanel.yml`
-- Python 3.7, Flask 2.2.5, SQLAlchemy
+Indica cuál de los dos cambios quieres que haga y lo implemento.
 
----
-
-
----
-
-## CI/CD y Despliegue Automatizado
-
-### Flujo Propuesto
-1. Push a rama `staging` o `main`:
-   - Ejecuta tests y linting.
-   - Si todo pasa, despliega automáticamente a cPanel usando Git Version Control.
-   - Opcional: Notifica por email o Slack.
-2. Despliegue en cPanel:
-   - cPanel detecta el nuevo commit y permite reiniciar la app Python.
-   - `.cpanel.yml` fuerza el restart y preserva `.htaccess`.
-
-### Ejemplo de Workflow GitHub Actions
-```yaml
-name: CI/CD workers-api
-
-on:
-  push:
-    branches: [staging, main]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.7'
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Run tests
-        run: pytest || echo "No tests found"
-      - name: Lint
-        run: flake8 . || echo "Lint warnings"
-
-  deploy:
-    needs: test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/staging'
-    steps:
-      - name: Deploy to cPanel (manual step)
-        run: echo "Haz deploy en cPanel: Git Version Control → Deploy HEAD Commit"
-```
-
-### Recomendaciones
-- Agrega tests en una carpeta `tests/` para validar endpoints y lógica.
-- Configura notificaciones en GitHub Actions si lo deseas.
-- Documenta el proceso en el README para el equipo.
-
----
-
-## Referencias
-- [openapi.yml](./openapi.yml)
-- [requirements.txt](./requirements.txt)
-
----
-
-> Documentación generada el 2025-08-05 por GitHub Copilot

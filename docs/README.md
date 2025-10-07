@@ -9,11 +9,20 @@
 - [Endpoints principales](#endpoints-principales)
 - [Base de datos](#base-de-datos)
 - [Despliegue y configuración](#despliegue-y-configuración)
+- [Documentación de la API](#documentación-de-la-api)
 
 ---
 
 ## Introducción
 `workers-api` es una API desarrollada en Python con Flask, orientada a la gestión de alumnos, clases y pagos para la secretaría de una empresa educativa. Utiliza SQLAlchemy para la persistencia en MySQL y sigue una arquitectura modular por dominios.
+
+Este proyecto aplica principios de Domain-Driven Design (DDD): el código está organizado por dominios y capas (domain, application, infrastructure, interfaces). Cada dominio agrupa su modelo, casos de uso, repositorios y rutas, lo que facilita el mantenimiento y la escalabilidad.
+
+Dominios principales:
+- `vlodeiro/empresa`: dominio responsable de la organización (empresas/academias). Aquí se gestiona el registro de empresas, la configuración global y los usuarios/roles asociados a una academia. Es el punto de entrada para operaciones de onboarding y configuración organizativa.
+- `vlodeiro/secretaria`: dominio responsable de la operativa diaria de la academia (alumnos, turnos/clases, inscripciones, pagos, tarifas). Implementa los casos de uso y endpoints que realizan operaciones transaccionales y reglas de negocio.
+
+La separación en estos dominios permite que la lógica de negocio de la secretaría evolucione independientemente de la gestión organizativa, y facilita la introducción de nuevos dominios (por ejemplo: facturación, reporting) sin mezclar responsabilidades.
 
 ## Arquitectura general
 - **Flask** como framework web principal. Flask es un framework ligero de Python que permite definir rutas, manejar peticiones HTTP y construir aplicaciones web de forma sencilla y modular.
@@ -80,6 +89,37 @@ workers-api/
 - Documentación visual e interactiva (Swagger UI) usando la especificación pública de S3.
 - Variables de entorno para configuración sensible (API_KEY, credenciales DB, endpoints, etc).
 - Requiere instalar dependencias de `requirements.txt`.
+
+## Documentación de la API
+
+Este directorio contiene archivos generados a partir de la aplicación que describen la API en formato OpenAPI.
+
+Cómo generar la especificación OpenAPI (generada automáticamente desde el código)
+
+1. Instalar las dependencias de desarrollo (activar tu virtualenv):
+
+```powershell
+pip install -r requirements-dev.txt
+```
+
+2. Ejecutar el script de volcado (se generarán `docs/openapi-auto.json` y `docs/openapi-auto.yml`):
+
+```powershell
+python scripts/dump_openapi.py
+```
+
+3. Servir la aplicación localmente y abrir la interfaz:
+
+```powershell
+# iniciar la aplicación Flask
+python app.py
+# Abrir en tu navegador: http://127.0.0.1:5000/docs
+```
+
+Notas
+- La implementación actual construye una especificación OpenAPI mínima para dos endpoints (`POST /auth/login` y `GET /academias`) utilizando los esquemas de Marshmallow en `src/schemas`.
+- Extiende los esquemas y el script `scripts/dump_openapi.py` (o integra completamente `flask-smorest`) para cubrir más endpoints de forma incremental.
+
 ## Referencias rápidas
 
 - **API REST producción:** https://ppmr69im5j.execute-api.eu-west-3.amazonaws.com/prod
