@@ -41,7 +41,9 @@ jobs:
           from config import Config
           Config.set_environment_variables()
           from main import app
-          from models import db, Usuario, Rol, Academia
+          from src.shared.database import db
+          from src.usuarios.infrastructure.models import Usuario, Rol
+          from src.academias.infrastructure.models import Academia
           with app.app_context():
               print('DB URL:', Config.get_database_config())
               try:
