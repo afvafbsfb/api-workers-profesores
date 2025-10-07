@@ -68,9 +68,13 @@ jobs:
         run: |
           echo "Running ordered tests against AWS RDS and generating combined HTML report"
           python -m pytest \
+            tests/academias/test_altas_bajas_academias.py \
+            tests/academias/test_busquedas_academias.py \
             tests/academias/test_academias_post.py \
             tests/academias/test_academias_get_patch.py \
             tests/usuarios/test_jwt_claims.py \
+            tests/usuarios/test_altas_bajas_usuarios.py \
+            tests/usuarios/test_busquedas_usuarios.py \
             tests/usuarios/test_login.py \
             tests/usuarios/test_unblock.py \
             tests/usuarios/test_refresh_logout.py \
