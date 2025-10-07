@@ -11,3 +11,4 @@ gunicorn
 awsgi; sys_platform != 'win32'
 Flask-JWT-Extended
 argon2-cffi
+apispec[marshmallow]
