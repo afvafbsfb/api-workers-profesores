@@ -131,8 +131,8 @@
           }
         ]
       },
-      "patch": {
-        "summary": "PATCH /usuarios/{usuario_id}",
+      "put": {
+        "summary": "PUT /usuarios/{usuario_id}",
         "description": "Auto-generated operation for usuarios.actualizar_usuario",
         "responses": {
           "200": {
@@ -174,8 +174,8 @@
           "required": true
         }
       },
-      "put": {
-        "summary": "PUT /usuarios/{usuario_id}",
+      "patch": {
+        "summary": "PATCH /usuarios/{usuario_id}",
         "description": "Auto-generated operation for usuarios.actualizar_usuario",
         "responses": {
           "200": {
