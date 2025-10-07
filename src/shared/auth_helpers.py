@@ -1,6 +1,7 @@
 from functools import wraps
 from flask import g, abort
-from models import CursoProfesores, db
+from src.profesores.infrastructure.models import CursoProfesores
+from src.shared.database import db
 
 # Role names used in the system
 ROLE_NAME_PLATFORM_ADMIN = 'Admin_plataforma'

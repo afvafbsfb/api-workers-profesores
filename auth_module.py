@@ -5,7 +5,8 @@ from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity, create_a
 from datetime import timedelta, datetime, timezone
 import hashlib
 from flask_sqlalchemy import SQLAlchemy
-from models import Usuario, RefreshToken, db, UserLoginLog
+from src.usuarios.infrastructure.models import Usuario, RefreshToken, UserLoginLog
+from src.shared.database import db
 import socket
 
 # Configuración de tiempos de expiración

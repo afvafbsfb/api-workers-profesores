@@ -22,7 +22,7 @@ import sys
 # ensure repo root is on path
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from config import Config
-from models import db
+from src.shared.database import db
 
 target_metadata = db.metadata
 

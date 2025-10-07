@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify, g
 from src.shared.middleware.auth import require_role, require_auth
 from src.shared.auth_helpers import is_platform_admin, is_academy_admin
-from models import Academia, db
+from src.academias.infrastructure.models import Academia
+from src.shared.database import db
 from config import Config
 
 academias_bp = Blueprint('academias', __name__)

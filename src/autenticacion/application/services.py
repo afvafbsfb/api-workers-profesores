@@ -1,11 +1,14 @@
 from typing import Tuple, Dict
 from src.autenticacion.infrastructure.repositories import UserRepository, RefreshTokenRepository
-from models import UserLoginLog, db, RefreshToken
+from src.usuarios.infrastructure.models import UserLoginLog, RefreshToken, Usuario
+from src.shared.database import db
 from src.autenticacion.infrastructure.hasher import Hasher
 from src.autenticacion.infrastructure.jwt_provider import JwtProvider
 from datetime import datetime, timezone, timedelta
 import hashlib
 from config import Config
+from src.autenticacion.application.dtos import LoginRequestDTO, LoginResponseDTO
+from src.autenticacion.domain.exceptions import UsuarioBloqueadoException, CredencialesInvalidasException
 
 
 class AuthService:
@@ -17,14 +20,12 @@ class AuthService:
     """
 
     @staticmethod
-    def login(email: str, password: str) -> Tuple[bool, Dict]:
+    def login(request: LoginRequestDTO) -> LoginResponseDTO:
         if Config.DEBUG:
-            print(f"[DEBUG] Intentando autenticar usuario: {email}")
-        user = UserRepository.get_by_email(email)
+            print(f"[DEBUG] Intentando autenticar usuario: {request.email}")
+        user = UserRepository.get_by_email(request.email)
         if not user:
-            if Config.DEBUG:
-                print(f"[DEBUG] Usuario no encontrado: {email}")
-            return False, {"error": "credenciales inválidas"}
+            raise CredencialesInvalidasException("Credenciales inválidas")
 
         now = datetime.now(timezone.utc)
 
@@ -44,13 +45,13 @@ class AuthService:
                 db.session.commit()
             except Exception:
                 db.session.rollback()
-            return False, {"error": "Usuario temporalmente bloqueado"}
+            raise UsuarioBloqueadoException("Usuario temporalmente bloqueado")
 
         if user.estado != 'Activo':
-            return False, {"error": f"Usuario no está activo (estado: {user.estado})"}
+            raise UsuarioBloqueadoException(f"Usuario no está activo (estado: {user.estado})")
 
         # verificar password
-        if not Hasher.verify(password, user.password):
+        if not Hasher.verify(request.password, user.password):
             # Registrar intento fallido BAD_CREDENTIALS y aplicar política de bloqueo
             try:
                 # 1) Crear log de fallo y confirmar inmediatamente
@@ -82,7 +83,7 @@ class AuthService:
             except Exception:
                 db.session.rollback()
 
-            return False, {"error": "credenciales inválidas"}
+            raise CredencialesInvalidasException("Credenciales inválidas")
 
         # login correcto: reset campos temporales, no cambiar estado
         try:
@@ -129,9 +130,10 @@ class AuthService:
         role = user.rol.nombre if user.rol else None
         name = user.nombre
 
-        return True, {
-            "tokens": {"access_token": access, "refresh_token": refresh},
-            "role": role,
-            "name": name,
-            "usuario": user
-        }
+        return LoginResponseDTO(
+            ok=True,
+            tokens={"access_token": access, "refresh_token": refresh},
+            role=role,
+            name=name,
+            status=200
+        )

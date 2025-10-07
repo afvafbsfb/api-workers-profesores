@@ -18,8 +18,12 @@ try:
         def _load_dotenv(*args, **kwargs):
             return False
     from functools import wraps
-    import models  # Importa SQLAlchemy y modelos
-    from models import db
+    # Importaciones actualizadas tras la refactorización
+    from src.shared.database import db
+    from src.academias.infrastructure.models import Academia, Aula, Curso, HorarioCurso
+    from src.usuarios.infrastructure.models import Usuario, Rol, RefreshToken, UserLoginLog
+    from src.alumnos.infrastructure.models import Alumno, Inscripcion
+    from src.profesores.infrastructure.models import CursoProfesores, Sesion
 
     app = Flask(__name__)
 
@@ -45,7 +49,7 @@ try:
     # Asegurar directorio tmp para logs
     if not os.path.exists('tmp'):
         os.makedirs('tmp')
-    db = models.db
+    db = db
 
     # Configuración por entorno y seguridad (dev/prod) + DB
     def _env(name, default=None):

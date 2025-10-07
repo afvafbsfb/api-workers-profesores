@@ -3,10 +3,13 @@ from marshmallow import Schema, fields, ValidationError
 from src.autenticacion.application.services import AuthService
 from src.autenticacion.infrastructure.jwt_provider import JwtProvider
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_refresh_token, create_access_token
-from models import RefreshToken, Usuario, db, UserLoginLog, Rol
+from src.usuarios.infrastructure.models import RefreshToken, Usuario, UserLoginLog, Rol
+from src.shared.database import db
 from src.shared.security import hash_password
 import hashlib
 from datetime import datetime, timezone, timedelta
+from src.autenticacion.application.dtos import LoginRequestDTO
+from src.autenticacion.domain.exceptions import UsuarioBloqueadoException, CredencialesInvalidasException
 
 login_bp = Blueprint('login_bp', __name__)
 
@@ -22,27 +25,23 @@ def login():
         data = request.get_json() or {}
         schema = LoginSchema()
         validated = schema.load(data)
+        request_dto = LoginRequestDTO(email=validated['email'], password=validated['password'])
+
+        # Delegar la lógica al servicio de aplicación
+        response_dto = AuthService.login(request_dto)
+        return jsonify({
+            "ok": response_dto.ok,
+            "tokens": response_dto.tokens,
+            "role": response_dto.role,
+            "name": response_dto.name
+        }), response_dto.status
+
     except ValidationError as e:
         return jsonify({"ok": False, "error": e.messages}), 400
-
-    ok, result = AuthService.login(validated['email'], validated['password'])
-    if not ok:
-        # mapear ciertos errores a 403 Forbidden (usuario bloqueado / dado de baja)
-        error = result.get('error', '')
-        if 'no está activo' in error or 'bloqueado' in error:
-            return jsonify({"ok": False, **result}), 403
-        return jsonify({"ok": False, **result}), 401
-
-    usuario = result.get('usuario')
-    rol = usuario.rol.nombre if usuario and usuario.rol else None
-    nombre = usuario.nombre if usuario else None
-
-    return jsonify({
-        "ok": True,
-        "tokens": result['tokens'],
-        "role": rol,
-        "name": nombre
-    }), 200
+    except UsuarioBloqueadoException as e:
+        return jsonify({"ok": False, "error": str(e)}), 403
+    except CredencialesInvalidasException as e:
+        return jsonify({"ok": False, "error": str(e)}), 401
 
 
 @login_bp.route('/refresh', methods=['POST'])

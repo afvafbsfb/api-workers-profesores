@@ -55,7 +55,8 @@ from flask.testing import FlaskClient
 from app import create_app
 from typing import Generator
 from config import Config  # Importar la configuración
-from models import Usuario, UserLoginLog, db
+from src.usuarios.infrastructure.models import Usuario, UserLoginLog
+from src.shared.database import db
 from src.shared.security import hash_password
 
 @pytest.fixture

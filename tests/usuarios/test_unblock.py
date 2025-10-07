@@ -2,7 +2,8 @@ import os
 os.environ['DB_ENV'] = 'developmentAWS'
 
 import pytest
-from models import db, Usuario
+from src.shared.database import db
+from src.usuarios.infrastructure.models import Usuario
 from src.shared.security import hash_password
 from flask_jwt_extended import create_access_token
 

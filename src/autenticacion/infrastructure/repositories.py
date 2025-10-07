@@ -1,4 +1,5 @@
-from models import Usuario, RefreshToken, db
+from src.usuarios.infrastructure.models import Usuario, RefreshToken
+from src.shared.database import db
 import hashlib
 from datetime import datetime, timezone
 from typing import Optional

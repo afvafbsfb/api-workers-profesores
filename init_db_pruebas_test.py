@@ -33,28 +33,11 @@ Config.set_environment_variables()
 
 from main import app
 from src.shared.security import hash_password
-
-from models import (
-    db,
-    Academia,
-    Curso,
-    Aula,
-    Usuario,
-    Rol,
-    HorarioCurso,
-    Alumno,
-    Inscripcion,
-    CursoProfesores,
-    Sesion,
-    Tarifa,
-    Token,
-    MovimientosExtracto,
-    Extractos,
-    AnotacionesAlumnoSesion,
-    DescuentosTarifa,
-    FamiliasAlumnos,
-    TrabajadorVirtual,
-)
+from src.shared.database import db
+from src.academias.infrastructure.models import Academia, Aula, Curso, HorarioCurso, Tarifa
+from src.usuarios.infrastructure.models import Usuario, Rol, RefreshToken
+from src.alumnos.infrastructure.models import Alumno, Inscripcion
+from src.profesores.infrastructure.models import CursoProfesores, Sesion
 from datetime import date, time
 import argparse
 from sqlalchemy import text
@@ -65,6 +48,11 @@ Config.SQLALCHEMY_DATABASE_URI = "mysql+pymysql://angel:Abanca0795@localhost:330
 app.config['SQLALCHEMY_DATABASE_URI'] = Config.SQLALCHEMY_DATABASE_URI
 
 app.app_context().push()
+
+# Inicializar la base de datos con la aplicación Flask
+if not hasattr(db, '_is_initialized'):
+    db.init_app(app)
+    db._is_initialized = True
 
 
 def get_or_create(model, defaults=None, **filters):
@@ -194,6 +182,10 @@ def seed():
         print("[init_db_pruebas_test] Tarifa existente, no se creó.")
 
     # Curso
+    # Verificar que la tarifa corresponde a la misma academia (evitar FK incoherente)
+    if tarifa.academia_id != academia.id:
+        raise RuntimeError(f"La tarifa (id={tarifa.id}) no pertenece a la academia (id={academia.id}). Revisa datos de Tarifa.")
+
     curso_filters = dict(academia_id=academia.id, nombre="Curso de Verano")
     curso_defaults = dict(
         anio_academico="2025-2026",

@@ -8,7 +8,8 @@ from app import create_app
 from config import Config
 from flask.testing import FlaskClient
 from typing import Generator
-from models import db, Academia
+from src.shared.database import db
+from src.academias.infrastructure.models import Academia
 
 
 @pytest.fixture

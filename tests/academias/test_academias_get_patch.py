@@ -3,7 +3,9 @@ os.environ['DB_ENV'] = 'developmentAWS'
 
 from app import create_app
 from config import Config
-from models import db, Academia, Usuario, Rol
+from src.shared.database import db
+from src.academias.infrastructure.models import Academia
+from src.usuarios.infrastructure.models import Usuario, Rol
 import pytest
 
 

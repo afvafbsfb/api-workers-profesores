@@ -5,7 +5,7 @@ import os
 from config import Config
 
 # Crear instancia de SQLAlchemy
-from models import db
+from src.shared.database import db
 
 
 def create_app():

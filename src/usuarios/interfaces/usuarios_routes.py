@@ -1,11 +1,45 @@
 from flask import Blueprint, jsonify, request, g
 from src.shared.middleware.auth import require_auth
+from src.usuarios.infrastructure.models import Usuario
 
 usuarios_bp = Blueprint('usuarios', __name__)
 
 @usuarios_bp.route('/', methods=['GET'])
+@require_auth  # Middleware para validar el token y extraer el rol
 def listar_usuarios():
-    return jsonify({"message": "Lista de usuarios"})
+    """
+    Endpoint para listar usuarios con filtros opcionales.
+    - Si el rol es admin_academia o profesor_academia, se fuerza el filtro por academia_id.
+    - Si el rol es admin_plataforma, se permite ver todos los usuarios o filtrar por academia opcionalmente.
+    """
+    user = get_current_user()  # Extraer usuario desde el token
+    rol = user['rol']
+    academia_id = request.args.get('academia_id')
+    nombre = request.args.get('nombre')
+    rol_filtro = request.args.get('rol')
+
+    # Construir la consulta
+    query = Usuario.query
+
+    if rol in ['admin_academia', 'profesor_academia']:
+        # Forzar filtro por academia
+        query = query.filter(Usuario.academia_id == user['academia_id'])
+    elif rol == 'admin_plataforma':
+        # Permitir ver todos o filtrar por academia opcionalmente
+        if academia_id:
+            query = query.filter(Usuario.academia_id == academia_id)
+    else:
+        # Rol no autorizado
+        return jsonify({'error': 'No autorizado'}), 403
+
+    # Aplicar filtros opcionales
+    if nombre:
+        query = query.filter(Usuario.nombre.ilike(f"%{nombre}%"))
+    if rol_filtro:
+        query = query.filter(Usuario.rol == rol_filtro)
+
+    usuarios = query.all()
+    return jsonify([usuario.to_dict() for usuario in usuarios])
 
 @usuarios_bp.route('/', methods=['POST'])
 def crear_usuario():
