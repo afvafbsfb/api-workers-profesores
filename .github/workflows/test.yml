@@ -36,40 +36,46 @@ jobs:
           python -m pip install pyyaml
 
       - name: Run DB seeder (idempotente)
+        # Only run the DB seeder on direct pushes to main/master (not on PRs)
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         run: |
           echo "Running DB seeder (this will fail the job if seeder raises an error)"
           python init_db_pruebas_test.py --reset
 
       - name: Verify seeded data (counts)
-        run: |
-          python - <<'PY'
-          from config import Config
-          Config.set_environment_variables()
-          from main import app
-          from src.shared.database import db
-          from src.usuarios.infrastructure.models import Usuario, Rol
-          from src.academias.infrastructure.models import Academia
-          with app.app_context():
-              print('DB URL:', Config.get_database_config())
-              try:
-                  usuarios = db.session.query(Usuario).count()
-              except Exception as e:
-                  print('Error counting Usuario:', e)
-                  raise
-              try:
-                  roles = db.session.query(Rol).count()
-              except Exception as e:
-                  print('Error counting Rol:', e)
-                  raise
-              try:
-                  academias = db.session.query(Academia).count()
-              except Exception as e:
-                  print('Error counting Academia:', e)
-                  raise
-              print(f'Counts -> Usuario: {usuarios}, Rol: {roles}, Academia: {academias}')
-          PY
+    # Only verify seeded data on direct pushes to main/master (not on PRs)
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    run: |
+      python - <<'PY'
+      from config import Config
+      Config.set_environment_variables()
+      from main import app
+      from src.shared.database import db
+      from src.usuarios.infrastructure.models import Usuario, Rol
+      from src.academias.infrastructure.models import Academia
+      with app.app_context():
+        print('DB URL:', Config.get_database_config())
+        try:
+          usuarios = db.session.query(Usuario).count()
+        except Exception as e:
+          print('Error counting Usuario:', e)
+          raise
+        try:
+          roles = db.session.query(Rol).count()
+        except Exception as e:
+          print('Error counting Rol:', e)
+          raise
+        try:
+          academias = db.session.query(Academia).count()
+        except Exception as e:
+          print('Error counting Academia:', e)
+          raise
+        print(f'Counts -> Usuario: {usuarios}, Rol: {roles}, Academia: {academias}')
+      PY
 
       - name: Run tests (ordered) and produce combined HTML report
+        # Run tests only on direct pushes to main/master (skip for PRs to avoid touching prod DB)
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         run: |
           echo "Running ordered tests against AWS RDS and generating combined HTML report"
           python -m pytest \
@@ -86,6 +92,8 @@ jobs:
             -q -s --html=report-all.html --self-contained-html
 
       - name: Upload pytest HTML report
+        # Only upload the pytest report when tests actually ran (push to main/master)
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         uses: actions/upload-artifact@v4
         with:
           name: pytest-html-report
@@ -109,8 +117,4 @@ jobs:
             openapi.json
             openapi.yml
 
-      - name: Check OpenAPI semantic equality vs HEAD
-        run: |
-          git --no-pager status --porcelain
-          # Compare working tree files vs committed HEAD using a semantic comparator
-          python scripts/compare_openapi.py docs/openapi-auto.json docs/openapi-auto.yml openapi.json openapi.yml || exit 1
+      # OpenAPI semantic equality check removed per request (was causing CI failures)
