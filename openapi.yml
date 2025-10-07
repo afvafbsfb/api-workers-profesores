@@ -83,6 +83,13 @@ paths:
   /academias:
     get:
       description: Auto-generated operation for academias.listar_academias
+      parameters:
+      - in: query
+        name: id
+        required: false
+        schema:
+          type: integer
+        description: Filtrar por id de academia (cuando el permiso lo permite)
       responses:
         '200':
           description: Successful response
@@ -270,6 +277,31 @@ paths:
   /usuarios/:
     get:
       description: Auto-generated operation for usuarios.listar_usuarios
+      parameters:
+      - in: query
+        name: academia_id
+        required: false
+        schema:
+          type: integer
+        description: Filtrar por academia_id (nota: para roles de academia se fuerza este filtro)
+      - in: query
+        name: rol
+        required: false
+        schema:
+          type: string
+        description: Filtrar por nombre del rol (e.g. Admin_plataforma, Admin_academia, Profesor)
+      - in: query
+        name: nombre
+        required: false
+        schema:
+          type: string
+        description: Buscar por parte del nombre (ilike)
+      - in: query
+        name: id
+        required: false
+        schema:
+          type: integer
+        description: Filtrar por id del usuario (puede usarse como usuario_id)
       responses:
         '200':
           description: Successful response
@@ -324,6 +356,14 @@ paths:
   /usuarios/recover:
     get:
       description: Auto-generated operation for usuarios.recuperar_credenciales
+      parameters:
+      - in: query
+        name: email
+        required: false
+        schema:
+          type: string
+          format: email
+        description: Email del usuario para el que se quieren recuperar credenciales
       responses:
         '200':
           description: Successful response

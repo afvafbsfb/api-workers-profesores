@@ -70,7 +70,15 @@ def test_list_academias_admin_plataforma(client):
 def test_list_academias_forbidden_other_roles(client):
     token = login(client, 'admin_academia@academia.com', 'password_admin_academia', expected_role='Admin_academia')
     rv = client.get('/academias', headers={'Authorization': f'Bearer {token}'})
-    assert rv.status_code == 403
+    # Policy: admin_academia is allowed to list but is scoped to its own academia
+    assert rv.status_code == 200
+    data = rv.get_json()
+    assert data.get('ok') is True
+    assert isinstance(data.get('result'), list)
+    # Ensure returned academias are the user's own
+    me = client.get('/usuarios/me', headers={'Authorization': f'Bearer {token}'}).get_json()
+    my_acad = me.get('academia_id')
+    assert all(a.get('id') == my_acad for a in data.get('result'))
     logout(client, token)
 
 

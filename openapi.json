@@ -61,6 +61,44 @@
         ],
         "tags": [
           "Usuarios"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "academia_id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filtrar por academia_id (nota: para roles de academia se fuerza este filtro)"
+          },
+          {
+            "in": "query",
+            "name": "rol",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filtrar por nombre del rol (e.g. Admin_plataforma, Admin_academia, Profesor)"
+          },
+          {
+            "in": "query",
+            "name": "nombre",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Buscar por parte del nombre (ilike)"
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filtrar por id del usuario (puede usarse como usuario_id)"
+          }
         ]
       },
       "post": {
@@ -96,16 +134,636 @@
           "required": true
         }
       }
+    },
+    "/usuarios/{usuario_id}": {
+      "get": {
+        "summary": "GET /usuarios/{usuario_id}",
+        "description": "Auto-generated operation for usuarios.obtener_usuario",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Usuarios"
+        ],
+        "parameters": [
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      },
+      "put": {
+        "summary": "PUT /usuarios/{usuario_id}",
+        "description": "Auto-generated operation for usuarios.actualizar_usuario",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Usuarios"
+        ],
+        "parameters": [
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Usuario"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "delete": {
+        "summary": "DELETE /usuarios/{usuario_id}",
+        "description": "Auto-generated operation for usuarios.eliminar_usuario",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Usuarios"
+        ],
+        "parameters": [
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      }
+    },
+    "/usuarios/{usuario_id}/credentials": {
+      "put": {
+        "summary": "PUT /usuarios/{usuario_id}/credentials",
+        "description": "Auto-generated operation for usuarios.actualizar_credenciales",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Usuarios"
+        ],
+        "parameters": [
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Usuario"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/usuarios/{usuario_id}/role": {
+      "put": {
+        "summary": "PUT /usuarios/{usuario_id}/role",
+        "description": "Auto-generated operation for usuarios.actualizar_rol",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Usuarios"
+        ],
+        "parameters": [
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Usuario"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/usuarios/{usuario_id}/status": {
+      "put": {
+        "summary": "PUT /usuarios/{usuario_id}/status",
+        "description": "Auto-generated operation for usuarios.actualizar_estado",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Usuarios"
+        ],
+        "parameters": [
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Usuario"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/usuarios/recover": {
+      "get": {
+        "summary": "GET /usuarios/recover",
+        "description": "Auto-generated operation for usuarios.recuperar_credenciales",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Usuarios"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "email",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "email"
+            },
+            "description": "Email del usuario para el que se quieren recuperar credenciales"
+          }
+        ]
+      }
+    },
+    "/usuarios/me": {
+      "get": {
+        "summary": "GET /usuarios/me",
+        "description": "Auto-generated operation for usuarios.obtener_mi_perfil",
+        "responses": {
+          "200": {
+            "description": "Perfil del usuario autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Usuario"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Usuarios"
+        ]
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "summary": "POST /auth/refresh",
+        "description": "Auto-generated operation for login_bp.refresh_tokens",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "oauth"
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "POST /auth/logout",
+        "description": "Auto-generated operation for login_bp.logout",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "oauth"
+        ]
+      }
+    },
+    "/auth/unblock": {
+      "post": {
+        "summary": "POST /auth/unblock",
+        "description": "Auto-generated operation for login_bp.unblock_user",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "oauth"
+        ]
+      }
+    },
+    "/academias": {
+      "post": {
+        "summary": "POST /academias",
+        "description": "Auto-generated operation for academias.crear_academia",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Academias"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Academia"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "get": {
+        "summary": "GET /academias",
+        "description": "Auto-generated operation for academias.listar_academias",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Academias"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filtrar por id de academia (cuando el permiso lo permite)"
+          }
+        ]
+      }
+    },
+    "/academias/{academia_id}": {
+      "get": {
+        "summary": "GET /academias/{academia_id}",
+        "description": "Auto-generated operation for academias.obtener_academia",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Academias"
+        ],
+        "parameters": [
+          {
+            "name": "academia_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      },
+      "patch": {
+        "summary": "PATCH /academias/{academia_id}",
+        "description": "Auto-generated operation for academias.modificar_academia",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Academias"
+        ],
+        "parameters": [
+          {
+            "name": "academia_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Academia"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/openapi.json": {
+      "get": {
+        "summary": "GET /openapi.json",
+        "description": "Auto-generated operation for docs.openapi_json",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "tags": [
+          "Docs/Health"
+        ]
+      }
+    },
+    "/docs": {
+      "get": {
+        "summary": "GET /docs",
+        "description": "Auto-generated operation for docs.docs_ui",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "tags": [
+          "Docs/Health"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "GET /health",
+        "description": "Auto-generated operation for health",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "tags": [
+          "Docs/Health"
+        ]
+      }
     }
   },
+  "tags": [
+    {
+      "name": "login",
+      "description": "Inicio de sesión (email/password)."
+    },
+    {
+      "name": "oauth",
+      "description": "Refresh, logout y gestión de tokens."
+    },
+    {
+      "name": "Academias",
+      "description": "Operaciones relacionadas con academias y su configuración."
+    },
+    {
+      "name": "Usuarios",
+      "description": "Gestión de usuarios, perfiles y credenciales."
+    },
+    {
+      "name": "Docs/Health",
+      "description": "Documentación y endpoints de salud."
+    }
+  ],
+  "openapi": "3.0.2",
   "components": {
     "schemas": {
       "LoginRequest": {
-        "additionalProperties": false,
+        "type": "object",
         "properties": {
           "email": {
-            "format": "email",
-            "type": "string"
+            "type": "string",
+            "format": "email"
           },
           "password": {
             "type": "string"
@@ -115,10 +773,10 @@
           "email",
           "password"
         ],
-        "type": "object"
+        "additionalProperties": false
       },
       "LoginResponse": {
-        "additionalProperties": false,
+        "type": "object",
         "properties": {
           "name": {
             "type": "string"
@@ -127,46 +785,84 @@
             "type": "string"
           },
           "tokens": {
-            "additionalProperties": {},
-            "type": "object"
+            "type": "object",
+            "additionalProperties": {}
           }
         },
-        "type": "object"
+        "additionalProperties": false
       },
-      "Usuario": {
-        "additionalProperties": false,
+      "Academia": {
+        "type": "object",
         "properties": {
-          "academia_id": {
-            "nullable": true,
-            "type": "integer"
-          },
-          "email": {
-            "format": "email",
-            "type": "string"
-          },
-          "estado": {
-            "type": "string"
-          },
-          "fecha_alta": {
-            "format": "date-time",
-            "type": "string"
-          },
           "id": {
-            "readOnly": true,
-            "type": "integer"
+            "type": "integer",
+            "readOnly": true
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "direccion": {
+            "type": "string"
+          },
+          "telefono": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "nombre"
+        ],
+        "additionalProperties": false
+      },
+      "Rol": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
           },
           "nombre": {
             "type": "string"
           }
         },
-        "type": "object"
+        "additionalProperties": false
+      },
+      "Usuario": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "academia_id": {
+            "type": "integer",
+            "nullable": true
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "rol": {
+            "$ref": "#/components/schemas/Rol"
+          },
+          "estado": {
+            "type": "string"
+          },
+          "fecha_alta": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
       }
     },
     "securitySchemes": {
       "bearerAuth": {
-        "bearerFormat": "JWT",
+        "type": "http",
         "scheme": "bearer",
-        "type": "http"
+        "bearerFormat": "JWT"
       }
     }
   }
