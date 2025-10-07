@@ -388,9 +388,11 @@ def dump():
 
         os.makedirs('docs', exist_ok=True)
         with open('docs/openapi-auto.json', 'w', encoding='utf-8') as f:
-            json.dump(spec, f, indent=2, ensure_ascii=False)
+            # Sort keys to make output deterministic between runs/environments
+            json.dump(spec, f, indent=2, ensure_ascii=False, sort_keys=True)
         with open('docs/openapi-auto.yml', 'w', encoding='utf-8') as f:
-            yaml.safe_dump(spec, f, allow_unicode=True)
+            # PyYAML sort_keys=True makes YAML keys deterministic (PyYAML >=5.1)
+            yaml.safe_dump(spec, f, allow_unicode=True, sort_keys=True)
         print('Wrote docs/openapi-auto.json and docs/openapi-auto.yml')
 
 

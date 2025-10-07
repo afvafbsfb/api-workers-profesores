@@ -97,6 +97,16 @@ jobs:
           if [ -f docs/openapi-auto.json ]; then cp docs/openapi-auto.json openapi.json || true; fi
           if [ -f docs/openapi-auto.yml ]; then cp docs/openapi-auto.yml openapi.yml || true; fi
 
+      - name: Upload generated OpenAPI artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-openapi
+          path: |
+            docs/openapi-auto.json
+            docs/openapi-auto.yml
+            openapi.json
+            openapi.yml
+
       - name: Check for uncommitted changes in spec files
         run: |
           git --no-pager status --porcelain
