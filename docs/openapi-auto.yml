@@ -116,6 +116,26 @@ paths:
       tags:
       - Academias
   /academias/{academia_id}:
+    delete:
+      description: Auto-generated operation for academias.eliminar_academia
+      parameters:
+      - in: path
+        name: academia_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+      - bearerAuth: []
+      summary: DELETE /academias/{academia_id}
+      tags:
+      - Academias
     get:
       description: Auto-generated operation for academias.obtener_academia
       parameters:
@@ -375,6 +395,32 @@ paths:
       security:
       - bearerAuth: []
       summary: GET /usuarios/{usuario_id}
+      tags:
+      - Usuarios
+    patch:
+      description: Auto-generated operation for usuarios.actualizar_usuario
+      parameters:
+      - in: path
+        name: usuario_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Usuario'
+        required: true
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+      - bearerAuth: []
+      summary: PATCH /usuarios/{usuario_id}
       tags:
       - Usuarios
     put:

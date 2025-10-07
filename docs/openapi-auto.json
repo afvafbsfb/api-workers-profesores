@@ -131,6 +131,49 @@
           }
         ]
       },
+      "patch": {
+        "summary": "PATCH /usuarios/{usuario_id}",
+        "description": "Auto-generated operation for usuarios.actualizar_usuario",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Usuarios"
+        ],
+        "parameters": [
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Usuario"
+              }
+            }
+          },
+          "required": true
+        }
+      },
       "put": {
         "summary": "PUT /usuarios/{usuario_id}",
         "description": "Auto-generated operation for usuarios.actualizar_usuario",
@@ -609,6 +652,39 @@
           },
           "required": true
         }
+      },
+      "delete": {
+        "summary": "DELETE /academias/{academia_id}",
+        "description": "Auto-generated operation for academias.eliminar_academia",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Academias"
+        ],
+        "parameters": [
+          {
+            "name": "academia_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
       }
     },
     "/openapi.json": {
