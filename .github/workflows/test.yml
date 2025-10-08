@@ -11,8 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DB_ENV: developmentAWS
-      DB_HOST: api-workers-dev.cvwcguygomlv.eu-west-3.rds.amazonaws.com
-      DB_PORT: 3306
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_PORT: ${{ secrets.DB_PORT }}
       DB_USER: ${{ secrets.DB_USER }}
       DB_PASS: ${{ secrets.DB_PASS }}
       DB_NAME: api_workers
