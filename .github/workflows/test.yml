@@ -95,6 +95,14 @@ jobs:
         run: |
           python scripts/dump_openapi.py
 
+      - name: Annotate OpenAPI with query parameters
+        run: |
+          if [ -f docs/openapi-auto.json ]; then
+            python scripts/annotate_openapi_params.py docs/openapi-auto.json || true
+          else
+            echo "docs/openapi-auto.json not found; skipping annotation"
+          fi
+
       - name: Check OpenAPI semantic equality (JSON only)
         # Compare JSONs to avoid YAML parsing/format differences that previously caused CI failures
         run: |
