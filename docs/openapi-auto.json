@@ -61,6 +61,44 @@
         ],
         "tags": [
           "Usuarios"
+        ],
+        "parameters": [
+          {
+            "name": "academia_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filtrar por academia_id (nota: para roles de academia se fuerza este filtro)"
+          },
+          {
+            "name": "rol",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filtrar por nombre del rol (e.g. Admin_plataforma, Admin_academia, Profesor)"
+          },
+          {
+            "name": "nombre",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Buscar por parte del nombre (ilike)"
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filtrar por id del usuario (puede usarse como usuario_id)"
+          }
         ]
       },
       "post": {
@@ -573,6 +611,17 @@
         ],
         "tags": [
           "Academias"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filtrar por id de academia (cuando el permiso lo permite)"
+          }
         ]
       }
     },

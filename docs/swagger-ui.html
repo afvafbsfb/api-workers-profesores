@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Swagger UI - OpenAPI</title>
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@4/swagger-ui.css" />
+    <style>
+      html, body { height: 100%; margin: 0; }
+      #swagger-ui { height: 100vh; }
+    </style>
+  </head>
+  <body>
+    <div id="swagger-ui"></div>
+    <script src="https://unpkg.com/swagger-ui-dist@4/swagger-ui-bundle.js"></script>
+    <script>
+      // Try relative paths so it works when serving from repo root or from the docs/ folder.
+      // 1) ./openapi-auto.json (same folder)
+      // 2) ../docs/openapi-auto.json (if served from repo root and file is under docs/)
+      // 3) ./openapi.json or ../openapi.json as fallbacks
+      const candidates = [
+        './openapi-auto.json',
+        '../docs/openapi-auto.json',
+        './openapi.json',
+        '../openapi.json'
+      ];
+
+      (async function tryLoad() {
+        for (const c of candidates) {
+          try {
+            const res = await fetch(c, { method: 'HEAD' });
+            console.log('Checking', c, res.status);
+            if (res.ok) {
+              console.log('Using spec at', c);
+              SwaggerUIBundle({
+                url: c,
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [SwaggerUIBundle.presets.apis],
+                layout: 'BaseLayout'
+              });
+              return;
+            }
+          } catch (e) {
+            console.warn('Failed to fetch', c, e);
+          }
+        }
+        // If nothing found, initialize UI with no url and show an error in console.
+        console.error('No OpenAPI spec found at any candidate path:', candidates);
+        SwaggerUIBundle({
+          dom_id: '#swagger-ui',
+          deepLinking: true,
+          presets: [SwaggerUIBundle.presets.apis],
+          layout: 'BaseLayout'
+        });
+      })();
+    </script>
+  </body>
+</html>
