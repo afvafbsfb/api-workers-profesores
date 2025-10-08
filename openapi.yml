@@ -83,13 +83,6 @@ paths:
   /academias:
     get:
       description: Auto-generated operation for academias.listar_academias
-      parameters:
-      - in: query
-        name: id
-        required: false
-        schema:
-          type: integer
-        description: Filtrar por id de academia (cuando el permiso lo permite)
       responses:
         '200':
           description: Successful response
@@ -123,6 +116,26 @@ paths:
       tags:
       - Academias
   /academias/{academia_id}:
+    delete:
+      description: Auto-generated operation for academias.eliminar_academia
+      parameters:
+      - in: path
+        name: academia_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+      - bearerAuth: []
+      summary: DELETE /academias/{academia_id}
+      tags:
+      - Academias
     get:
       description: Auto-generated operation for academias.obtener_academia
       parameters:
@@ -277,31 +290,6 @@ paths:
   /usuarios/:
     get:
       description: Auto-generated operation for usuarios.listar_usuarios
-      parameters:
-      - in: query
-        name: academia_id
-        required: false
-        schema:
-          type: integer
-        description: Filtrar por academia_id (nota: para roles de academia se fuerza este filtro)
-      - in: query
-        name: rol
-        required: false
-        schema:
-          type: string
-        description: Filtrar por nombre del rol (e.g. Admin_plataforma, Admin_academia, Profesor)
-      - in: query
-        name: nombre
-        required: false
-        schema:
-          type: string
-        description: Buscar por parte del nombre (ilike)
-      - in: query
-        name: id
-        required: false
-        schema:
-          type: integer
-        description: Filtrar por id del usuario (puede usarse como usuario_id)
       responses:
         '200':
           description: Successful response
@@ -356,14 +344,6 @@ paths:
   /usuarios/recover:
     get:
       description: Auto-generated operation for usuarios.recuperar_credenciales
-      parameters:
-      - in: query
-        name: email
-        required: false
-        schema:
-          type: string
-          format: email
-        description: Email del usuario para el que se quieren recuperar credenciales
       responses:
         '200':
           description: Successful response
@@ -415,6 +395,32 @@ paths:
       security:
       - bearerAuth: []
       summary: GET /usuarios/{usuario_id}
+      tags:
+      - Usuarios
+    patch:
+      description: Auto-generated operation for usuarios.actualizar_usuario
+      parameters:
+      - in: path
+        name: usuario_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Usuario'
+        required: true
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+      - bearerAuth: []
+      summary: PATCH /usuarios/{usuario_id}
       tags:
       - Usuarios
     put:
@@ -522,67 +528,6 @@ paths:
       security:
       - bearerAuth: []
       summary: PUT /usuarios/{usuario_id}/status
-      tags:
-      - Usuarios
-  /usuarios/recover:
-    get:
-      description: Auto-generated operation for usuarios.recuperar_credenciales
-      responses:
-        '200':
-          description: Successful response
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-      security:
-      - bearerAuth: []
-      summary: GET /usuarios/recover
-      tags:
-      - Usuarios
-  /usuarios/me:
-    get:
-      description: Auto-generated operation for usuarios.obtener_mi_perfil
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Usuario'
-          description: Perfil del usuario autenticado
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-      security:
-      - bearerAuth: []
-      summary: GET /usuarios/me
-      tags:
-      - Usuarios
-  /usuarios/{usuario_id}/credentials:
-    put:
-      description: Auto-generated operation for usuarios.actualizar_credenciales
-      parameters:
-      - in: path
-        name: usuario_id
-        required: true
-        schema:
-          type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Usuario'
-        required: true
-      responses:
-        '200':
-          description: Successful response
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-      security:
-      - bearerAuth: []
-      summary: PUT /usuarios/{usuario_id}/credentials
       tags:
       - Usuarios
 tags:

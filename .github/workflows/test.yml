@@ -13,8 +13,8 @@ jobs:
       DB_ENV: developmentAWS
       DB_HOST: api-workers-dev.cvwcguygomlv.eu-west-3.rds.amazonaws.com
       DB_PORT: 3306
-      DB_USER: admin
-      DB_PASS: Abanca0795
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASS: ${{ secrets.DB_PASS }}
       DB_NAME: api_workers
       PYTHONPATH: '.'
     steps:
@@ -36,15 +36,11 @@ jobs:
           python -m pip install pyyaml
 
       - name: Run DB seeder (idempotente)
-        # Only run the DB seeder manually on main/master via workflow_dispatch
-        if: github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         run: |
           echo "Running DB seeder (this will fail the job if seeder raises an error)"
           python init_db_pruebas_test.py --reset
 
       - name: Verify seeded data (counts)
-        # Only verify seeded data manually on main/master via workflow_dispatch
-        if: github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         run: |
           python - <<'PY'
           from config import Config
@@ -74,8 +70,6 @@ jobs:
           PY
 
       - name: Run tests (ordered) and produce combined HTML report
-        # Run tests only when manually dispatched on main/master (avoid running on merge automatically)
-        if: github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         run: |
           echo "Running ordered tests against AWS RDS and generating combined HTML report"
           python -m pytest \
@@ -83,17 +77,15 @@ jobs:
             tests/academias/test_busquedas_academias.py \
             tests/academias/test_academias_post.py \
             tests/academias/test_academias_get_patch.py \
-            tests/usuarios/test_jwt_claims.py \
             tests/usuarios/test_altas_bajas_usuarios.py \
             tests/usuarios/test_busquedas_usuarios.py \
             tests/usuarios/test_login.py \
+            tests/usuarios/test_jwt_claims.py \
             tests/usuarios/test_unblock.py \
             tests/usuarios/test_refresh_logout.py \
             -q -s --html=report-all.html --self-contained-html
 
       - name: Upload pytest HTML report
-        # Only upload the pytest report when tests actually ran via manual dispatch on main/master
-        if: github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         uses: actions/upload-artifact@v4
         with:
           name: pytest-html-report
@@ -102,6 +94,15 @@ jobs:
       - name: Regenerate OpenAPI (dump_openapi.py)
         run: |
           python scripts/dump_openapi.py
+
+      - name: Check OpenAPI semantic equality (JSON only)
+        # Compare JSONs to avoid YAML parsing/format differences that previously caused CI failures
+        run: |
+          if [ -f docs/openapi-auto.json ] && [ -f openapi.json ]; then
+            python scripts/compare_openapi.py docs/openapi-auto.json openapi.json || (echo "OpenAPI JSONs differ" && exit 1)
+          else
+            echo "OpenAPI JSON files not found, skipping comparison"
+          fi
 
       - name: Sync root spec files (optional)
         run: |
