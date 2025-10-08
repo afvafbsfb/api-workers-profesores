@@ -18,11 +18,10 @@
       // 1) ./openapi-auto.json (same folder)
       // 2) ../docs/openapi-auto.json (if served from repo root and file is under docs/)
       // 3) ./openapi.json or ../openapi.json as fallbacks
+      // Force the UI to load the local docs/openapi-auto.json when serving the docs folder.
+      // Using a single explicit path avoids ambiguity and caching issues.
       const candidates = [
-        './openapi-auto.json',
-        '../docs/openapi-auto.json',
-        './openapi.json',
-        '../openapi.json'
+        './openapi-auto.json'
       ];
 
       (async function tryLoad() {
