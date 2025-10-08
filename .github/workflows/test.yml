@@ -91,6 +91,14 @@ jobs:
           name: pytest-html-report
           path: report-all.html
 
+      - name: Export permissions (export_permissions.py)
+        run: |
+          if [ -f scripts/export_permissions.py ]; then
+            python scripts/export_permissions.py
+          else
+            echo "scripts/export_permissions.py not found; skipping"
+          fi
+
       - name: Regenerate OpenAPI (dump_openapi.py)
         run: |
           python scripts/dump_openapi.py
@@ -126,5 +134,13 @@ jobs:
             docs/openapi-auto.yml
             openapi.json
             openapi.yml
+
+      - name: Upload generated permissions artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-permissions
+          path: |
+            docs/permissions.json
+            docs/permissions.yaml
 
       # OpenAPI semantic equality check removed per request (was causing CI failures)

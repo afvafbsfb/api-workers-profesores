@@ -1,0 +1,5 @@
+# Canonical roles used by the application (one per line).
+# Values are case-insensitive; the export script will normalize them.
+Admin_plataforma
+Admin_academia
+Profesor_academia

@@ -1,132 +1,183 @@
-# Documentación del proyecto workers-api
+d# API Workers Profesores
 
-## Índice
-- [Introducción](#introducción)
-- [Arquitectura general](#arquitectura-general)
-- [Estructura de carpetas](#estructura-de-carpetas)
-- [Principales componentes](#principales-componentes)
-- [Flujos funcionales](#flujos-funcionales)
-- [Endpoints principales](#endpoints-principales)
-- [Base de datos](#base-de-datos)
-- [Despliegue y configuración](#despliegue-y-configuración)
-- [Documentación de la API](#documentación-de-la-api)
+Esto es un README nuevo y completo para desarrollo, pruebas y documentación de la API.
 
----
+Contenido rápido
+- Setup local (venv, deps)
+- Seeder y datos de prueba
+- Cómo arrancar la app (desarrollo)
+- Uso de Swagger UI (/docs) y de la especificación OpenAPI
+- Detalle del endpoint `POST /auth/logout` (uso de refresh token)
+- Ejecutar tests (pytest)
+- Checklist antes de commit/push
 
-## Introducción
-`workers-api` es una API desarrollada en Python con Flask, orientada a la gestión de alumnos, clases y pagos para la secretaría de una empresa educativa. Utiliza SQLAlchemy para la persistencia en MySQL y sigue una arquitectura modular por dominios.
+Requisitos
+- Python 3.11+
+- Virtualenv
+- MySQL (local o remoto) según `DATABASE_URL` o la configuración en `config.py`
 
-Este proyecto aplica principios de Domain-Driven Design (DDD): el código está organizado por dominios y capas (domain, application, infrastructure, interfaces). Cada dominio agrupa su modelo, casos de uso, repositorios y rutas, lo que facilita el mantenimiento y la escalabilidad.
-
-Dominios principales:
-- `vlodeiro/empresa`: dominio responsable de la organización (empresas/academias). Aquí se gestiona el registro de empresas, la configuración global y los usuarios/roles asociados a una academia. Es el punto de entrada para operaciones de onboarding y configuración organizativa.
-- `vlodeiro/secretaria`: dominio responsable de la operativa diaria de la academia (alumnos, turnos/clases, inscripciones, pagos, tarifas). Implementa los casos de uso y endpoints que realizan operaciones transaccionales y reglas de negocio.
-
-La separación en estos dominios permite que la lógica de negocio de la secretaría evolucione independientemente de la gestión organizativa, y facilita la introducción de nuevos dominios (por ejemplo: facturación, reporting) sin mezclar responsabilidades.
-
-## Arquitectura general
-- **Flask** como framework web principal. Flask es un framework ligero de Python que permite definir rutas, manejar peticiones HTTP y construir aplicaciones web de forma sencilla y modular.
-En este proyecto, toda la lógica de la API y la gestión de peticiones se basa en Flask.
-- **SQLAlchemy** para ORM y acceso a base de datos MySQL. Usamos SQLAlchemy como herramienta para interactuar con la base de datos MySQL. SQLAlchemy es un ORM (Object Relational Mapper), lo que permite trabajar con la base de datos usando objetos y clases de Python en vez de escribir directamente sentencias SQL.
-Así, podemos crear, consultar y modificar datos en MySQL de forma más sencilla y estructurada desde nuestro código Python.
-- **Blueprints** para modularizar rutas por dominio. En Flask, los Blueprints son una forma de organizar y modularizar el código de una aplicación dividiéndolo en componentes independientes. En este proyecto, se usan Blueprints para separar las rutas (endpoints) según el dominio (por ejemplo, alumnos, clases, pagos), facilitando el mantenimiento y la escalabilidad del código.
-Así, cada grupo de rutas relacionadas se gestiona en un archivo o módulo diferente, y luego se registran en la aplicación principal.
-- **Separación en capas:**
-  - Dominio (modelos y lógica de negocio)
-  - Infraestructura (repositorios y acceso a datos)
-  - Interfaces (rutas Flask)
-  - Aplicación (servicios y casos de uso)
-
-## Estructura de carpetas
-```
-workers-api/
-├── app.py                  # Punto de entrada principal de la API
-├── models.py               # Modelos globales y configuración de SQLAlchemy
-├── openapi-rest.yaml       # Especificación OpenAPI REST (actual, versión pública en S3)
-├── passenger_wsgi.py       # Integración con Passenger/cPanel
-├── requirements.txt        # Dependencias Python
-├── vlodeiro/
-│   └── secretaria/
-│       ├── application/    # Casos de uso y lógica de aplicación
-│       ├── domain/         # Modelos de dominio (Alumno, Clase, Turno, Pago)
-│       ├── infrastructure/ # Repositorios para MySQL
-│       └── interfaces/     # Rutas Flask (Blueprints)
-└── tmp/                    # Archivos temporales y de control
-```
-
-## Principales componentes
-- **app.py:** Configura Flask, SQLAlchemy, registra blueprints y define endpoints generales.
-- **models.py:** Define el objeto `db` (SQLAlchemy) y modelos globales si los hay.
-- **vlodeiro/secretaria/domain/models.py:** Modelos de dominio como `Alumno`, `Clase`, `Turno`, `Pago`.
-- **vlodeiro/secretaria/infrastructure/repositorio_mysql.py:** Repositorios que implementan acceso a datos usando SQLAlchemy.
-- **vlodeiro/secretaria/interfaces/flask_routes.py:** Define las rutas HTTP para la secretaría usando Flask Blueprints.
-- **vlodeiro/secretaria/application/**: Casos de uso y lógica de negocio (inscribir alumno, registrar pago, etc).
-- **openapi-rest.yaml:** Especificación OpenAPI REST, publicada en S3 para integraciones externas y plugins (ChatGPT, Swagger UI, etc).
-
-## Flujos funcionales
-- **Gestión de alumnos:** Alta, consulta y persistencia de alumnos.
-- **Gestión de clases:** Alta, consulta y persistencia de clases.
-- **Gestión de turnos:** Consulta de turnos activos por empresa.
-- **Gestión de pagos:** Registro y consulta de pagos de alumnos.
-- **Endpoints de salud y debug:** `/health`, `/debug`, `/openapi.yml`.
-
-## Endpoints principales (ver detalle y parámetros en openapi-rest.yaml)
-- `/vlodeiro/secretaria/turnos` (GET): Lista los turnos activos.
-- `/vlodeiro/secretaria/alumnos` (GET/POST): Consulta y alta de alumnos.
-- `/vlodeiro/secretaria/clases` (GET/POST): Consulta y alta de clases.
-- `/vlodeiro/secretaria/pagos` (GET/POST): Consulta y registro de pagos.
-- `/health` (GET): Estado de la API.
-- `/debug` (GET): Prueba de vida de Flask.
-
-## Base de datos
-- **MySQL** como motor principal.
-- Modelos definidos con SQLAlchemy.
-- Tablas principales: `alumno`, `clase`, `turno`, `pago`.
-
-## Despliegue y configuración
-- Despliegue en AWS Elastic Beanstalk (Python/Flask) y exposición pública mediante API Gateway REST.
-- Especificación OpenAPI REST publicada en S3: https://api-workers-plugins.s3.eu-west-3.amazonaws.com/openapi-rest.yaml
-- Documentación visual e interactiva (Swagger UI) usando la especificación pública de S3.
-- Variables de entorno para configuración sensible (API_KEY, credenciales DB, endpoints, etc).
-- Requiere instalar dependencias de `requirements.txt`.
-
-## Documentación de la API
-
-Este directorio contiene archivos generados a partir de la aplicación que describen la API en formato OpenAPI.
-
-Cómo generar la especificación OpenAPI (generada automáticamente desde el código)
-
-1. Instalar las dependencias de desarrollo (activar tu virtualenv):
+1) Preparar el entorno (PowerShell)
 
 ```powershell
-pip install -r requirements-dev.txt
+# Sitúate en la raíz del repo
+Set-Location 'C:\Users\Angel FV\Desktop\FORMACION\api-workers-profesores'
+
+# Crear y activar virtualenv
+python -m venv .venv
+. .\.venv\Scripts\Activate.ps1
+
+# Instalar dependencias
+python -m pip install -r requirements.txt
+python -m pip install -r requirements-dev.txt
 ```
 
-2. Ejecutar el script de volcado (se generarán `docs/openapi-auto.json` y `docs/openapi-auto.yml`):
+2) Variables de entorno útiles (solo para la sesión actual)
+
+```powershell
+# Opcional: ajustar según tu entorno
+# $env:DB_ENV = 'development'
+# $env:DATABASE_URL = 'mysql+pymysql://user:pass@host:port/db'
+# $env:JWT_SECRET_KEY = 'mi-secreto-local'
+```
+
+3) Seeder — poblar datos de prueba
+
+El seeder `init_db_pruebas_test.py` crea roles, academias y usuarios `reserve_*` para pruebas.
+
+```powershell
+python init_db_pruebas_test.py --reset
+```
+
+Observa la salida: el script imprime un resumen con usuarios y (temporalmente) las contraseñas planas para pruebas.
+
+4) Arrancar la aplicación (desarrollo)
+
+Opción recomendada (ver logs):
+
+```powershell
+python main.py
+```
+
+Alternativa (flask run):
+
+```powershell
+$env:FLASK_APP = 'main.py'
+flask run --port 5000
+```
+
+5) Documentación y Swagger UI
+
+- Abre en el navegador: `http://localhost:5000/docs`
+- La UI carga la especificación desde `/openapi.json`. También existe `/openapi-auto.json` (archivo generado en `docs/`).
+
+Si ves "No API definition provided":
+
+1. Comprueba que `http://localhost:5000/openapi.json` devuelve JSON (usa `Invoke-RestMethod`).
+2. Limpia la caché del navegador y recarga la página.
+
+6) Uso del endpoint `/auth/logout` (importante)
+
+Resumen: `POST /auth/logout` revoca el refresh token.
+
+Requisitos:
+- Debes enviar un refresh token. Opciones:
+	- En header: `Authorization: Bearer <REFRESH_TOKEN>` (modo que utilizan los tests existentes).
+	- En body JSON: `{ "refresh_token": "<REFRESH_TOKEN>" }` (útil desde Swagger UI cuando la UI haya puesto un access token en Authorization).
+
+Comportamiento:
+- Si envías un access token en Authorization y no envías refresh en body → 422 `Only refresh tokens are allowed`.
+- Si envías header con refresh o body con refresh válido → 200 {"ok": true} (token marcado como revocado en BD).
+
+7) Ejemplos PowerShell rápidos
+
+Login y obtener tokens:
+
+```powershell
+$body = @{ email = 'reserve_activo@academia.com'; password = '...' } | ConvertTo-Json
+$resp = Invoke-RestMethod -Uri 'http://localhost:5000/auth/login' -Method Post -Body $body -ContentType 'application/json'
+$access = $resp.tokens.access_token
+$refresh = $resp.tokens.refresh_token
+```
+
+Logout usando body + header access (caso Swagger UI):
+
+```powershell
+$headers = @{ Authorization = "Bearer $access"; 'Content-Type' = 'application/json' }
+$payload = @{ refresh_token = $refresh } | ConvertTo-Json
+Invoke-RestMethod -Uri 'http://localhost:5000/auth/logout' -Method Post -Headers $headers -Body $payload
+```
+
+Logout usando refresh en header:
+
+```powershell
+Invoke-RestMethod -Uri 'http://localhost:5000/auth/logout' -Method Post -Headers @{ Authorization = "Bearer $refresh" }
+```
+
+8) Ejecutar tests (pytest)
+
+Tests de autenticación:
+
+```powershell
+python -m pytest tests/usuarios/test_login.py -q -s
+python -m pytest tests/usuarios/test_refresh_logout.py -q -s
+```
+
+Ejecutar la suite completa:
+
+```powershell
+python -m pytest -q -s
+```
+
+Los tests usan cuentas `reserve_*` creadas por el seeder.
+
+9) Generar OpenAPI para publicar (opcional)
 
 ```powershell
 python scripts/dump_openapi.py
+# Genera: docs/openapi-auto.json y docs/openapi-auto.yml
 ```
 
-3. Servir la aplicación localmente y abrir la interfaz:
+10) Checklist antes de commit/push
 
-```powershell
-# iniciar la aplicación Flask
-python app.py
-# Abrir en tu navegador: http://127.0.0.1:5000/docs
-```
+1. Ejecuta y supera los tests (`pytest`).
+2. Asegúrate de haber ejecutado el seeder si los tests o cambios lo requieren.
+3. Genera OpenAPI si has cambiado rutas/schemas.
+4. Revisa `/docs` y `/openapi.json` manualmente.
 
-Notas
-- La implementación actual construye una especificación OpenAPI mínima para dos endpoints (`POST /auth/login` y `GET /academias`) utilizando los esquemas de Marshmallow en `src/schemas`.
-- Extiende los esquemas y el script `scripts/dump_openapi.py` (o integra completamente `flask-smorest`) para cubrir más endpoints de forma incremental.
+11) Notas y buenas prácticas
 
-## Referencias rápidas
-
-- **API REST producción:** https://ppmr69im5j.execute-api.eu-west-3.amazonaws.com/prod
-- **OpenAPI REST (YAML en S3):** https://api-workers-plugins.s3.eu-west-3.amazonaws.com/openapi-rest.yaml
-- **Swagger UI (documentación visual):** https://api-workers-plugins.s3.eu-west-3.amazonaws.com/openapi-rest.yaml
-- Reinicio automático tras despliegue por archivo `tmp/restart.txt`.
+- No expongas `/docs` en producción sin control de acceso.
+- Mantén las pruebas reproducibles usando las cuentas `reserve_*`.
+- Si necesitas, puedo añadir un `docs/README.md` con ejemplos HTTP/Postman.
 
 ---
 
-> Para detalles técnicos de cada módulo, consulta los archivos fuente en cada carpeta.
+Administración de permisos (roles) — qué leer y cómo se usa
+---------------------------------------------------------
+
+La lógica de autorización está implementada en `src/shared/application/permissions.py` (fuente de verdad). Para que otros servicios —en particular el mediador `backend-OpenAI`— puedan entender las reglas sin importar el lenguaje de ejecución, generamos artefactos estáticos que describen las decisiones de permiso.
+
+Archivos relevantes (en este repositorio):
+
+- `src/shared/application/permissions.py` — implementación de las funciones `can_*` que deciden acceso/alcance.
+- `scripts/export_permissions.py` — script que extrae metadatos (docstrings, parámetros y roles detectados) de `permissions.py` y produce:
+  - `docs/permissions.yaml`
+  - `docs/permissions.json`
+- `scripts/roles_whitelist.txt` — lista mantenible de roles canónicos (actualmente: `Admin_plataforma`, `Admin_academia`, `Profesor_academia`). El script prioriza esta whitelist para normalizar roles.
+- `docs/openapi-auto.json` (o la ruta pública `/openapi.json`) — la especificación OpenAPI de la API, necesaria para conocer rutas, parámetros y esquemas.
+
+Qué debe leer el mediador (`backend-OpenAI`):
+
+1. `docs/permissions.json` — para obtener las reglas de permiso por operación. Este archivo permite que el mediador construya la "whitelist de operaciones permitidas" por usuario/rol sin tener que ejecutar código Python del API.
+2. `docs/openapi-auto.json` (o `GET /openapi.json`) — para conocer las rutas, parámetros y los esquemas de request/response que el modelo puede usar como referencia.
+
+Flujo recomendado antes de cada despliegue o ejecución CI del mediador:
+
+1. En el repo de la API ejecutar `python scripts/export_permissions.py` (genera `docs/permissions.*`).
+2. Ejecutar `python scripts/dump_openapi.py` (genera `docs/openapi-auto.json`).
+3. El mediador descarga `docs/permissions.json` y `docs/openapi-auto.json` y los usa para construir prompts + validar cualquier `tool_call` que proponga el modelo.
+
+Nota de seguridad: el mediador puede usar estos artefactos para decidir qué endpoints sugerir al modelo y construir el prompt, pero la autorización final de cada llamada la debe realizar el API (`AuthorizationService`) en el momento de la ejecución. Nunca ejecutar llamadas basadas únicamente en la recomendación del modelo sin validarlas contra `permissions.json` y contra el `AuthorizationService` del API.
+
+Si quieres que haga commit y push de este README a la rama actual, dime y lo hago con un mensaje de commit descriptivo.
+

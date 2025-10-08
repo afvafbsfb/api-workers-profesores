@@ -1,0 +1,103 @@
+{
+  "permissions": [
+    {
+      "name": "can_query_academias",
+      "description": "Decide si `current_user` puede listar/consultar academias con `params`.\n\nReturns: (allowed, effective_filters, reason)\n- effective_filters puede contener 'id' forzada para limitar al ámbito del usuario.",
+      "params": [
+        "current_user",
+        "params"
+      ],
+      "detected_roles": [
+        "admin_academia",
+        "admin_plataforma",
+        "profesor_academia"
+      ]
+    },
+    {
+      "name": "can_create_academia",
+      "description": "Decide si current_user puede crear una academia.\n\nRegla: solo `admin_plataforma` puede crear academias.",
+      "params": [
+        "current_user",
+        "payload"
+      ],
+      "detected_roles": [
+        "admin_plataforma"
+      ]
+    },
+    {
+      "name": "can_modify_academia",
+      "description": "Decide si current_user puede modificar `target_academia`.\n\nReglas:\n- admin_plataforma: puede modificar cualquier academia\n- admin_academia: puede modificar solo su propia academia (target_academia.id == current_user.academia_id)\n- profesor_academia: no puede modificar academias",
+      "params": [
+        "current_user",
+        "target_academia",
+        "payload"
+      ],
+      "detected_roles": [
+        "admin_academia",
+        "admin_plataforma"
+      ]
+    },
+    {
+      "name": "can_delete_academia",
+      "description": "Decide si current_user puede borrar (soft-delete) `target_academia`.\n\nRegla: solo admin_plataforma puede dar de baja academias. La comprobación de\ndependencias (cursos, aulas, etc.) debe hacerse fuera de esta función.",
+      "params": [
+        "current_user",
+        "target_academia"
+      ],
+      "detected_roles": [
+        "admin_plataforma"
+      ]
+    },
+    {
+      "name": "can_query_users",
+      "description": "Decide si `current_user` puede listar/consultar usuarios con `params`.\n\nReturns: (allowed, effective_filters, reason)\n- effective_filters: dict de filtros que la API debe aplicar (p.ej. forzar academia_id)",
+      "params": [
+        "current_user",
+        "params"
+      ],
+      "detected_roles": [
+        "admin_academia",
+        "admin_plataforma",
+        "profesor_academia"
+      ]
+    },
+    {
+      "name": "can_create_user",
+      "description": "Decide si current_user puede crear un usuario.\n\n- admin_plataforma: puede crear cualquier usuario\n- admin_academia: solo puede crear usuarios asignados a su academia y nunca con rol admin_plataforma\n- otros: denegado",
+      "params": [
+        "current_user",
+        "payload"
+      ],
+      "detected_roles": [
+        "admin_academia",
+        "admin_plataforma"
+      ]
+    },
+    {
+      "name": "can_delete_user",
+      "description": "Decide si current_user puede dar de baja (soft-delete) a target_user.",
+      "params": [
+        "current_user",
+        "target_user"
+      ],
+      "detected_roles": [
+        "admin_academia",
+        "admin_plataforma"
+      ]
+    },
+    {
+      "name": "can_modify_user",
+      "description": "Decide qué puede modificar current_user sobre target_user.\n\n- admin_plataforma: puede cambiar rol/academia/estado/demás campos\n- admin_academia: solo puede modificar usuarios de su academia y no cambiar rol ni academia\n- profesor_academia: solo puede modificar su propio nombre/password",
+      "params": [
+        "current_user",
+        "target_user",
+        "payload"
+      ],
+      "detected_roles": [
+        "admin_academia",
+        "admin_plataforma",
+        "profesor_academia"
+      ]
+    }
+  ]
+}
