@@ -140,10 +140,25 @@ try:
     # Permitir acceso público al endpoint /auth/login
     @app.before_request
     def _enforce_api_key_globally():
-        public_paths = ["/auth/login", "/docs", "/openapi.yml", "/openapi-rest.yaml", "/health", "/"]
-        print(f"[DEBUG][AUTH] before_request ejecutado. Path: {request.path} | Method: {request.method}", flush=True)
-        if request.path in public_paths or request.path.startswith("/static/"):
-            print(f"[DEBUG][AUTH] Ruta pública: {request.path}", flush=True)
+        # Normalize path comparison so '/auth/login/' and '/auth/login' both match
+        public_paths = [
+            "/auth/login",
+            "/docs",
+            "/openapi.yml",
+            "/openapi-rest.yaml",
+            "/openapi.json",
+            "/openapi-auto.json",
+            "/openapi-auto.yml",
+            "/openapi-rest.yml",
+            "/health",
+            "/"
+        ]
+        raw_path = request.path
+        norm_path = raw_path if raw_path == '/' else raw_path.rstrip('/')
+        norm_public = [p if p == '/' else p.rstrip('/') for p in public_paths]
+        print(f"[DEBUG][AUTH] before_request ejecutado. Path: {raw_path} | Normalized: {norm_path} | Method: {request.method}", flush=True)
+        if norm_path in norm_public or request.path.startswith("/static/"):
+            print(f"[DEBUG][AUTH] Ruta pública: {raw_path}", flush=True)
             return None  # Permite acceso público sin validar el encabezado Authorization
         print(f"[DEBUG][AUTH] Ruta protegida: {request.path}", flush=True)
         return enforce_jwt_globally()
@@ -217,10 +232,46 @@ try:
     def openapi_rest_spec():
         return send_from_directory("docs", "openapi-rest.yaml", mimetype="text/yaml")
 
+    @app.route('/openapi-auto.json', methods=['GET'])
+    def openapi_auto_json():
+        # Serve the generated spec from docs/openapi-auto.json if present
+        import os
+        path = os.path.join(os.getcwd(), 'docs', 'openapi-auto.json')
+        if os.path.exists(path):
+            return send_from_directory(os.path.join(os.getcwd(), 'docs'), 'openapi-auto.json', mimetype='application/json')
+        return jsonify({}), 404
+
+    @app.route('/openapi.json', methods=['GET'])
+    def openapi_json():
+        # Try to serve an app-provided spec or fall back to docs/openapi-auto.json
+        try:
+            from src.docs.swagger import openapi_json as swagger_openapi
+            return swagger_openapi()
+        except Exception:
+            import os
+            path = os.path.join(os.getcwd(), 'docs', 'openapi-auto.json')
+            if os.path.exists(path):
+                return send_from_directory(os.path.join(os.getcwd(), 'docs'), 'openapi-auto.json', mimetype='application/json')
+            return jsonify({}), 404
+
     @app.route("/docs", methods=["GET"])
     def docs_index():
-        # Sirve la UI de Swagger ya configurada con la especificación de producción
-        return send_from_directory("docs", "index.html", mimetype="text/html")
+        # Sirve la UI de Swagger: intenta primero docs/index.html, luego docs/swagger-ui.html
+        import os
+        docs_dir = os.path.join(os.getcwd(), 'docs')
+        index_path = os.path.join(docs_dir, 'index.html')
+        swagger_ui_path = os.path.join(docs_dir, 'swagger-ui.html')
+        if os.path.exists(index_path):
+            return send_from_directory('docs', 'index.html', mimetype='text/html')
+        if os.path.exists(swagger_ui_path):
+            return send_from_directory('docs', 'swagger-ui.html', mimetype='text/html')
+
+        # Fallback: si existe el blueprint que sirve una UI embebida, úsalo
+        try:
+            from src.docs.swagger import docs_ui as embedded_docs_ui
+            return embedded_docs_ui()
+        except Exception:
+            return jsonify({"ok": False, "error": "docs_not_found"}), 404
 
 
     @app.route("/debug", methods=["GET"])

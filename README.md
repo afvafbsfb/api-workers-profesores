@@ -1,218 +1,154 @@
 # API Workers Profesores
 
-Repositorio de desarrollo de la API para gestión de academias, usuarios y operaciones relacionadas.
+Esto es un README nuevo y completo para desarrollo, pruebas y documentación de la API.
 
-Este README está centrado en el flujo actual de desarrollo (seeders, pruebas, generación de OpenAPI y uso de Swagger UI).
+Contenido rápido
+- Setup local (venv, deps)
+- Seeder y datos de prueba
+- Cómo arrancar la app (desarrollo)
+- Uso de Swagger UI (/docs) y de la especificación OpenAPI
+- Detalle del endpoint `POST /auth/logout` (uso de refresh token)
+- Ejecutar tests (pytest)
+- Checklist antes de commit/push
 
----
+Requisitos
+- Python 3.11+
+- Virtualenv
+- MySQL (local o remoto) según `DATABASE_URL` o la configuración en `config.py`
 
-## Estructura relevante
-
-- `app.py` - fábrica de la aplicación Flask y registro de blueprints.
-- `main.py` - entrada auxiliar (si procede).
-- `src/` - código de la aplicación (blueprints, servicios, esquemas, etc.).
-  - `src/schemas/` - esquemas Marshmallow para validación y documentación.
-  - `src/docs/` - blueprint para servir `/openapi.json` y `/docs` (Swagger UI).
-- `scripts/dump_openapi.py` - script que vuelca la especificación OpenAPI a `docs/openapi-auto.json` / `.yml`.
-- `docs/` - artefactos y documentación generada.
-- `init_db_pruebas_test.py` - seeder idempotente para poblar datos de prueba.
-- `tests/` - tests automatizados (pytest).
-
----
-
-## Requisitos y virtualenv
-
-Recomendado: usar la virtualenv del repo o crear una nueva.
-
-PowerShell (ejemplos):
+1) Preparar el entorno (PowerShell)
 
 ```powershell
-# Activar venv existente
-& ".\.venv/Scripts/Activate.ps1"
+# Sitúate en la raíz del repo
+Set-Location 'C:\Users\Angel FV\Desktop\FORMACION\api-workers-profesores'
 
-# O crear uno nuevo
+# Crear y activar virtualenv
 python -m venv .venv
-& ".\.venv/Scripts/Activate.ps1"
+. .\.venv\Scripts\Activate.ps1
 
 # Instalar dependencias
 python -m pip install -r requirements.txt
 python -m pip install -r requirements-dev.txt
 ```
 
----
-
-## Ejecutar la aplicación (desarrollo)
-
-Opciones comunes:
-
-1) Ejecutar directamente el script que contiene la fábrica:
+2) Variables de entorno útiles (solo para la sesión actual)
 
 ```powershell
-& ".venv/Scripts/python.exe" app.py
+# Opcional: ajustar según tu entorno
+# $env:DB_ENV = 'development'
+# $env:DATABASE_URL = 'mysql+pymysql://user:pass@host:port/db'
+# $env:JWT_SECRET_KEY = 'mi-secreto-local'
 ```
 
-2) Usar la CLI de Flask (si prefieres):
+3) Seeder — poblar datos de prueba
+
+El seeder `init_db_pruebas_test.py` crea roles, academias y usuarios `reserve_*` para pruebas.
 
 ```powershell
-$env:FLASK_APP = "app:create_app"
-& ".venv/Scripts/python.exe" -m flask run --host=0.0.0.0 --port=5000 --debug
+python init_db_pruebas_test.py --reset
 ```
 
-Rutas útiles:
-- `/health` → comprobación de estado.
-- `/docs` → Swagger UI (si el blueprint está registrado).
-- `/openapi.json` → especificación OpenAPI (generada o dinámica).
+Observa la salida: el script imprime un resumen con usuarios y (temporalmente) las contraseñas planas para pruebas.
 
-Detalles adicionales y pasos recomendados
--------------------------------------
+4) Arrancar la aplicación (desarrollo)
 
-1) Variables de entorno importantes
-
-- `DB_ENV` (opcional): controla qué bloque de `DATABASES` en `config.py` se usa. Valores: `development`, `developmentAWS`, `production`. Por defecto `development`.
-- `DATABASE_URL` (opcional): si la defines, tiene prioridad sobre la construcción automática desde `config.py`. Formato típico: `mysql+pymysql://user:pass@host:port/dbname`.
-- `JWT_SECRET_KEY`: la clave usada por `flask_jwt_extended` para firmar tokens (puedes exportarla antes de arrancar en desarrollo).
-
-Ejemplo (PowerShell) — establecer variables temporales para la sesión:
+Opción recomendada (ver logs):
 
 ```powershell
-$env:DB_ENV = 'development'
-$env:DATABASE_URL = 'mysql+pymysql://angel:Abanca0795@localhost:3307/api_workers'
-$env:JWT_SECRET_KEY = 'mi-clave-secreta-local'
+python main.py
 ```
 
-Nota: `config.Config.set_environment_variables()` construye `DATABASE_URL` automáticamente si no está definido, usando los valores en `config.py` (por eso el puerto local por defecto en este repo es `3307`).
-
-2) Preparar el entorno y dependencias (PowerShell)
+Alternativa (flask run):
 
 ```powershell
-# crear/activar virtualenv (si no existe)
-python -m venv .venv
-& ".\.venv\Scripts\Activate.ps1"
-
-# instalar dependencias
-python -m pip install -r requirements.txt
-python -m pip install -r requirements-dev.txt
+$env:FLASK_APP = 'main.py'
+flask run --port 5000
 ```
 
-3) (Recomendado) Poblar la base de datos de desarrollo / pruebas antes de arrancar
+5) Documentación y Swagger UI
+
+- Abre en el navegador: `http://localhost:5000/docs`
+- La UI carga la especificación desde `/openapi.json`. También existe `/openapi-auto.json` (archivo generado en `docs/`).
+
+Si ves "No API definition provided":
+
+1. Comprueba que `http://localhost:5000/openapi.json` devuelve JSON (usa `Invoke-RestMethod`).
+2. Limpia la caché del navegador y recarga la página.
+
+6) Uso del endpoint `/auth/logout` (importante)
+
+Resumen: `POST /auth/logout` revoca el refresh token.
+
+Requisitos:
+- Debes enviar un refresh token. Opciones:
+	- En header: `Authorization: Bearer <REFRESH_TOKEN>` (modo que utilizan los tests existentes).
+	- En body JSON: `{ "refresh_token": "<REFRESH_TOKEN>" }` (útil desde Swagger UI cuando la UI haya puesto un access token en Authorization).
+
+Comportamiento:
+- Si envías un access token en Authorization y no envías refresh en body → 422 `Only refresh tokens are allowed`.
+- Si envías header con refresh o body con refresh válido → 200 {"ok": true} (token marcado como revocado en BD).
+
+7) Ejemplos PowerShell rápidos
+
+Login y obtener tokens:
 
 ```powershell
-& ".venv\Scripts\python.exe" init_db_pruebas_test.py --reset
+$body = @{ email = 'reserve_activo@academia.com'; password = '...' } | ConvertTo-Json
+$resp = Invoke-RestMethod -Uri 'http://localhost:5000/auth/login' -Method Post -Body $body -ContentType 'application/json'
+$access = $resp.tokens.access_token
+$refresh = $resp.tokens.refresh_token
 ```
 
-4) Generar la especificación OpenAPI (opcional, pero útil para la UI)
+Logout usando body + header access (caso Swagger UI):
 
 ```powershell
-& ".venv\Scripts\python.exe" scripts/dump_openapi.py
-# Esto escribe: docs/openapi-auto.json y docs/openapi-auto.yml
+$headers = @{ Authorization = "Bearer $access"; 'Content-Type' = 'application/json' }
+$payload = @{ refresh_token = $refresh } | ConvertTo-Json
+Invoke-RestMethod -Uri 'http://localhost:5000/auth/logout' -Method Post -Headers $headers -Body $payload
 ```
 
-5) Arrancar la aplicación
-
-Opción A — ejecutar `app.py` directamente (la fábrica crea la app y llama a `app.run`):
+Logout usando refresh en header:
 
 ```powershell
-& ".venv\Scripts\python.exe" app.py
+Invoke-RestMethod -Uri 'http://localhost:5000/auth/logout' -Method Post -Headers @{ Authorization = "Bearer $refresh" }
 ```
 
-Opción B — usar `flask run` (más flexible para desarrollo):
+8) Ejecutar tests (pytest)
+
+Tests de autenticación:
 
 ```powershell
-$env:FLASK_APP = 'app:create_app'
-& ".venv\Scripts\python.exe" -m flask run --host=0.0.0.0 --port=5000 --debug
+python -m pytest tests/usuarios/test_login.py -q -s
+python -m pytest tests/usuarios/test_refresh_logout.py -q -s
 ```
-
-6) Acceder a la documentación y probar endpoints
-
-- Abre `http://127.0.0.1:5000/docs` para ver la Swagger UI (apunta a `/openapi.json`).
-- Para rutas protegidas: haz `POST /auth/login` desde la UI o con curl/Invoke-RestMethod, copia `access_token` y usa la opción "Authorize" en Swagger UI con `Bearer <ACCESS_TOKEN>`.
-
-Troubleshooting rápido
-----------------------
-- Si la app falla por conexión a la base de datos, revisa que `DATABASE_URL` apunta al host/puerto correctos (por defecto `localhost:3307` en `config.py` para `development`).
-- Si quieres probar con una base remota (RDS u otro), exporta `DATABASE_URL` con la cadena de conexión completa o ajusta `DB_ENV` a `developmentAWS`.
-- Si `src/docs/swagger.py` no muestra la UI, confirma que `docs/openapi-auto.json` existe o que la extensión `apispec` esté presente en la app (el blueprint intenta usar ambas opciones).
-
----
-
-## Seeder de pruebas
-
-El seeder `init_db_pruebas_test.py` inserta datos de prueba de forma idempotente y normaliza campos importantes para tests.
-
-Para reset completo (DELETE + INSERT):
-
-```powershell
-& ".venv/Scripts/python.exe" init_db_pruebas_test.py --reset
-```
-
-Nota: el seeder crea usuarios `reserve_*` para pruebas destructivas; úsalos en tests que modifiquen datos.
-
----
-
-## Documentación OpenAPI / Swagger
-
-Flujo actual (code-first incremental):
-
-- Generar spec desde el código:
-
-```powershell
-& ".venv/Scripts/python.exe" scripts/dump_openapi.py
-```
-
-- El script vuelca `docs/openapi-auto.json` y `docs/openapi-auto.yml`.
-- `src/docs/swagger.py` sirve `/openapi.json` (usa la extensión apispec si está disponible) y `/docs` (página Swagger UI básica usando CDN).
-
-Autorización en Swagger UI
-- El spec incluye un security scheme `bearerAuth` (JWT). Para probar rutas protegidas:
-  1. Ejecuta `POST /auth/login` desde la UI o con curl/PowerShell.
-  2. Copia el `access_token` de la respuesta.
-  3. Pulsa "Authorize" en Swagger UI e introduce: `Bearer <ACCESS_TOKEN>`.
-
-Ejemplo (PowerShell):
-
-```powershell
-# Login y petición protegida
-$body = @{ email = "reserve_activo@academia.com"; password = "password_reserve_activo" } | ConvertTo-Json
-$response = Invoke-RestMethod -Uri "http://127.0.0.1:5000/auth/login" -Method POST -Body $body -ContentType "application/json"
-$access = $response.tokens.access_token
-Invoke-RestMethod -Uri "http://127.0.0.1:5000/academias" -Headers @{ Authorization = "Bearer $access" } -Method GET
-```
-
----
-
-## Tests (pytest)
 
 Ejecutar la suite completa:
 
 ```powershell
-& ".venv/Scripts/python.exe" -m pytest -q -s
+python -m pytest -q -s
 ```
 
-Los tests se encuentran en `tests/` y usan fixtures y cuentas `reserve_*` para evitar interferencias.
+Los tests usan cuentas `reserve_*` creadas por el seeder.
 
----
+9) Generar OpenAPI para publicar (opcional)
 
-## CI / GitHub Actions
+```powershell
+python scripts/dump_openapi.py
+# Genera: docs/openapi-auto.json y docs/openapi-auto.yml
+```
 
-El workflow actual ejecuta el seeder antes de los tests, corre los tests en orden y genera un reporte HTML (`report-all.html`) que se sube como artifact.
+10) Checklist antes de commit/push
 
-Recomendación: ejecutar `scripts/dump_openapi.py` en CI si quieres publicar la especificación generada como parte del build.
+1. Ejecuta y supera los tests (`pytest`).
+2. Asegúrate de haber ejecutado el seeder si los tests o cambios lo requieren.
+3. Genera OpenAPI si has cambiado rutas/schemas.
+4. Revisa `/docs` y `/openapi.json` manualmente.
 
----
+11) Notas y buenas prácticas
 
-## Buenas prácticas y notas
+- No expongas `/docs` en producción sin control de acceso.
+- Mantén las pruebas reproducibles usando las cuentas `reserve_*`.
+- Si necesitas, puedo añadir un `docs/README.md` con ejemplos HTTP/Postman.
 
-- No exponer `Swagger UI` en producción: registra el blueprint solo en entornos `development`/`staging` o protege la ruta.
-- Mantén los schemas en `src/schemas/` y reutilízalos en rutas y en el script de volcado.
-- Usa las cuentas `reserve_*` para tests destructivos; no modificar los usuarios canónicos.
-- Si mueves la base de datos o credenciales, usa variables de entorno o secrets en CI en lugar de valores en workflows.
-
----
-
-Si quieres, puedo:
-
-- Crear `docs/README.md` con los pasos exactos y ejemplos para desarrolladores.
-- Proteger el blueprint `/docs` para que solo se registre fuera de `production`.
-
-Indica cuál de los dos cambios quieres que haga y lo implemento.
+Si quieres que haga commit y push de este README a la rama actual, dime y lo hago con un mensaje de commit descriptivo.
 

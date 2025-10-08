@@ -14,45 +14,33 @@
     <div id="swagger-ui"></div>
     <script src="https://unpkg.com/swagger-ui-dist@4/swagger-ui-bundle.js"></script>
     <script>
-      // Try relative paths so it works when serving from repo root or from the docs/ folder.
-      // 1) ./openapi-auto.json (same folder)
-      // 2) ../docs/openapi-auto.json (if served from repo root and file is under docs/)
-      // 3) ./openapi.json or ../openapi.json as fallbacks
-      // Force the UI to load the local docs/openapi-auto.json when serving the docs folder.
-      // Using a single explicit path avoids ambiguity and caching issues.
-      const candidates = [
-        './openapi-auto.json'
-      ];
+      // Use a single canonical spec URL. We serve the spec at /openapi.json
+      // from the Flask app (or fall back to docs/openapi-auto.json). This
+      // is simpler and reliable for local development and CI-generated docs.
+      const SPEC_URL = '/openapi.json';
 
-      (async function tryLoad() {
-        for (const c of candidates) {
+      SwaggerUIBundle({
+        url: SPEC_URL,
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [SwaggerUIBundle.presets.apis],
+        layout: 'BaseLayout',
+        requestInterceptor: (req) => {
           try {
-            const res = await fetch(c, { method: 'HEAD' });
-            console.log('Checking', c, res.status);
-            if (res.ok) {
-              console.log('Using spec at', c);
-              SwaggerUIBundle({
-                url: c,
-                dom_id: '#swagger-ui',
-                deepLinking: true,
-                presets: [SwaggerUIBundle.presets.apis],
-                layout: 'BaseLayout'
-              });
-              return;
+            const url = new URL(req.url, window.location.href);
+            const staticOrigin = window.location.origin;
+            const backendOrigin = 'http://localhost:5000';
+            // If Swagger UI is being served from a static server (different origin),
+            // rewrite same-origin API calls to the local backend for "Try it out".
+            if (url.origin === staticOrigin) {
+              req.url = backendOrigin + url.pathname + url.search;
             }
           } catch (e) {
-            console.warn('Failed to fetch', c, e);
+            console.warn('requestInterceptor error', e);
           }
+          return req;
         }
-        // If nothing found, initialize UI with no url and show an error in console.
-        console.error('No OpenAPI spec found at any candidate path:', candidates);
-        SwaggerUIBundle({
-          dom_id: '#swagger-ui',
-          deepLinking: true,
-          presets: [SwaggerUIBundle.presets.apis],
-          layout: 'BaseLayout'
-        });
-      })();
+      });
     </script>
   </body>
 </html>

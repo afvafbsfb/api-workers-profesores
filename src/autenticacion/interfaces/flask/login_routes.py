@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from marshmallow import Schema, fields, ValidationError
 from src.autenticacion.application.services import AuthService
 from src.autenticacion.infrastructure.jwt_provider import JwtProvider
-from flask_jwt_extended import jwt_required, get_jwt_identity, create_refresh_token, create_access_token
+from flask_jwt_extended import jwt_required, get_jwt_identity, create_refresh_token, create_access_token, decode_token
 from src.usuarios.infrastructure.models import RefreshToken, Usuario, UserLoginLog, Rol
 from src.shared.database import db
 from src.shared.security import hash_password
@@ -121,20 +121,79 @@ def refresh_tokens():
 
 
 @login_bp.route('/logout', methods=['POST'])
-@jwt_required(refresh=True)
 def logout():
     try:
-        identity = get_jwt_identity()
-        usuario_id = identity if isinstance(identity, int) or isinstance(identity, str) else identity.get('usuario_id')
-
+        # Allow passing the refresh token either via Authorization header or in the JSON body.
+        # If the Authorization header contains an access token but the body contains a refresh token,
+        # prefer the body refresh token so clients can send both.
         auth_header = request.headers.get('Authorization', '')
+        header_token = None
         if auth_header.startswith('Bearer '):
-            raw_token = auth_header.split(' ', 1)[1].strip()
+            header_token = auth_header.split(' ', 1)[1].strip()
+        body_token = request.get_json(silent=True) and request.get_json().get('refresh_token')
+
+        raw_token = None
+        decoded = None
+
+        if header_token:
+            # Try to decode header token first; if it's a refresh token we'll use it.
+            try:
+                decoded_header = decode_token(header_token)
+                header_type = decoded_header.get('type') or decoded_header.get('token_type')
+                if header_type == 'refresh':
+                    raw_token = header_token
+                    decoded = decoded_header
+                else:
+                    # Header contains non-refresh (probably access token). Prefer body token if present.
+                    if body_token:
+                        raw_token = body_token
+                    else:
+                        return jsonify({"msg": "Only refresh tokens are allowed"}), 422
+            except Exception:
+                # Header token invalid; fall back to body token if present
+                if body_token:
+                    raw_token = body_token
+                else:
+                    return jsonify({"ok": False, "error": "invalid_token", "message": "invalid header token"}), 401
         else:
-            raw_token = request.get_json(silent=True) and request.get_json().get('refresh_token')
+            raw_token = body_token
 
         if not raw_token:
             return jsonify({"ok": False, "error": "refresh_missing"}), 400
+
+        # Decode the chosen token if not already decoded
+        if decoded is None:
+            try:
+                decoded = decode_token(raw_token)
+            except Exception as e:
+                return jsonify({"ok": False, "error": "invalid_token", "message": str(e)}), 401
+
+        # Ensure token is a refresh token
+        token_type = decoded.get('type') or decoded.get('token_type')
+        if token_type != 'refresh':
+            return jsonify({"msg": "Only refresh tokens are allowed"}), 422
+
+        # Extract identity from decoded token
+        sub = decoded.get('sub') if 'sub' in decoded else decoded.get('identity')
+        usuario_id = None
+        try:
+            import json as _json
+            if isinstance(sub, str):
+                # sometimes identity is serialized json string
+                try:
+                    parsed = _json.loads(sub)
+                    if isinstance(parsed, dict):
+                        usuario_id = parsed.get('usuario_id') or parsed.get('user_id')
+                    else:
+                        usuario_id = int(parsed) if str(parsed).isdigit() else parsed
+                except Exception:
+                    usuario_id = int(sub) if sub.isdigit() else sub
+            elif isinstance(sub, dict):
+                usuario_id = sub.get('usuario_id') or sub.get('user_id')
+            else:
+                usuario_id = sub
+        except Exception:
+            usuario_id = sub
 
         token_hash = hashlib.sha256(raw_token.encode('utf-8')).hexdigest()
         existing = RefreshToken.query.filter_by(token_hash=token_hash).first()

@@ -236,15 +236,20 @@ def seed():
 
     # Usuarios de prueba: crear solo si email no existe
     usuarios_prueba = [
-        dict(nombre="Usuario Activo", email="activo@academia.com", password=hash_password("password_activo"), rol_id=rol.id, estado="Activo", academia_id=academia.id),
-        dict(nombre="Usuario Bloqueado", email="bloqueado@academia.com", password=hash_password("password_bloqueado"), rol_id=rol.id, estado="Bloqueado", academia_id=academia.id),
-        dict(nombre="Usuario Baja", email="baja@academia.com", password=hash_password("password_baja"), rol_id=rol.id, estado="Baja", academia_id=academia.id),
-        dict(nombre="Admin Plataforma", email="admin_plataforma@academia.com", password=hash_password("password_admin_plataforma"), rol_id=rol.id, estado="Activo", academia_id=None),
-        dict(nombre="Admin Academia", email="admin_academia@academia.com", password=hash_password("password_admin_academia"), rol_id=rol_academia.id, estado="Activo", academia_id=academia.id),
+        dict(nombre="Usuario Activo", email="activo@academia.com", plain_password="password_activo", password=hash_password("password_activo"), rol_id=rol.id, estado="Activo", academia_id=academia.id),
+        dict(nombre="Usuario Bloqueado", email="bloqueado@academia.com", plain_password="password_bloqueado", password=hash_password("password_bloqueado"), rol_id=rol.id, estado="Bloqueado", academia_id=academia.id),
+        dict(nombre="Usuario Baja", email="baja@academia.com", plain_password="password_baja", password=hash_password("password_baja"), rol_id=rol.id, estado="Baja", academia_id=academia.id),
+        dict(nombre="Admin Plataforma", email="admin_plataforma@academia.com", plain_password="password_admin_plataforma", password=hash_password("password_admin_plataforma"), rol_id=rol.id, estado="Activo", academia_id=None),
+        dict(nombre="Admin Academia", email="admin_academia@academia.com", plain_password="password_admin_academia", password=hash_password("password_admin_academia"), rol_id=rol_academia.id, estado="Activo", academia_id=academia.id),
     ]
     for u in usuarios_prueba:
         user_filters = dict(email=u['email'])
         defaults = {k: v for k, v in u.items() if k != 'email'}
+        # If a plain_password is provided, compute the hashed password now and
+        # ensure we do not persist the plain text in the DB
+        if 'plain_password' in defaults:
+            plain = defaults.pop('plain_password')
+            defaults['password'] = hash_password(plain)
         user, created = get_or_create(Usuario, defaults=defaults, **user_filters)
         if created:
             print(f"[init_db_pruebas_test] Usuario creado: {user.email} (id={user.id})")
@@ -337,13 +342,16 @@ def seed():
 
     # Crear usuarios administradores de la plataforma
     usuarios_plataforma = [
-        dict(email='admin_plataforma_1@academia.com', nombre='Admin Plataforma 1', password=hash_password('password_admin_plataforma_1'), rol_id=rol.id, estado='Activo', academia_id=None),
-        dict(email='admin_plataforma_2@academia.com', nombre='Admin Plataforma 2', password=hash_password('password_admin_plataforma_2'), rol_id=rol.id, estado='Bloqueado', academia_id=None),
+        dict(email='admin_plataforma_1@academia.com', plain_password='password_admin_plataforma_1', nombre='Admin Plataforma 1', password=hash_password('password_admin_plataforma_1'), rol_id=rol.id, estado='Activo', academia_id=None),
+        dict(email='admin_plataforma_2@academia.com', plain_password='password_admin_plataforma_2', nombre='Admin Plataforma 2', password=hash_password('password_admin_plataforma_2'), rol_id=rol.id, estado='Bloqueado', academia_id=None),
     ]
 
     for u in usuarios_plataforma:
         user_filters = dict(email=u['email'])
         defaults = {k: v for k, v in u.items() if k != 'email'}
+        if 'plain_password' in defaults:
+            plain = defaults.pop('plain_password')
+            defaults['password'] = hash_password(plain)
         user, created = get_or_create(Usuario, defaults=defaults, **user_filters)
         if created:
             print(f"[init_db_pruebas_test] Usuario creado: {user.email} (id={user.id})")
@@ -366,14 +374,17 @@ def seed():
 
     # Crear usuarios de Academia 1
     usuarios_academia_1 = [
-        dict(email='admin_academia_1@academia.com', nombre='Admin Academia 1', password=hash_password('password_admin_academia_1'), rol_id=rol_academia.id, estado='Activo', academia_id=academia_1.id),
-        dict(email='user_academia_1_1@academia.com', nombre='User Academia 1.1', password=hash_password('password_user_academia_1_1'), rol_id=rol_profesor.id, estado='Bloqueado', academia_id=academia_1.id),
-        dict(email='user_academia_1_2@academia.com', nombre='User Academia 1.2', password=hash_password('password_user_academia_1_2'), rol_id=rol_profesor.id, estado='Bloqueado', academia_id=academia_1.id),
+        dict(email='admin_academia_1@academia.com', plain_password='password_admin_academia_1', nombre='Admin Academia 1', password=hash_password('password_admin_academia_1'), rol_id=rol_academia.id, estado='Activo', academia_id=academia_1.id),
+        dict(email='user_academia_1_1@academia.com', plain_password='password_user_academia_1_1', nombre='User Academia 1.1', password=hash_password('password_user_academia_1_1'), rol_id=rol_profesor.id, estado='Bloqueado', academia_id=academia_1.id),
+        dict(email='user_academia_1_2@academia.com', plain_password='password_user_academia_1_2', nombre='User Academia 1.2', password=hash_password('password_user_academia_1_2'), rol_id=rol_profesor.id, estado='Bloqueado', academia_id=academia_1.id),
     ]
 
     for u in usuarios_academia_1:
         user_filters = dict(email=u['email'])
         defaults = {k: v for k, v in u.items() if k != 'email'}
+        if 'plain_password' in defaults:
+            plain = defaults.pop('plain_password')
+            defaults['password'] = hash_password(plain)
         user, created = get_or_create(Usuario, defaults=defaults, **user_filters)
         if created:
             print(f"[init_db_pruebas_test] Usuario creado: {user.email} (id={user.id})")
@@ -396,9 +407,9 @@ def seed():
 
     # Crear usuarios de Academia 2
     usuarios_academia_2 = [
-        dict(email='admin_academia_2@academia.com', nombre='Admin Academia 2', password=hash_password('password_admin_academia_2'), rol_id=rol_academia.id, estado='Activo', academia_id=academia_2.id),
-        dict(email='user_academia_2_1@academia.com', nombre='User Academia 2.1', password=hash_password('password_user_academia_2_1'), rol_id=rol_profesor.id, estado='Activo', academia_id=academia_2.id),  # Changed to activo
-        dict(email='user_academia_2_2@academia.com', nombre='User Academia 2.2', password=hash_password('password_user_academia_2_2'), rol_id=rol_profesor.id, estado='Activo', academia_id=academia_2.id),  # Changed to activo
+        dict(email='admin_academia_2@academia.com', plain_password='password_admin_academia_2', nombre='Admin Academia 2', password=hash_password('password_admin_academia_2'), rol_id=rol_academia.id, estado='Activo', academia_id=academia_2.id),
+        dict(email='user_academia_2_1@academia.com', plain_password='password_user_academia_2_1', nombre='User Academia 2.1', password=hash_password('password_user_academia_2_1'), rol_id=rol_profesor.id, estado='Activo', academia_id=academia_2.id),  # Changed to activo
+        dict(email='user_academia_2_2@academia.com', plain_password='password_user_academia_2_2', nombre='User Academia 2.2', password=hash_password('password_user_academia_2_2'), rol_id=rol_profesor.id, estado='Activo', academia_id=academia_2.id),  # Changed to activo
     ]
 
     # After seeding, ensure critical test users exist — fail loudly if not
@@ -421,6 +432,9 @@ def seed():
     for u in usuarios_academia_2:
         user_filters = dict(email=u['email'])
         defaults = {k: v for k, v in u.items() if k != 'email'}
+        if 'plain_password' in defaults:
+            plain = defaults.pop('plain_password')
+            defaults['password'] = hash_password(plain)
         user, created = get_or_create(Usuario, defaults=defaults, **user_filters)
         if created:
             print(f"[init_db_pruebas_test] Usuario creado: {user.email} (id={user.id})")
@@ -443,17 +457,23 @@ def seed():
 
     # Usuarios de reserva dedicados a pruebas destructivas (no tocar los usuarios canónicos)
     usuarios_reserva = [
-        dict(email='reserve_activo@academia.com', nombre='Reserve Activo', password=hash_password('password_reserve_activo'), rol_id=rol.id, estado='Activo', academia_id=None),
-        dict(email='reserve_user_academia_1_1@academia.com', nombre='Reserve User A1.1', password=hash_password('password_reserve_user_academia_1_1'), rol_id=rol_profesor.id, estado='Activo', academia_id=academia_1.id),
-        dict(email='reserve_admin_plataforma@academia.com', nombre='Reserve Admin Plataforma', password=hash_password('password_reserve_admin_plataforma'), rol_id=rol.id, estado='Activo', academia_id=None),
-        dict(email='reserve_admin_academia_1@academia.com', nombre='Reserve Admin Academia 1', password=hash_password('password_reserve_admin_academia_1'), rol_id=rol_academia.id, estado='Activo', academia_id=academia_1.id),
-        dict(email='reserve_admin_academia_2@academia.com', nombre='Reserve Admin Academia 2', password=hash_password('password_reserve_admin_academia_2'), rol_id=rol_academia.id, estado='Activo', academia_id=academia_2.id),
-        dict(email='reserve_admin_plataforma_2@academia.com', nombre='Reserve Admin Plataforma 2', password=hash_password('password_reserve_admin_plataforma_2'), rol_id=rol.id, estado='Bloqueado', academia_id=None),
+        dict(email='reserve_activo@academia.com', plain_password='password_reserve_activo', nombre='Reserve Activo', password=hash_password('password_reserve_activo'), rol_id=rol.id, estado='Activo', academia_id=None),
+        dict(email='reserve_user_academia_1_1@academia.com', plain_password='password_reserve_user_academia_1_1', nombre='Reserve User A1.1', password=hash_password('password_reserve_user_academia_1_1'), rol_id=rol_profesor.id, estado='Activo', academia_id=academia_1.id),
+        dict(email='reserve_admin_plataforma@academia.com', plain_password='password_reserve_admin_plataforma', nombre='Reserve Admin Plataforma', password=hash_password('password_reserve_admin_plataforma'), rol_id=rol.id, estado='Activo', academia_id=None),
+        dict(email='reserve_admin_academia_1@academia.com', plain_password='password_reserve_admin_academia_1', nombre='Reserve Admin Academia 1', password=hash_password('password_reserve_admin_academia_1'), rol_id=rol_academia.id, estado='Activo', academia_id=academia_1.id),
+        dict(email='reserve_admin_academia_2@academia.com', plain_password='password_reserve_admin_academia_2', nombre='Reserve Admin Academia 2', password=hash_password('password_reserve_admin_academia_2'), rol_id=rol_academia.id, estado='Activo', academia_id=academia_2.id),
+        dict(email='reserve_admin_plataforma_2@academia.com', plain_password='password_reserve_admin_plataforma_2', nombre='Reserve Admin Plataforma 2', password=hash_password('password_reserve_admin_plataforma_2'), rol_id=rol.id, estado='Bloqueado', academia_id=None),
     ]
+
+    # Combined seed list for reliable lookups in the summary
+    all_seed_users = usuarios_prueba + usuarios_plataforma + usuarios_academia_1 + usuarios_academia_2 + usuarios_reserva
 
     for u in usuarios_reserva:
         user_filters = dict(email=u['email'])
         defaults = {k: v for k, v in u.items() if k != 'email'}
+        if 'plain_password' in defaults:
+            plain = defaults.pop('plain_password')
+            defaults['password'] = hash_password(plain)
         user, created = get_or_create(Usuario, defaults=defaults, **user_filters)
         if created:
             print(f"[init_db_pruebas_test] Usuario reserva creado: {user.email} (id={user.id})")
@@ -490,7 +510,16 @@ def seed():
         for usuario in usuarios_plataforma:
             rol_usuario = db.session.get(Rol, usuario.rol_id)
             rol_descripcion = rol_usuario.nombre if rol_usuario else "Sin rol"
-            print(f"  Usuario ID: {usuario.id}, Nombre: {usuario.nombre}, Estado: {usuario.estado}, Rol: {rol_descripcion}")
+            # Try to find the plain password in the seed data (not stored in DB)
+            plain = None
+            try:
+                seed_match = next((x for x in all_seed_users if x.get('email') == usuario.email), None)
+                if seed_match:
+                    plain = seed_match.get('plain_password')
+            except Exception:
+                plain = None
+            pwd_info = f", email={usuario.email}, plain_password={plain}" if plain else f", email={usuario.email}"
+            print(f"  Usuario ID: {usuario.id}, Nombre: {usuario.nombre}, Estado: {usuario.estado}, Rol: {rol_descripcion}{pwd_info}")
 
         # Listar academias y sus usuarios
         academias = Academia.query.all()
@@ -503,7 +532,16 @@ def seed():
             for usuario in usuarios:
                 rol_usuario = db.session.get(Rol, usuario.rol_id)
                 rol_descripcion = rol_usuario.nombre if rol_usuario else "Sin rol"
-                print(f"    Usuario ID: {usuario.id}, Nombre: {usuario.nombre}, Estado: {usuario.estado}, Rol: {rol_descripcion}")
+                # Reveal plain password if available in seed definitions
+                plain = None
+                try:
+                    seed_match = next((x for x in all_seed_users if x.get('email') == usuario.email), None)
+                    if seed_match:
+                        plain = seed_match.get('plain_password')
+                except Exception:
+                    plain = None
+                pwd_info = f", email={usuario.email}, plain_password={plain}" if plain else f", email={usuario.email}"
+                print(f"    Usuario ID: {usuario.id}, Nombre: {usuario.nombre}, Estado: {usuario.estado}, Rol: {rol_descripcion}{pwd_info}")
 
     # Llamar a la función de resumen después del seeding
     mostrar_resumen()
