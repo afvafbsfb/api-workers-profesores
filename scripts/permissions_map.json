@@ -1,0 +1,68 @@
+{
+  "can_query_users": {
+    "operationId": "usuarios.listar_usuarios",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope": "own_academia",
+    "enforced_filters": { "academia_id": "current_user.academia_id" },
+    "note": "Listado de usuarios limitado al ámbito de la academia del usuario cuando aplica"
+  },
+
+  "can_create_user": {
+    "operationId": "usuarios.crear_usuario",
+    "allowed_roles": ["admin_plataforma", "admin_academia"],
+    "scope": "own_academia",
+    "allowed_target_roles": {
+      "admin_plataforma": ["admin_plataforma", "admin_academia", "profesor_academia"],
+      "admin_academia": ["admin_academia", "profesor_academia"]
+    },
+    "note": "Admin_academia puede crear usuarios solo en su academia y no puede crear Admin_plataforma"
+  },
+
+  "can_modify_user": {
+    "operationId": "usuarios.actualizar_usuario",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope_by_role": {
+      "admin_plataforma": "global",
+      "admin_academia": "own_academia",
+      "profesor_academia": "own_user"
+    },
+    "mutable_fields_by_role": {
+      "admin_plataforma": ["rol", "academia_id", "estado", "nombre"],
+      "admin_academia": ["nombre", "estado"],
+      "profesor_academia": ["nombre", "password"]
+    },
+    "note": "Permisos de modificación por rol y ámbito"
+  },
+
+  "can_delete_user": {
+    "operationId": "usuarios.eliminar_usuario",
+    "allowed_roles": ["admin_plataforma", "admin_academia"],
+    "scope_by_role": { "admin_plataforma": "global", "admin_academia": "own_academia" },
+    "note": "Admin_academia solo puede borrar usuarios de su propia academia"
+  },
+
+  "can_query_academias": {
+    "operationId": "academias.listar_academias",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope": "own_academia",
+    "enforced_filters": { "id": "current_user.academia_id" }
+  },
+
+  "can_create_academia": {
+    "operationId": "academias.crear_academia",
+    "allowed_roles": ["admin_plataforma"],
+    "scope": "global"
+  },
+
+  "can_modify_academia": {
+    "operationId": "academias.modificar_academia",
+    "allowed_roles": ["admin_academia", "admin_plataforma"],
+    "scope_by_role": { "admin_academia": "own_academia", "admin_plataforma": "global" }
+  },
+
+  "can_delete_academia": {
+    "operationId": "academias.eliminar_academia",
+    "allowed_roles": ["admin_plataforma"],
+    "scope": "global"
+  }
+}

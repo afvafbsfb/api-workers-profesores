@@ -155,29 +155,60 @@ python scripts/dump_openapi.py
 Administración de permisos (roles) — qué leer y cómo se usa
 ---------------------------------------------------------
 
-La lógica de autorización está implementada en `src/shared/application/permissions.py` (fuente de verdad). Para que otros servicios —en particular el mediador `backend-OpenAI`— puedan entender las reglas sin importar el lenguaje de ejecución, generamos artefactos estáticos que describen las decisiones de permiso.
+La lógica de autorización se implementa en `src/shared/application/permissions.py` (fuente de verdad). Para que otros servicios —especialmente el mediador `backend-OpenAI`— puedan comprender las reglas sin ejecutar código, generamos artefactos estáticos y unificamos la información en un único spec final consumible.
 
-Archivos relevantes (en este repositorio):
-
-- `src/shared/application/permissions.py` — implementación de las funciones `can_*` que deciden acceso/alcance.
-- `scripts/export_permissions.py` — script que extrae metadatos (docstrings, parámetros y roles detectados) de `permissions.py` y produce:
+Archivos relevantes (en este repositorio)
+- `src/shared/application/permissions.py` — implementación de las funciones `can_*`.
+- `scripts/export_permissions.py` — extrae metadatos desde `permissions.py` y genera:
   - `docs/permissions.yaml`
   - `docs/permissions.json`
-- `scripts/roles_whitelist.txt` — lista mantenible de roles canónicos (actualmente: `Admin_plataforma`, `Admin_academia`, `Profesor_academia`). El script prioriza esta whitelist para normalizar roles.
-- `docs/openapi-auto.json` (o la ruta pública `/openapi.json`) — la especificación OpenAPI de la API, necesaria para conocer rutas, parámetros y esquemas.
+- `scripts/roles_whitelist.txt` — roles canónicos (ej.: `Admin_plataforma`, `Admin_academia`, `Profesor_academia`).
+- `scripts/dump_openapi.py` — genera `docs/openapi-auto.json` / `.yml` desde el código.
+- `scripts/permissions_map.json` — (mapa explícito) mapeo permiso → operationId y metadata enriquecida (scope, enforced_filters, allowed_target_roles, mutable_fields_by_role).
+- `scripts/merge_permissions_into_openapi.py` — combina `docs/openapi-auto.json` y `docs/permissions.json` (y el mapa) e inyecta `x-permissions` por operación.
+- `docs/served-openapi.json` — ARTIFACTO ÚNICO RECOMENDADO (final) que contiene rutas, parámetros, responses y `x-permissions`.
+- `docs/permissions-mapping-report.json`, `docs/permissions-validation-report.json` — informes de mapeo y validación generados en CI/local.
 
-Qué debe leer el mediador (`backend-OpenAI`):
+Qué debe leer el mediador (backend-OpenAI)
+1. Primario (recomendado): `docs/served-openapi.json`
+   - Contiene: `paths`, `operationId`, `parameters`, `responses[200].content` (schemas), y por operación `x-permissions` con:
+     - `allowed_roles`, `scope` (e.g. `own_academia`, `own_user`, `global`)
+     - `enforced_filters` (p. ej. `"academia_id": "current_user.academia_id"`)
+     - `allowed_target_roles` (qué roles puede asignar cada rol)
+     - `mutable_fields_by_role` (qué campos puede modificar cada rol)
+     - `generated_at`, `source`
+   - Con este único archivo el mediador puede construir prompts, validar propuestas y aplicar filtros de ámbito sin combinar fuentes en tiempo de ejecución.
 
-1. `docs/permissions.json` — para obtener las reglas de permiso por operación. Este archivo permite que el mediador construya la "whitelist de operaciones permitidas" por usuario/rol sin tener que ejecutar código Python del API.
-2. `docs/openapi-auto.json` (o `GET /openapi.json`) — para conocer las rutas, parámetros y los esquemas de request/response que el modelo puede usar como referencia.
+2. Secundario (opcional, diagnóstico): `docs/permissions.json` y `docs/openapi-auto.json` — útiles para debugging humano o auditoría, pero no necesarios en producción si existe `served-openapi.json`.
 
-Flujo recomendado antes de cada despliegue o ejecución CI del mediador:
+Flujo recomendado antes de cada despliegue / CI (repo API)
+1. En el job de CI del repo API:
+   1. `python scripts/export_permissions.py` → genera `docs/permissions.*`.
+   2. `python scripts/dump_openapi.py` → genera `docs/openapi-auto.json` / `.yml`.
+   3. `python scripts/merge_permissions_into_openapi.py` → genera `docs/served-openapi.json` (añade `operationId`, `responses[200].content` donde haga falta e inyecta `x-permissions` usando `permissions.json` y `permissions_map.json`).
+   4. Subir `docs/served-openapi.json` (y opcionalmente `docs/permissions.json`) como artifact del job de CI (o publicarlo en bucket/versioned release).
 
-1. En el repo de la API ejecutar `python scripts/export_permissions.py` (genera `docs/permissions.*`).
-2. Ejecutar `python scripts/dump_openapi.py` (genera `docs/openapi-auto.json`).
-3. El mediador descarga `docs/permissions.json` y `docs/openapi-auto.json` y los usa para construir prompts + validar cualquier `tool_call` que proponga el modelo.
+Flujo recomendado en el mediador (CI o runtime)
+1. Descargar el artifact `served-openapi.json` del último run exitoso del workflow del repo API (recomendado: GitHub Actions artifacts).
+2. Validar integridad y contenido mínimo (JSON válido, `paths` con endpoints críticos, `x-permissions` presentes para ellos).
+3. Usar `served-openapi.json` para:
+   - Construir el system prompt / function schema para OpenAI.
+   - Validar cualquier `tool_call` propuesto por el modelo contra `x-permissions` y aplicar `enforced_filters` (ej. `academia_id = current_user.academia_id`) antes de ejecutar la llamada.
+   - Rechazar o ajustar propuestas que intenten actuar fuera del `scope` o asignen roles no permitidos.
 
-Nota de seguridad: el mediador puede usar estos artefactos para decidir qué endpoints sugerir al modelo y construir el prompt, pero la autorización final de cada llamada la debe realizar el API (`AuthorizationService`) en el momento de la ejecución. Nunca ejecutar llamadas basadas únicamente en la recomendación del modelo sin validarlas contra `permissions.json` y contra el `AuthorizationService` del API.
+Nota de seguridad y responsabilidad
+- El mediador usa `served-openapi.json` para decidir y validar, pero la AUTORIZACIÓN FINAL debe realizarla siempre el API (p. ej. `AuthorizationService`) en tiempo de ejecución. No ejecutar sensibles basadas sólo en la recomendación del modelo.
+- Si el repo es privado, usar secrets con permisos mínimos (actions:read o repo:contents read) para descargar artifacts.
 
-Si quieres que haga commit y push de este README a la rama actual, dime y lo hago con un mensaje de commit descriptivo.
+Mantenimiento y buenas prácticas
+- Incluir `generated_at` y `git_commit` dentro de `served-openapi.json` para trazabilidad.
+- Regenerar `served-openapi.json` en CI en cada push que cambie rutas / permisos.
+- Añadir tests en la CI del mediador que fallen si `served-openapi.json` no contiene `x-permissions` para endpoints críticos (p. ej. `/usuarios`, `/academias`).
+- Mantener actualizado `scripts/permissions_map.json` cuando se renombren permisos o `operationId`.
+
+Ejemplo breve de uso en el mediador
+- Descargar artifact → extraer `docs/served-openapi.json` → comprobar `paths["/usuarios/"].get.x-permissions.scope == "own_academia"` → añadir `academia_id=current_user.academia_id` a la query generada por el modelo.
+
+// ...existing code...
+
 

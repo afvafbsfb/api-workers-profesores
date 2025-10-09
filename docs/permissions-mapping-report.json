@@ -1,0 +1,85 @@
+{
+  "mappings": [
+    {
+      "permission": "can_query_academias",
+      "detected_roles": [
+        "admin_academia",
+        "admin_plataforma",
+        "profesor_academia"
+      ],
+      "mapping_source": "explicit_map",
+      "mapped_to": "academias.listar_academias",
+      "mapped_target_exists": true
+    },
+    {
+      "permission": "can_create_academia",
+      "detected_roles": [
+        "admin_plataforma"
+      ],
+      "mapping_source": "explicit_map",
+      "mapped_to": "academias.crear_academia",
+      "mapped_target_exists": true
+    },
+    {
+      "permission": "can_modify_academia",
+      "detected_roles": [
+        "admin_academia",
+        "admin_plataforma"
+      ],
+      "mapping_source": "explicit_map",
+      "mapped_to": "academias.modificar_academia",
+      "mapped_target_exists": true
+    },
+    {
+      "permission": "can_delete_academia",
+      "detected_roles": [
+        "admin_plataforma"
+      ],
+      "mapping_source": "explicit_map",
+      "mapped_to": "academias.eliminar_academia",
+      "mapped_target_exists": true
+    },
+    {
+      "permission": "can_query_users",
+      "detected_roles": [
+        "admin_academia",
+        "admin_plataforma",
+        "profesor_academia"
+      ],
+      "mapping_source": "explicit_map",
+      "mapped_to": "usuarios.listar_usuarios",
+      "mapped_target_exists": true
+    },
+    {
+      "permission": "can_create_user",
+      "detected_roles": [
+        "admin_academia",
+        "admin_plataforma"
+      ],
+      "mapping_source": "explicit_map",
+      "mapped_to": "usuarios.crear_usuario",
+      "mapped_target_exists": true
+    },
+    {
+      "permission": "can_delete_user",
+      "detected_roles": [
+        "admin_academia",
+        "admin_plataforma"
+      ],
+      "mapping_source": "explicit_map",
+      "mapped_to": "usuarios.eliminar_usuario",
+      "mapped_target_exists": true
+    },
+    {
+      "permission": "can_modify_user",
+      "detected_roles": [
+        "admin_academia",
+        "admin_plataforma",
+        "profesor_academia"
+      ],
+      "mapping_source": "explicit_map",
+      "mapped_to": "usuarios.actualizar_usuario",
+      "mapped_target_exists": true
+    }
+  ]
+}
