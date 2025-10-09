@@ -23,8 +23,7 @@ Requisitos
 Set-Location 'C:\Users\Angel FV\Desktop\FORMACION\api-workers-profesores'
 
 # Crear y activar virtualenv
-python -m venv .venv
-. .\.venv\Scripts\Activate.ps1
+python -m 
 
 # Instalar dependencias
 python -m pip install -r requirements.txt
