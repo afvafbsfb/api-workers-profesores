@@ -134,6 +134,7 @@ python -m pytest tests/academias/test_academias_post.py -q -s
 python -m pytest tests/academias/test_academias_get_patch.py -q -s
 
 # B. Usuarios (ejecutados después de los tests de academias en CI)
+
 python -m pytest tests/usuarios/test_altas_bajas_usuarios.py -q -s
 python -m pytest tests/usuarios/test_busquedas_usuarios.py -q -s
 python -m pytest tests/usuarios/test_login.py -q -s
@@ -288,4 +289,39 @@ Notas finales
 - Artifactorigén: `docs/served-openapi.json` es el formato recomendado para consumo por el mediador y debe ser generado en CI a partir del código fuente y los mapas de permisos.
 - Si quieres, preparo un workflow de GitHub Actions que automatice el pipeline y publique el artifact `served-openapi.json`. 
 
+========================================================
+checklist minimalísimo y directo al grano para añadir CRUD de Cursos + Aulas + Horario y garantizar operationId + permisos desde el inicio:
 
+API design
+
+Definir operationId por operación: cursos.list, cursos.create, cursos.get, cursos.update, cursos.delete (igual para aulas/horario: aulas., horarios.).
+Código: rutas / handlers
+
+Crear blueprint (p. ej. src/academias/interfaces/flask/cursos_routes.py) y registrar en main.py.
+En cada view function fijar el operationId (ejemplo): view_fn.operation_id = 'cursos.create' o usar el decorador que ya usáis.
+Permissions runtime
+
+Añadir funciones en permissions.py: can_view_cursos, can_manage_cursos (determinando allowed_roles / scope).
+Mantener nombres claros que encajen con permissions_map.json si lo usas.
+Mapear permisos a operationId
+
+Editar permissions_map.json o confiar en export_permissions.py para exponer las funciones y añadir entradas que vinculen permiso → operationId (+ scope/allowed_roles).
+Schemas / validation
+
+Añadir/actualizar Marshmallow schemas y request/response models usados por las rutas.
+Tests mínimos
+
+Crear tests para cada endpoint (happy-path) y uno que verifique x-permissions/security en served-openapi.json (o ejecutar los scripts de validación más abajo).
+Generar y validar (comandos que debes ejecutar)
+
+python dump_openapi.py
+python check_operation_ids.py --spec openapi-auto.json
+python merge_permissions_into_openapi.py --spec openapi-auto.json --out served-openapi.json
+python validate_permissions_sync.py --map permissions_map.json --code permissions.py --spec openapi-auto.json
+python validate_served_openapi_for_mediator.py --spec served-openapi.json
+Criterio de éxito: todos los pasos devuelven exit code 0 y served-openapi.json contiene para cada operationId su x-permissions.
+Edge cases a revisar (rápido)
+
+Mismo path, distintos métodos → cada método necesita un operationId distinto.
+Operaciones “own_*” necesitan scope/scope_by_role correctos.
+Si usas wrappers/adaptadores en permissions, asegúrate que export_permissions.py las exponga con el nombre esperado.

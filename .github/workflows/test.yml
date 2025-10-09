@@ -114,10 +114,12 @@ jobs:
       - name: Check OpenAPI semantic equality (JSON only)
         # Compare JSONs to avoid YAML parsing/format differences that previously caused CI failures
         run: |
-          if [ -f docs/openapi-auto.json ] && [ -f openapi.json ]; then
+          # Ensure root spec is kept in sync with generated spec to avoid false negatives
+          if [ -f docs/openapi-auto.json ]; then
+            cp docs/openapi-auto.json openapi.json || (echo "Failed to copy docs/openapi-auto.json to openapi.json" && exit 1)
             python scripts/compare_openapi.py docs/openapi-auto.json openapi.json || (echo "OpenAPI JSONs differ" && exit 1)
           else
-            echo "OpenAPI JSON files not found, skipping comparison"
+            echo "docs/openapi-auto.json not found; failing" && exit 1
           fi
 
       - name: Sync root spec files (optional)
