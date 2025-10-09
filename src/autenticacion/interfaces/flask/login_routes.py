@@ -12,6 +12,7 @@ from src.autenticacion.application.dtos import LoginRequestDTO
 from src.autenticacion.domain.exceptions import UsuarioBloqueadoException, CredencialesInvalidasException
 
 login_bp = Blueprint('login_bp', __name__)
+from src.shared.docs.operation_id import operation_id
 
 
 class LoginSchema(Schema):
@@ -20,6 +21,7 @@ class LoginSchema(Schema):
 
 
 @login_bp.route('/login', methods=['POST'])
+@operation_id('login.login')
 def login():
     try:
         data = request.get_json() or {}
@@ -46,6 +48,7 @@ def login():
 
 @login_bp.route('/refresh', methods=['POST'])
 @jwt_required(refresh=True)
+@operation_id('login.refresh_tokens')
 def refresh_tokens():
     identity = get_jwt_identity()
     if isinstance(identity, str) and identity.isdigit():
@@ -121,6 +124,7 @@ def refresh_tokens():
 
 
 @login_bp.route('/logout', methods=['POST'])
+@operation_id('login.logout')
 def logout():
     try:
         # Allow passing the refresh token either via Authorization header or in the JSON body.
@@ -218,6 +222,7 @@ def logout():
 
 @login_bp.route('/unblock', methods=['POST'])
 @jwt_required()
+@operation_id('login.unblock_user')
 def unblock_user():
     try:
         identity = get_jwt_identity()

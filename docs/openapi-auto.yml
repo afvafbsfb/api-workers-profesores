@@ -83,6 +83,7 @@ paths:
   /academias:
     get:
       description: Auto-generated operation for academias.listar_academias
+      operationId: academias.listar_academias
       responses:
         '200':
           description: Successful response
@@ -97,6 +98,7 @@ paths:
       - Academias
     post:
       description: Auto-generated operation for academias.crear_academia
+      operationId: academias.crear_academia
       requestBody:
         content:
           application/json:
@@ -118,6 +120,7 @@ paths:
   /academias/{academia_id}:
     delete:
       description: Auto-generated operation for academias.eliminar_academia
+      operationId: academias.eliminar_academia
       parameters:
       - in: path
         name: academia_id
@@ -138,6 +141,7 @@ paths:
       - Academias
     get:
       description: Auto-generated operation for academias.obtener_academia
+      operationId: academias.obtener_academia
       parameters:
       - in: path
         name: academia_id
@@ -158,6 +162,7 @@ paths:
       - Academias
     patch:
       description: Auto-generated operation for academias.modificar_academia
+      operationId: academias.modificar_academia
       parameters:
       - in: path
         name: academia_id
@@ -185,6 +190,7 @@ paths:
   /auth/login:
     post:
       description: Inicio de sesión con email y password
+      operationId: login.login
       requestBody:
         content:
           application/json:
@@ -206,6 +212,7 @@ paths:
   /auth/logout:
     post:
       description: Auto-generated operation for login_bp.logout
+      operationId: login.logout
       responses:
         '200':
           description: Successful response
@@ -221,6 +228,7 @@ paths:
   /auth/refresh:
     post:
       description: Auto-generated operation for login_bp.refresh_tokens
+      operationId: login.refresh_tokens
       responses:
         '200':
           description: Successful response
@@ -236,6 +244,7 @@ paths:
   /auth/unblock:
     post:
       description: Auto-generated operation for login_bp.unblock_user
+      operationId: login.unblock_user
       responses:
         '200':
           description: Successful response
@@ -251,6 +260,7 @@ paths:
   /docs:
     get:
       description: Auto-generated operation for docs.docs_ui
+      operationId: docs.docs_ui
       responses:
         '200':
           description: Successful response
@@ -264,6 +274,7 @@ paths:
   /health:
     get:
       description: Auto-generated operation for health
+      operationId: health
       responses:
         '200':
           description: Successful response
@@ -277,6 +288,7 @@ paths:
   /openapi.json:
     get:
       description: Auto-generated operation for docs.openapi_json
+      operationId: docs.openapi_json
       responses:
         '200':
           description: Successful response
@@ -290,6 +302,7 @@ paths:
   /usuarios/:
     get:
       description: Auto-generated operation for usuarios.listar_usuarios
+      operationId: usuarios.listar_usuarios
       responses:
         '200':
           description: Successful response
@@ -304,6 +317,7 @@ paths:
       - Usuarios
     post:
       description: Auto-generated operation for usuarios.crear_usuario
+      operationId: usuarios.crear_usuario
       requestBody:
         content:
           application/json:
@@ -325,6 +339,7 @@ paths:
   /usuarios/me:
     get:
       description: Auto-generated operation for usuarios.obtener_mi_perfil
+      operationId: usuarios.obtener_mi_perfil
       responses:
         '200':
           content:
@@ -344,6 +359,7 @@ paths:
   /usuarios/recover:
     get:
       description: Auto-generated operation for usuarios.recuperar_credenciales
+      operationId: usuarios.recuperar_credenciales
       responses:
         '200':
           description: Successful response
@@ -359,6 +375,7 @@ paths:
   /usuarios/{usuario_id}:
     delete:
       description: Auto-generated operation for usuarios.eliminar_usuario
+      operationId: usuarios.eliminar_usuario
       parameters:
       - in: path
         name: usuario_id
@@ -379,6 +396,7 @@ paths:
       - Usuarios
     get:
       description: Auto-generated operation for usuarios.obtener_usuario
+      operationId: usuarios.obtener_usuario
       parameters:
       - in: path
         name: usuario_id
@@ -399,6 +417,7 @@ paths:
       - Usuarios
     patch:
       description: Auto-generated operation for usuarios.actualizar_usuario
+      operationId: usuarios.actualizar_usuario_patch
       parameters:
       - in: path
         name: usuario_id
@@ -425,6 +444,7 @@ paths:
       - Usuarios
     put:
       description: Auto-generated operation for usuarios.actualizar_usuario
+      operationId: usuarios.actualizar_usuario_put
       parameters:
       - in: path
         name: usuario_id
@@ -452,6 +472,7 @@ paths:
   /usuarios/{usuario_id}/credentials:
     put:
       description: Auto-generated operation for usuarios.actualizar_credenciales
+      operationId: usuarios.actualizar_credenciales
       parameters:
       - in: path
         name: usuario_id
@@ -479,6 +500,7 @@ paths:
   /usuarios/{usuario_id}/role:
     put:
       description: Auto-generated operation for usuarios.actualizar_rol
+      operationId: usuarios.actualizar_rol
       parameters:
       - in: path
         name: usuario_id
@@ -506,6 +528,7 @@ paths:
   /usuarios/{usuario_id}/status:
     put:
       description: Auto-generated operation for usuarios.actualizar_estado
+      operationId: usuarios.actualizar_estado
       parameters:
       - in: path
         name: usuario_id

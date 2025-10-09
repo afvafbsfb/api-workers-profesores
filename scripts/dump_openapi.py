@@ -66,11 +66,13 @@ def dump():
                 })
 
                 # Add POST /auth/login (explicit so requestBody is preserved)
+                # Ensure operationId matches the decorator used in the route source (login.login)
                 apispec.path(path='/auth/login', operations={
                     'post': {
                         'summary': 'Login usuario',
                         'description': 'Inicio de sesión con email y password',
                         'tags': ['login'],
+                        'operationId': 'login.login',
                         'requestBody': {
                             'content': {
                                 'application/json': {'schema': {'$ref': '#/components/schemas/LoginRequest'}}
@@ -216,6 +218,46 @@ def dump():
                                 '403': {'description': 'Forbidden'},
                             }
                         }
+
+                        # Attempt to set a deterministic operationId:
+                        # 1) If the view function has an explicit 'operation_id' attribute (set via decorator), use it.
+                        # 2) Else derive from rule.endpoint which is usually 'blueprint.func' or 'module.func'.
+                        try:
+                            op_id = None
+                            # prefer attribute on the original view function
+                            if view_fn is not None:
+                                op_id = getattr(view_fn, 'operation_id', None)
+                                if not op_id:
+                                    wrapped = getattr(view_fn, '__wrapped__', None)
+                                    op_id = getattr(wrapped, 'operation_id', None) if wrapped is not None else None
+
+                            # If op_id is a dict mapping methods -> id, pick the one for this method
+                            if isinstance(op_id, dict):
+                                try:
+                                    op_method_key = m.lower()
+                                    chosen = op_id.get(op_method_key)
+                                    if chosen:
+                                        op['operationId'] = chosen
+                                        op_id = chosen
+                                    else:
+                                        # no explicit mapping for this method; fallthrough to derive
+                                        op_id = None
+                                except Exception:
+                                    op_id = None
+
+                            if not op_id and isinstance(rule.endpoint, str):
+                                # rule.endpoint often has format 'blueprint.endpoint'; normalize to blueprint.endpoint
+                                ep = rule.endpoint
+                                # sanitize: lowercase and replace invalid chars with '_'
+                                ep_clean = re.sub(r'[^A-Za-z0-9_.]', '_', ep)
+                                op_id = ep_clean.lower()
+                                op['operationId'] = op_id
+                            elif op_id and not isinstance(op_id, dict):
+                                # if op_id is a string, use it
+                                op['operationId'] = op_id
+                        except Exception:
+                            # best-effort: do not prevent spec generation
+                            pass
 
                         # Determine if this path is public (no auth) by prefix or exact match
                         is_public = False

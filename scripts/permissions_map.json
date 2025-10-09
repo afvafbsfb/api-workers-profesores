@@ -2,9 +2,9 @@
   "can_query_users": {
     "operationId": "usuarios.listar_usuarios",
     "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
-    "scope": "own_academia",
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia", "profesor_academia": "own_academia"},
     "enforced_filters": { "academia_id": "current_user.academia_id" },
-    "note": "Listado de usuarios limitado al ámbito de la academia del usuario cuando aplica"
+    "note": "Listado de usuarios: admin_plataforma puede consultar todos; admin_academia y profesor_academia sólo su propia academia"
   },
 
   "can_create_user": {
@@ -19,7 +19,7 @@
   },
 
   "can_modify_user": {
-    "operationId": "usuarios.actualizar_usuario",
+    "operationId": ["usuarios.actualizar_usuario_put", "usuarios.actualizar_usuario_patch"],
     "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
     "scope_by_role": {
       "admin_plataforma": "global",
@@ -27,9 +27,9 @@
       "profesor_academia": "own_user"
     },
     "mutable_fields_by_role": {
-      "admin_plataforma": ["rol", "academia_id", "estado", "nombre"],
-      "admin_academia": ["nombre", "estado"],
-      "profesor_academia": ["nombre", "password"]
+      "admin_plataforma": ["rol", "email", "estado", "nombre"],
+      "admin_academia": ["email", "nombre", "estado"],
+      "profesor_academia": ["email", "nombre", "password"]
     },
     "note": "Permisos de modificación por rol y ámbito"
   },
@@ -44,8 +44,9 @@
   "can_query_academias": {
     "operationId": "academias.listar_academias",
     "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
-    "scope": "own_academia",
-    "enforced_filters": { "id": "current_user.academia_id" }
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia", "profesor_academia": "own_academia"},
+    "enforced_filters": { "id": "current_user.academia_id" },
+    "note": "Listado de academias: admin_plataforma puede listar todas; admin_academia y profesor_academia sólo su propia academia"
   },
 
   "can_create_academia": {
@@ -64,5 +65,87 @@
     "operationId": "academias.eliminar_academia",
     "allowed_roles": ["admin_plataforma"],
     "scope": "global"
+  }
+,
+  "can_view_academia": {
+    "operationId": "academias.obtener_academia",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia", "profesor_academia": "own_academia"},
+    "note": "Lectura de academia: admin_plataforma global; admin_academia/profesor_academia limitados a su propia academia"
+  },
+
+  "can_login": {
+    "operationId": "login.login",
+    "allowed_roles": [],
+    "scope": "public",
+    "note": "Login público (no requiere rol)"
+  },
+
+  "can_logout": {
+    "operationId": "login.logout",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope": "own_user",
+    "note": "Logout para usuarios autenticados"
+  },
+
+  "can_refresh": {
+    "operationId": "login.refresh_tokens",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope": "own_user",
+    "note": "Refresh de tokens para usuarios autenticados"
+  },
+
+  "can_unblock": {
+    "operationId": "login.unblock_user",
+    "allowed_roles": ["admin_plataforma", "admin_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia"},
+    "note": "Desbloqueo de usuarios: admin_plataforma global; admin_academia su academia"
+  },
+
+  "can_view_my_profile": {
+    "operationId": "usuarios.obtener_mi_perfil",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope": "own_user",
+    "note": "Cada usuario puede ver su propio perfil; admins pueden verlo según su scope"
+  },
+
+  "can_view_user": {
+    "operationId": "usuarios.obtener_usuario",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia", "profesor_academia": "own_academia"},
+    "note": "Lectura de usuario: admin_plataforma global; admin_academia y profesor_academia limitados a su academia"
+  },
+
+  "can_recover_credentials": {
+    "operationId": "usuarios.recuperar_credenciales",
+    "allowed_roles": [],
+    "scope": "own_user",
+    "note": "Recuperación de credenciales: la operación puede iniciarse sin sesión (por ejemplo 'forgot password'), pero solo debe permitir recuperar las credenciales del propio usuario. Los admins pueden tener flujos separados para administrar credenciales de otros usuarios."
+  },
+
+  "can_modify_credentials": {
+    "operationId": "usuarios.actualizar_credenciales",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia", "profesor_academia": "own_user"},
+    "mutable_fields_by_role": {
+      "admin_plataforma": ["password", "email", "nombre", "rol", "academia_id", "estado"],
+      "admin_academia": ["password", "email", "nombre", "rol", "academia_id", "estado"],
+      "profesor_academia": ["password", "email", "nombre"]
+    },
+    "note": "Modificación de credenciales/propio perfil"
+  },
+
+  "can_modify_role": {
+    "operationId": "usuarios.actualizar_rol",
+    "allowed_roles": ["admin_plataforma", "admin_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia"},
+    "note": "Cambio de rol: admin_academia limitado a su academia"
+  },
+
+  "can_modify_status": {
+    "operationId": "usuarios.actualizar_estado",
+    "allowed_roles": ["admin_plataforma", "admin_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia"},
+    "note": "Cambio de estado de usuario: admins"
   }
 }

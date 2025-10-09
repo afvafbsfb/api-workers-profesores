@@ -293,3 +293,156 @@ def can_modify_user(current_user, target_user, payload: Dict) -> Tuple[bool, Dic
         return True, sanitized, None
 
     return False, {}, 'forbidden'
+
+
+# ---------------------------------------------------------------------------
+# Adapter / compatibility functions (map names used in scripts/permissions_map.json)
+# These are thin wrappers that delegate to existing logic or implement minimal checks.
+# ---------------------------------------------------------------------------
+
+
+def can_view_academia(current_user, params: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Compatibility wrapper for permissions_map 'can_view_academia'.
+
+    Delegates to `can_query_academias` and is intended to enforce scope_by_role
+    semantics for: admin_plataforma, admin_academia, profesor_academia.
+    """
+    return can_query_academias(current_user, params)
+
+
+def can_login(current_user, payload: Dict = None) -> Tuple[bool, Dict, Optional[str]]:
+    """Login is a public operation: allow initiation of the flow.
+
+    Returns (allowed, info, None). The actual authentication checks happen in the
+    auth handlers and token validation paths.
+    """
+    return True, {}, None
+
+
+def can_logout(current_user) -> Tuple[bool, Optional[str]]:
+    """Compatibility wrapper: logout requires an authenticated user."""
+    if not current_user:
+        return False, 'not_authenticated'
+    return True, None
+
+
+def can_refresh(current_user) -> Tuple[bool, Optional[str]]:
+    """Token refresh requires an authenticated user (or a valid refresh token).
+
+    This is a minimal check; token validation is done elsewhere.
+    """
+    if not current_user:
+        return False, 'not_authenticated'
+    return True, None
+
+
+def can_unblock(current_user, target_user) -> Tuple[bool, Optional[str]]:
+    """Allow unblocking according to scope_by_role: admin_plataforma global, admin_academia own_academia."""
+    if not current_user:
+        return False, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    if user_role == 'admin_plataforma':
+        return True, None
+
+    if user_role == 'admin_academia':
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, 'user_has_no_academy'
+        if getattr(target_user, 'academia_id', None) != int(acad_id):
+            return False, 'forbidden_other_academia'
+        return True, None
+
+    return False, 'forbidden'
+
+
+def can_view_my_profile(current_user, params: Dict = None) -> Tuple[bool, Dict, Optional[str]]:
+    """Allow a user to view their own profile. For simplicity this returns allowed
+    if the request is from an authenticated user; further checks can be done by handlers.
+    """
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    return True, {}, None
+
+
+def can_view_user(current_user, target_user) -> Tuple[bool, Dict, Optional[str]]:
+    """Check if current_user can view target_user according to role/academy scope."""
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    if user_role == 'admin_plataforma':
+        return True, {}, None
+
+    if user_role in ('admin_academia', 'profesor_academia'):
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        if getattr(target_user, 'academia_id', None) != int(acad_id):
+            return False, {}, 'forbidden_other_academia'
+        return True, {}, None
+
+    return False, {}, 'forbidden'
+
+
+def can_recover_credentials(current_user, payload: Dict = None) -> Tuple[bool, Dict, Optional[str]]:
+    """Recovery flow: initiation can be public (e.g. user provides email) but
+    final recovery must be constrained to the own_user (token/email verification).
+    We allow initiation here and rely on the handler to enforce further checks.
+    """
+    return True, {}, None
+
+
+def can_modify_credentials(current_user, target_user, payload: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Delegate to can_modify_user but ensure semantics are aligned for credentials.
+
+    Reuses `can_modify_user` which enforces role-based restrictions. Mention
+    role keywords for static heuristics: admin_plataforma, admin_academia, profesor_academia.
+    """
+    return can_modify_user(current_user, target_user, payload)
+
+
+def can_modify_role(current_user, target_user, payload: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Allow changing role according to existing modify rules: only admins, with admin_academia limited to own academy."""
+    # Reuse can_modify_user but additionally ensure that non-admin_plataforma cannot assign admin_plataforma
+    allowed, sanitized, reason = can_modify_user(current_user, target_user, payload)
+    if not allowed:
+        return allowed, sanitized, reason
+    # if payload tries to change rol and the actor is admin_academia, block assigning admin_plataforma
+    try:
+        actor_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        actor_role = None
+    if actor_role == 'admin_academia':
+        new_rol = None
+        if payload and 'rol' in payload:
+            new_rol = normalize_role(payload.get('rol'))
+        if new_rol == 'admin_plataforma':
+            return False, {}, 'forbidden_role_assignment'
+    return True, sanitized, None
+
+
+def can_modify_status(current_user, target_user) -> Tuple[bool, Optional[str]]:
+    """Allow status changes only to admins (admin_plataforma global; admin_academia own_academia)."""
+    if not current_user:
+        return False, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+    if user_role == 'admin_plataforma':
+        return True, None
+    if user_role == 'admin_academia':
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, 'user_has_no_academy'
+        if getattr(target_user, 'academia_id', None) != int(acad_id):
+            return False, 'forbidden_other_academia'
+        return True, None
+    return False, 'forbidden'

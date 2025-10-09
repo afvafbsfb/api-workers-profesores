@@ -3,11 +3,13 @@ from src.shared.middleware.auth import require_auth
 from src.usuarios.infrastructure.models import Usuario
 from src.shared.application.permissions import can_query_users, can_create_user, can_modify_user, can_delete_user
 from src.shared.database import db
+from src.shared.docs.operation_id import operation_id
 
 usuarios_bp = Blueprint('usuarios', __name__)
 
 @usuarios_bp.route('/', methods=['GET'])
 @require_auth  # Middleware para validar el token y extraer el rol
+@operation_id('usuarios.listar_usuarios')
 def listar_usuarios():
     """
     Endpoint para listar usuarios con filtros opcionales.
@@ -67,6 +69,7 @@ def listar_usuarios():
 
 @usuarios_bp.route('/', methods=['POST'])
 @require_auth
+@operation_id('usuarios.crear_usuario')
 def crear_usuario():
     user = getattr(g, 'current_user', None)
     data = request.get_json() or {}
@@ -98,10 +101,12 @@ def crear_usuario():
         return jsonify({"ok": False, "error": "db_error", "message": str(e)}), 500
 
 @usuarios_bp.route('/<int:usuario_id>', methods=['GET'])
+@operation_id('usuarios.obtener_usuario')
 def obtener_usuario(usuario_id):
     return jsonify({"message": f"Detalles del usuario {usuario_id}"})
 @usuarios_bp.route('/<int:usuario_id>', methods=['PUT', 'PATCH'])
 @require_auth
+@operation_id({'put': 'usuarios.actualizar_usuario_put', 'patch': 'usuarios.actualizar_usuario_patch'})
 def actualizar_usuario(usuario_id):
     user = getattr(g, 'current_user', None)
     target = db.session.get(Usuario, usuario_id)
@@ -126,6 +131,7 @@ def actualizar_usuario(usuario_id):
 
 @usuarios_bp.route('/<int:usuario_id>', methods=['DELETE'])
 @require_auth
+@operation_id('usuarios.eliminar_usuario')
 def eliminar_usuario(usuario_id):
     user = getattr(g, 'current_user', None)
     target = db.session.get(Usuario, usuario_id)
@@ -149,21 +155,25 @@ def eliminar_usuario(usuario_id):
         return jsonify({"ok": False, "error": "db_error", "message": str(e)}), 500
 
 @usuarios_bp.route('/<int:usuario_id>/credentials', methods=['PUT'])
+@operation_id('usuarios.actualizar_credenciales')
 def actualizar_credenciales(usuario_id):
     data = request.get_json()
     return jsonify({"message": f"Credenciales del usuario {usuario_id} actualizadas", "data": data})
 
 @usuarios_bp.route('/<int:usuario_id>/role', methods=['PUT'])
+@operation_id('usuarios.actualizar_rol')
 def actualizar_rol(usuario_id):
     data = request.get_json()
     return jsonify({"message": f"Rol del usuario {usuario_id} actualizado", "data": data})
 
 @usuarios_bp.route('/<int:usuario_id>/status', methods=['PUT'])
+@operation_id('usuarios.actualizar_estado')
 def actualizar_estado(usuario_id):
     data = request.get_json()
     return jsonify({"message": f"Estado del usuario {usuario_id} actualizado", "data": data})
 
 @usuarios_bp.route('/recover', methods=['GET'])
+@operation_id('usuarios.recuperar_credenciales')
 def recuperar_credenciales():
     email = request.args.get('email')
     return jsonify({"message": f"Instrucciones enviadas al correo {email}"})
@@ -172,6 +182,7 @@ def recuperar_credenciales():
 # Endpoint para obtener los datos del usuario autenticado
 @usuarios_bp.route('/me', methods=['GET'])
 @require_auth
+@operation_id('usuarios.obtener_mi_perfil')
 def obtener_mi_perfil():
     user = getattr(g, 'current_user', None)
     if not user:

@@ -160,87 +160,118 @@ def load_permissions_map():
 # load explicit map and apply it first
 perm_map = load_permissions_map()
 unmapped = []
+processed_names = set()
 
 for perm in perms:
     name = perm.get('name')
     mapped = None
+    if name:
+        processed_names.add(name)
     if name and name in perm_map:
         mapped = perm_map[name]
-        # mapped can be a string (operationId) or an object with metadata
+        # mapped can be a string (operationId), a list of operationIds, or an object with metadata
+        metadata = None
+        op_ids = []
+
         if isinstance(mapped, str):
-            target_op_id = mapped
-            metadata = None
+            op_ids = [mapped]
+        elif isinstance(mapped, list):
+            op_ids = list(mapped)
         elif isinstance(mapped, dict):
-            target_op_id = mapped.get('operationId')
+            # metadata may include operationId as str or list
             metadata = mapped
+            opv = mapped.get('operationId')
+            if isinstance(opv, str):
+                op_ids = [opv]
+            elif isinstance(opv, list):
+                op_ids = list(opv)
+            else:
+                # no explicit operationId in metadata: fall back to heuristic below
+                op_ids = []
         else:
             print(f'Unsupported map entry for {name}: {mapped!r}')
             unmapped.append(name)
             continue
 
-        # find operation by operationId
-        found = None
-        for (path, method, operation) in ops:
-            if operation.get('operationId') == target_op_id:
-                found = (path, method, operation)
-                break
-        if not found:
-            print(f'Permissions map points to unknown operationId: {target_op_id} (perm: {name})')
+        if not op_ids:
+            # nothing explicitly mapped; fallback to heuristic - leave for later
+            # record unmapped for reporting
             unmapped.append(name)
             continue
 
-        path, method, operation = found
-        xp = operation.setdefault('x-permissions', {})
+        # For each operationId in op_ids, find the operation and attach x-permissions
+        attached_any = False
+        for target_op_id in op_ids:
+            found = None
+            for (path, method, operation) in ops:
+                if operation.get('operationId') == target_op_id:
+                    found = (path, method, operation)
+                    break
+            if not found:
+                print(f'Permissions map points to unknown operationId: {target_op_id} (perm: {name})')
+                continue
 
-        # if metadata present, copy fields, normalizing role names where needed
-        if metadata:
-            # copy allowed_roles normalizing casing
-            if 'allowed_roles' in metadata:
-                xp['allowed_roles'] = sorted({normalize_role(r) for r in metadata.get('allowed_roles') or []})
+            path, method, operation = found
+            xp = operation.setdefault('x-permissions', {})
 
-            # enforced_filters and note copy as-is
-            if 'enforced_filters' in metadata:
-                xp['enforced_filters'] = metadata['enforced_filters']
-            if 'note' in metadata:
-                xp['note'] = metadata['note']
+            # if metadata present, copy fields, normalizing role names where needed
+            if metadata:
+                # copy allowed_roles normalizing casing
+                if 'allowed_roles' in metadata:
+                    xp['allowed_roles'] = sorted({normalize_role(r) for r in metadata.get('allowed_roles') or []})
 
-            # scope (single string)
-            if 'scope' in metadata:
-                xp['scope'] = metadata['scope']
+                # enforced_filters and note copy as-is
+                if 'enforced_filters' in metadata:
+                    xp['enforced_filters'] = metadata['enforced_filters']
+                if 'note' in metadata:
+                    xp['note'] = metadata['note']
 
-            # scope_by_role: normalize role keys
-            if 'scope_by_role' in metadata:
-                sb = {}
-                for rk, rv in (metadata.get('scope_by_role') or {}).items():
-                    sb[normalize_role(rk)] = rv
-                xp['scope_by_role'] = sb
+                # scope (single string)
+                if 'scope' in metadata:
+                    xp['scope'] = metadata['scope']
+                    # if explicitly public scope, ensure the OpenAPI operation has no security requirements
+                    if metadata.get('scope') == 'public':
+                        operation['security'] = []
 
-            # allowed_target_roles: normalize keys and values (role lists)
-            if 'allowed_target_roles' in metadata:
-                atr = {}
-                for rk, rv in (metadata.get('allowed_target_roles') or {}).items():
-                    nk = normalize_role(rk)
-                    # rv may be list of role names
-                    if isinstance(rv, (list, tuple)):
-                        atr[nk] = [normalize_role(x) for x in rv]
-                    else:
-                        atr[nk] = rv
-                xp['allowed_target_roles'] = atr
+                # scope_by_role: normalize role keys
+                if 'scope_by_role' in metadata:
+                    sb = {}
+                    for rk, rv in (metadata.get('scope_by_role') or {}).items():
+                        sb[normalize_role(rk)] = rv
+                    xp['scope_by_role'] = sb
 
-            # mutable_fields_by_role: normalize keys
-            if 'mutable_fields_by_role' in metadata:
-                mfb = {}
-                for rk, rv in (metadata.get('mutable_fields_by_role') or {}).items():
-                    mfb[normalize_role(rk)] = rv
-                xp['mutable_fields_by_role'] = mfb
+                # allowed_target_roles: normalize keys and values (role lists)
+                if 'allowed_target_roles' in metadata:
+                    atr = {}
+                    for rk, rv in (metadata.get('allowed_target_roles') or {}).items():
+                        nk = normalize_role(rk)
+                        # rv may be list of role names
+                        if isinstance(rv, (list, tuple)):
+                            atr[nk] = [normalize_role(x) for x in rv]
+                        else:
+                            atr[nk] = rv
+                    xp['allowed_target_roles'] = atr
+
+                # mutable_fields_by_role: normalize keys
+                if 'mutable_fields_by_role' in metadata:
+                    mfb = {}
+                    for rk, rv in (metadata.get('mutable_fields_by_role') or {}).items():
+                        mfb[normalize_role(rk)] = rv
+                    xp['mutable_fields_by_role'] = mfb
+            else:
+                # fallback to detected_roles from permissions.json
+                roles = [normalize_role(r) for r in (perm.get('detected_roles') or [])]
+                xp['allowed_roles'] = sorted(set(roles))
+
+            xp['source'] = 'permissions_map'
+            xp['generated_at'] = datetime.now(timezone.utc).isoformat()
+            attached_any = True
+
+        if attached_any:
+            continue
         else:
-            # fallback to detected_roles from permissions.json
-            roles = [normalize_role(r) for r in (perm.get('detected_roles') or [])]
-            xp['allowed_roles'] = sorted(set(roles))
-
-        xp['source'] = 'permissions_map'
-        xp['generated_at'] = datetime.now(timezone.utc).isoformat()
-        continue
+            unmapped.append(name)
+            continue
 
     # fallback to token-overlap heuristic
     perm_desc = (perm.get('description') or '') .lower()
@@ -269,6 +300,96 @@ if unmapped:
     report_p = OUT.parent / 'permissions-unmapped.json'
     report_p.write_text(json.dumps({'unmapped': unmapped}, ensure_ascii=False, indent=2), encoding='utf-8')
     print(f'Warning: {len(unmapped)} permissions left unmapped. See {report_p}')
+
+# Also process permissions declared in scripts/permissions_map.json but not present in docs/permissions.json
+for name, mapped in perm_map.items():
+    if name in processed_names:
+        continue
+    metadata = None
+    op_ids = []
+
+    if isinstance(mapped, str):
+        op_ids = [mapped]
+    elif isinstance(mapped, list):
+        op_ids = list(mapped)
+    elif isinstance(mapped, dict):
+        metadata = mapped
+        opv = mapped.get('operationId')
+        if isinstance(opv, str):
+            op_ids = [opv]
+        elif isinstance(opv, list):
+            op_ids = list(opv)
+        else:
+            op_ids = []
+    else:
+        print(f'Unsupported map entry for {name}: {mapped!r}')
+        unmapped.append(name)
+        continue
+
+    if not op_ids:
+        unmapped.append(name)
+        continue
+
+    attached_any = False
+    for target_op_id in op_ids:
+        found = None
+        for (path, method, operation) in ops:
+            if operation.get('operationId') == target_op_id:
+                found = (path, method, operation)
+                break
+        if not found:
+            print(f'Permissions map points to unknown operationId: {target_op_id} (perm: {name})')
+            continue
+
+        path, method, operation = found
+        xp = operation.setdefault('x-permissions', {})
+
+        if metadata:
+            if 'allowed_roles' in metadata:
+                xp['allowed_roles'] = sorted({normalize_role(r) for r in metadata.get('allowed_roles') or []})
+            if 'enforced_filters' in metadata:
+                xp['enforced_filters'] = metadata['enforced_filters']
+            if 'note' in metadata:
+                xp['note'] = metadata['note']
+            if 'scope' in metadata:
+                xp['scope'] = metadata['scope']
+                # if explicitly public scope, ensure the OpenAPI operation has no security requirements
+                if metadata.get('scope') == 'public':
+                    operation['security'] = []
+            if 'scope_by_role' in metadata:
+                sb = {}
+                for rk, rv in (metadata.get('scope_by_role') or {}).items():
+                    sb[normalize_role(rk)] = rv
+                xp['scope_by_role'] = sb
+            if 'allowed_target_roles' in metadata:
+                atr = {}
+                for rk, rv in (metadata.get('allowed_target_roles') or {}).items():
+                    nk = normalize_role(rk)
+                    if isinstance(rv, (list, tuple)):
+                        atr[nk] = [normalize_role(x) for x in rv]
+                    else:
+                        atr[nk] = rv
+                xp['allowed_target_roles'] = atr
+            if 'mutable_fields_by_role' in metadata:
+                mfb = {}
+                for rk, rv in (metadata.get('mutable_fields_by_role') or {}).items():
+                    mfb[normalize_role(rk)] = rv
+                xp['mutable_fields_by_role'] = mfb
+        else:
+            # fallback to empty allowed_roles if no metadata given
+            xp['allowed_roles'] = []
+
+        xp['source'] = 'permissions_map'
+        xp['generated_at'] = datetime.now(timezone.utc).isoformat()
+        attached_any = True
+
+    if attached_any:
+        # mark as processed
+        processed_names.add(name)
+        continue
+    else:
+        unmapped.append(name)
+        continue
 
 # write output
 OUT.write_text(json.dumps(openapi, ensure_ascii=False, indent=2), encoding='utf-8')

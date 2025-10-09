@@ -125,6 +125,40 @@ jobs:
           if [ -f docs/openapi-auto.json ]; then cp docs/openapi-auto.json openapi.json || true; fi
           if [ -f docs/openapi-auto.yml ]; then cp docs/openapi-auto.yml openapi.yml || true; fi
 
+      # -----------------------------
+      # OpenAPI & Permissions validations and merge
+      # -----------------------------
+      - name: Check OpenAPI has operationIds
+        run: |
+          if [ -f docs/openapi-auto.json ]; then
+            python scripts/check_operation_ids.py --spec docs/openapi-auto.json
+          else
+            echo "docs/openapi-auto.json not found; failing" && exit 1
+          fi
+
+      - name: Merge permissions into OpenAPI (produce served-openapi.json)
+        run: |
+          # merge_permissions expects docs/permissions.json (export_permissions.py should have created it)
+          python scripts/merge_permissions_into_openapi.py --spec docs/openapi-auto.json --out docs/served-openapi.json
+
+      - name: Validate permissions sync
+        run: |
+          # Fail-fast: ensure permission names and operationIds are in sync
+          python scripts/validate_permissions_sync.py --map scripts/permissions_map.json --code src/shared/application/permissions.py --spec docs/openapi-auto.json
+
+      - name: Validate critical endpoints
+        run: |
+          # This is blocking: ensure all critical endpoints have x-permissions and security
+          python scripts/validate_critical_endpoints.py --spec docs/served-openapi.json
+
+      - name: Validate served-openapi for mediator
+        run: |
+          # Mandatory mediator-specific validation: fail if the validator script is missing or returns non-zero
+          if [ ! -f scripts/validate_served_openapi_for_mediator.py ]; then
+            echo "ERROR: scripts/validate_served_openapi_for_mediator.py not found" && exit 1
+          fi
+          python scripts/validate_served_openapi_for_mediator.py --spec docs/served-openapi.json
+
       - name: Upload generated OpenAPI artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -134,6 +168,18 @@ jobs:
             docs/openapi-auto.yml
             openapi.json
             openapi.yml
+
+      - name: Upload served-openapi and validation reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: served-openapi
+          path: |
+            docs/served-openapi.json
+            docs/permissions.json
+            docs/permissions.yaml
+            docs/permissions-unmapped.json
+            docs/permissions-validation-report.json
+            report-all.html
 
       - name: Upload generated permissions artifact
         uses: actions/upload-artifact@v4

@@ -6,17 +6,26 @@ Checks:
  - allowed_target_roles and mutable_fields_by_role keys normalized
  - scope or scope_by_role present where expected
 Generates a JSON report and prints a human summary.
-Usage: python scripts/validate_served_openapi_for_mediator.py [--fix]
-If --fix is provided, the script will normalize nested role keys in-place in served-openapi.json.
+Usage: python scripts/validate_served_openapi_for_mediator.py [--spec PATH] [--fix]
+If --fix is provided, the script will normalize nested role keys in-place in the provided spec file.
 """
 from pathlib import Path
 import json
 import re
 import sys
+import argparse
 
 ROOT = Path(__file__).resolve().parents[1]
-SPEC = ROOT / 'docs' / 'served-openapi.json'
+DEFAULT_SPEC = ROOT / 'docs' / 'served-openapi.json'
 REPORT = ROOT / 'docs' / 'permissions-validation-report.json'
+
+# CLI args
+parser = argparse.ArgumentParser(description='Validate served-openapi.json for mediator consumption')
+parser.add_argument('--spec', default=str(DEFAULT_SPEC), help='Path to served-openapi.json')
+parser.add_argument('--fix', action='store_true', help='Apply normalization fixes in-place')
+args = parser.parse_args()
+
+SPEC = Path(args.spec)
 
 if not SPEC.exists():
     raise SystemExit(f'served-openapi.json not found: {SPEC}')
@@ -88,7 +97,7 @@ for path, method, opid in critical_ops:
 report = {'issues': issues, 'fixed': False, 'fixes': []}
 
 # Offer to fix normalization if requested
-if '--fix' in sys.argv:
+if args.fix:
     modified = False
     for path, methods in paths.items():
         for method, op in methods.items():
@@ -140,10 +149,12 @@ else:
     print(len(issues), 'issue(s) found:')
     for it in issues:
         print('-', it['op'], it['problem'])
-    if '--fix' in sys.argv:
+    if args.fix:
         if report['fixed']:
             print('Applied fixes:')
             for c in changes:
                 print('-', c['path'], c['method'], c['field'])
         else:
             print('No automatic fixes applied.')
+    # Fail if any issues detected so CI step is blocking
+    sys.exit(1)

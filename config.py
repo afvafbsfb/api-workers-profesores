@@ -4,7 +4,7 @@ class Config:
     """
     Clase base para manejar configuraciones de la aplicación.
     """
-    DB_ENV = os.getenv('DB_ENV', 'development')  # Valores posibles: 'development', 'production'
+    DB_ENV = os.getenv('DB_ENV', 'developmentAWS')  # Valores posibles: 'development', 'developmentAWS', 'production'
 
     # Configuración de bases de datos
     DATABASES = {

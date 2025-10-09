@@ -5,12 +5,14 @@ from src.shared.application.permissions import can_query_academias
 from src.academias.infrastructure.models import Academia
 from src.shared.database import db
 from config import Config
+from src.shared.docs.operation_id import operation_id
 
 academias_bp = Blueprint('academias', __name__)
 
 
 @academias_bp.route('', methods=['POST'])
 @require_role('Admin_plataforma')
+@operation_id('academias.crear_academia')
 def crear_academia():
     # Enhanced debugging to trace 422 issues
     if Config.DEBUG:
@@ -57,6 +59,7 @@ def crear_academia():
 
 @academias_bp.route('', methods=['GET'])
 @require_auth
+@operation_id('academias.listar_academias')
 def listar_academias():
     user = getattr(g, 'current_user', None)
 
@@ -82,6 +85,7 @@ def listar_academias():
 
 @academias_bp.route('/<int:academia_id>', methods=['GET'])
 @require_auth
+@operation_id('academias.obtener_academia')
 def obtener_academia(academia_id):
     user = getattr(g, 'current_user', None)
     rol_nombre = user.rol.nombre if user and user.rol else None
@@ -104,6 +108,7 @@ def obtener_academia(academia_id):
 
 @academias_bp.route('/<int:academia_id>', methods=['PATCH'])
 @require_auth
+@operation_id('academias.modificar_academia')
 def modificar_academia(academia_id):
     user = getattr(g, 'current_user', None)
     rol_nombre = user.rol.nombre if user and user.rol else None
@@ -160,6 +165,7 @@ def modificar_academia(academia_id):
 
 @academias_bp.route('/<int:academia_id>', methods=['DELETE'])
 @require_role('Admin_plataforma')
+@operation_id('academias.eliminar_academia')
 def eliminar_academia(academia_id):
     """Soft-delete an academy only if no dependent active records exist.
 

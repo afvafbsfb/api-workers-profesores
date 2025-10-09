@@ -119,6 +119,7 @@
     "/academias": {
       "get": {
         "description": "Auto-generated operation for academias.listar_academias",
+        "operationId": "academias.listar_academias",
         "responses": {
           "200": {
             "description": "Successful response"
@@ -138,21 +139,11 @@
         "summary": "GET /academias",
         "tags": [
           "Academias"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer"
-            },
-            "description": "Filtrar por id de academia (cuando el permiso lo permite)"
-          }
         ]
       },
       "post": {
         "description": "Auto-generated operation for academias.crear_academia",
+        "operationId": "academias.crear_academia",
         "requestBody": {
           "content": {
             "application/json": {
@@ -188,6 +179,7 @@
     "/academias/{academia_id}": {
       "delete": {
         "description": "Auto-generated operation for academias.eliminar_academia",
+        "operationId": "academias.eliminar_academia",
         "parameters": [
           {
             "in": "path",
@@ -221,6 +213,7 @@
       },
       "get": {
         "description": "Auto-generated operation for academias.obtener_academia",
+        "operationId": "academias.obtener_academia",
         "parameters": [
           {
             "in": "path",
@@ -254,6 +247,7 @@
       },
       "patch": {
         "description": "Auto-generated operation for academias.modificar_academia",
+        "operationId": "academias.modificar_academia",
         "parameters": [
           {
             "in": "path",
@@ -299,6 +293,7 @@
     "/auth/login": {
       "post": {
         "description": "Inicio de sesión con email y password",
+        "operationId": "login.login",
         "requestBody": {
           "content": {
             "application/json": {
@@ -333,6 +328,7 @@
     "/auth/logout": {
       "post": {
         "description": "Auto-generated operation for login_bp.logout",
+        "operationId": "login.logout",
         "responses": {
           "200": {
             "description": "Successful response"
@@ -358,6 +354,7 @@
     "/auth/refresh": {
       "post": {
         "description": "Auto-generated operation for login_bp.refresh_tokens",
+        "operationId": "login.refresh_tokens",
         "responses": {
           "200": {
             "description": "Successful response"
@@ -383,6 +380,7 @@
     "/auth/unblock": {
       "post": {
         "description": "Auto-generated operation for login_bp.unblock_user",
+        "operationId": "login.unblock_user",
         "responses": {
           "200": {
             "description": "Successful response"
@@ -408,6 +406,7 @@
     "/docs": {
       "get": {
         "description": "Auto-generated operation for docs.docs_ui",
+        "operationId": "docs.docs_ui",
         "responses": {
           "200": {
             "description": "Successful response"
@@ -428,6 +427,7 @@
     "/health": {
       "get": {
         "description": "Auto-generated operation for health",
+        "operationId": "health",
         "responses": {
           "200": {
             "description": "Successful response"
@@ -448,6 +448,7 @@
     "/openapi.json": {
       "get": {
         "description": "Auto-generated operation for docs.openapi_json",
+        "operationId": "docs.openapi_json",
         "responses": {
           "200": {
             "description": "Successful response"
@@ -468,6 +469,7 @@
     "/usuarios/": {
       "get": {
         "description": "Auto-generated operation for usuarios.listar_usuarios",
+        "operationId": "usuarios.listar_usuarios",
         "responses": {
           "200": {
             "description": "Successful response"
@@ -487,48 +489,11 @@
         "summary": "GET /usuarios/",
         "tags": [
           "Usuarios"
-        ],
-        "parameters": [
-          {
-            "name": "academia_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer"
-            },
-            "description": "Filtrar por academia_id (nota: para roles de academia se fuerza este filtro)"
-          },
-          {
-            "name": "rol",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Filtrar por nombre del rol (e.g. Admin_plataforma, Admin_academia, Profesor)"
-          },
-          {
-            "name": "nombre",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Buscar por parte del nombre (ilike)"
-          },
-          {
-            "name": "id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer"
-            },
-            "description": "Filtrar por id del usuario (puede usarse como usuario_id)"
-          }
         ]
       },
       "post": {
         "description": "Auto-generated operation for usuarios.crear_usuario",
+        "operationId": "usuarios.crear_usuario",
         "requestBody": {
           "content": {
             "application/json": {
@@ -564,6 +529,7 @@
     "/usuarios/me": {
       "get": {
         "description": "Auto-generated operation for usuarios.obtener_mi_perfil",
+        "operationId": "usuarios.obtener_mi_perfil",
         "responses": {
           "200": {
             "content": {
@@ -596,6 +562,7 @@
     "/usuarios/recover": {
       "get": {
         "description": "Auto-generated operation for usuarios.recuperar_credenciales",
+        "operationId": "usuarios.recuperar_credenciales",
         "responses": {
           "200": {
             "description": "Successful response"
@@ -621,6 +588,7 @@
     "/usuarios/{usuario_id}": {
       "delete": {
         "description": "Auto-generated operation for usuarios.eliminar_usuario",
+        "operationId": "usuarios.eliminar_usuario",
         "parameters": [
           {
             "in": "path",
@@ -654,6 +622,7 @@
       },
       "get": {
         "description": "Auto-generated operation for usuarios.obtener_usuario",
+        "operationId": "usuarios.obtener_usuario",
         "parameters": [
           {
             "in": "path",
@@ -687,6 +656,7 @@
       },
       "patch": {
         "description": "Auto-generated operation for usuarios.actualizar_usuario",
+        "operationId": "usuarios.actualizar_usuario_patch",
         "parameters": [
           {
             "in": "path",
@@ -730,6 +700,7 @@
       },
       "put": {
         "description": "Auto-generated operation for usuarios.actualizar_usuario",
+        "operationId": "usuarios.actualizar_usuario_put",
         "parameters": [
           {
             "in": "path",
@@ -775,6 +746,7 @@
     "/usuarios/{usuario_id}/credentials": {
       "put": {
         "description": "Auto-generated operation for usuarios.actualizar_credenciales",
+        "operationId": "usuarios.actualizar_credenciales",
         "parameters": [
           {
             "in": "path",
@@ -820,6 +792,7 @@
     "/usuarios/{usuario_id}/role": {
       "put": {
         "description": "Auto-generated operation for usuarios.actualizar_rol",
+        "operationId": "usuarios.actualizar_rol",
         "parameters": [
           {
             "in": "path",
@@ -865,6 +838,7 @@
     "/usuarios/{usuario_id}/status": {
       "put": {
         "description": "Auto-generated operation for usuarios.actualizar_estado",
+        "operationId": "usuarios.actualizar_estado",
         "parameters": [
           {
             "in": "path",
