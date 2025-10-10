@@ -56,6 +56,18 @@
         },
         "type": "object"
       },
+      "RefreshRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "refresh_token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "refresh_token"
+        ],
+        "type": "object"
+      },
       "Rol": {
         "additionalProperties": false,
         "properties": {
@@ -242,7 +254,7 @@
             "Profesor_academia": "own_academia"
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-10T10:16:31.241089+00:00"
+          "generated_at": "2025-10-10T12:15:56.380458+00:00"
         }
       },
       "post": {
@@ -291,7 +303,7 @@
           ],
           "scope": "global",
           "source": "permissions_map",
-          "generated_at": "2025-10-10T10:16:31.241089+00:00"
+          "generated_at": "2025-10-10T12:15:56.380458+00:00"
         }
       }
     },
@@ -342,7 +354,7 @@
           ],
           "scope": "global",
           "source": "permissions_map",
-          "generated_at": "2025-10-10T10:16:31.241089+00:00"
+          "generated_at": "2025-10-10T12:15:56.380458+00:00"
         }
       },
       "get": {
@@ -398,7 +410,7 @@
             "Profesor_academia": "own_academia"
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-10T10:16:31.241089+00:00"
+          "generated_at": "2025-10-10T12:15:56.380458+00:00"
         }
       },
       "patch": {
@@ -461,7 +473,7 @@
             "Admin_plataforma": "global"
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-10T10:16:31.241089+00:00"
+          "generated_at": "2025-10-10T12:15:56.380458+00:00"
         }
       }
     },
@@ -503,7 +515,7 @@
           "note": "Login público (no requiere rol)",
           "scope": "public",
           "source": "permissions_map",
-          "generated_at": "2025-10-10T10:16:31.241089+00:00"
+          "generated_at": "2025-10-10T12:15:56.380458+00:00"
         },
         "security": []
       }
@@ -512,6 +524,16 @@
       "post": {
         "description": "Auto-generated operation for login_bp.logout",
         "operationId": "login.logout",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequest"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Successful response"
@@ -541,7 +563,7 @@
           "note": "Logout para usuarios autenticados",
           "scope": "own_user",
           "source": "permissions_map",
-          "generated_at": "2025-10-10T10:16:31.241089+00:00"
+          "generated_at": "2025-10-10T12:15:56.380458+00:00"
         }
       }
     },
@@ -578,7 +600,7 @@
           "note": "Refresh de tokens para usuarios autenticados",
           "scope": "own_user",
           "source": "permissions_map",
-          "generated_at": "2025-10-10T10:16:31.241089+00:00"
+          "generated_at": "2025-10-10T12:15:56.380458+00:00"
         }
       }
     },
@@ -617,7 +639,7 @@
             "Admin_academia": "own_academia"
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-10T10:16:31.241089+00:00"
+          "generated_at": "2025-10-10T12:15:56.380458+00:00"
         }
       }
     },
@@ -786,7 +808,7 @@
             "Profesor_academia": "own_academia"
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-10T10:16:31.241089+00:00"
+          "generated_at": "2025-10-10T12:15:56.380458+00:00"
         }
       },
       "post": {
@@ -848,7 +870,7 @@
             ]
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-10T10:16:31.241089+00:00"
+          "generated_at": "2025-10-10T12:15:56.380458+00:00"
         }
       }
     },
@@ -892,7 +914,7 @@
           "note": "Cada usuario puede ver su propio perfil; admins pueden verlo según su scope",
           "scope": "own_user",
           "source": "permissions_map",
-          "generated_at": "2025-10-10T10:16:31.241089+00:00"
+          "generated_at": "2025-10-10T12:15:56.380458+00:00"
         }
       }
     },
@@ -932,7 +954,7 @@
           "note": "Recuperación de credenciales: la operación puede iniciarse sin sesión (por ejemplo 'forgot password'), pero solo debe permitir recuperar las credenciales del propio usuario. Los admins pueden tener flujos separados para administrar credenciales de otros usuarios.",
           "scope": "own_user",
           "source": "permissions_map",
-          "generated_at": "2025-10-10T10:16:31.241089+00:00"
+          "generated_at": "2025-10-10T12:15:56.380458+00:00"
         }
       }
     },
@@ -988,7 +1010,7 @@
             "Admin_academia": "own_academia"
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-10T10:16:31.241089+00:00"
+          "generated_at": "2025-10-10T12:15:56.380458+00:00"
         }
       },
       "get": {
@@ -1044,7 +1066,7 @@
             "Profesor_academia": "own_academia"
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-10T10:16:31.241089+00:00"
+          "generated_at": "2025-10-10T12:15:56.380458+00:00"
         }
       },
       "patch": {
@@ -1128,7 +1150,7 @@
             ]
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-10T10:16:31.241089+00:00"
+          "generated_at": "2025-10-10T12:15:56.380458+00:00"
         }
       },
       "put": {
@@ -1212,7 +1234,7 @@
             ]
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-10T10:16:31.241089+00:00"
+          "generated_at": "2025-10-10T12:15:56.380458+00:00"
         }
       }
     },
@@ -1303,7 +1325,7 @@
             ]
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-10T10:16:31.241089+00:00"
+          "generated_at": "2025-10-10T12:15:56.380458+00:00"
         }
       }
     },
@@ -1369,7 +1391,7 @@
             "Admin_academia": "own_academia"
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-10T10:16:31.241089+00:00"
+          "generated_at": "2025-10-10T12:15:56.380458+00:00"
         }
       }
     },
@@ -1435,7 +1457,7 @@
             "Admin_academia": "own_academia"
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-10T10:16:31.241089+00:00"
+          "generated_at": "2025-10-10T12:15:56.380458+00:00"
         }
       }
     }

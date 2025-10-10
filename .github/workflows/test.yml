@@ -40,6 +40,11 @@ jobs:
           echo "Running DB seeder (this will fail the job if seeder raises an error)"
           python init_db_pruebas_test.py --reset
 
+      - name: Validate logout documented in OpenAPI (single test)
+        run: |
+          echo "Running OpenAPI logout documentation test"
+          pytest -q -s tests/test_openapi_requestbody.py
+
       - name: Verify seeded data (counts)
         run: |
           python - <<'PY'

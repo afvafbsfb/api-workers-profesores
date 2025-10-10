@@ -17,6 +17,8 @@ from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 from src.schemas.auth import LoginRequestSchema, LoginResponseSchema
 from src.schemas.academia import AcademiaSchema
+# New: register refresh request schema
+from src.schemas.refresh import RefreshRequestSchema
 import re
 
 # Basic programmatic schemas for Usuario and Rol derived from models.py
@@ -61,6 +63,7 @@ def dump():
                 apispec.components.schema('LoginRequest', schema=LoginRequestSchema)
                 apispec.components.schema('LoginResponse', schema=LoginResponseSchema)
                 apispec.components.schema('Academia', schema=AcademiaSchema)
+                apispec.components.schema('RefreshRequest', schema=RefreshRequestSchema)
                 apispec.components.schema('Rol', schema=RolSchema)
                 apispec.components.schema('Usuario', schema=UsuarioSchema)
 
@@ -377,25 +380,50 @@ def dump():
 
                         # Add requestBody heuristics for certain resources
                         if m.lower() in ('post', 'put', 'patch'):
-                            if path.startswith('/usuarios'):
-                                # Use Usuario schema as request/response body for create/update (simple heuristic)
-                                op['requestBody'] = {
-                                    'content': {
-                                        'application/json': {
-                                            'schema': {'$ref': '#/components/schemas/Usuario'}
+                            # If the view function explicitly declares a request body schema via
+                            # the openapi_request_body attribute, emit that as requestBody.
+                            try:
+                                body_schema = None
+                                if view_fn is not None:
+                                    body_schema = getattr(view_fn, 'openapi_request_body', None)
+                                    if not body_schema:
+                                        wrapped = getattr(view_fn, '__wrapped__', None)
+                                        body_schema = getattr(wrapped, 'openapi_request_body', None) if wrapped is not None else None
+
+                                if body_schema:
+                                    # body_schema may be a string name of the component schema
+                                    schema_ref = body_schema if isinstance(body_schema, str) else str(body_schema)
+                                    op['requestBody'] = {
+                                        'content': {
+                                            'application/json': {
+                                                'schema': {'$ref': f"#/components/schemas/{schema_ref}"}
+                                            }
+                                        },
+                                        'required': True
+                                    }
+                                else:
+                                    if path.startswith('/usuarios'):
+                                        # Use Usuario schema as request/response body for create/update (simple heuristic)
+                                        op['requestBody'] = {
+                                            'content': {
+                                                'application/json': {
+                                                    'schema': {'$ref': '#/components/schemas/Usuario'}
+                                                }
+                                            },
+                                            'required': True
                                         }
-                                    },
-                                    'required': True
-                                }
-                            elif path.startswith('/academias') and m.lower() in ('post', 'patch', 'put'):
-                                op['requestBody'] = {
-                                    'content': {
-                                        'application/json': {
-                                            'schema': {'$ref': '#/components/schemas/Academia'}
+                                    elif path.startswith('/academias') and m.lower() in ('post', 'patch', 'put'):
+                                        op['requestBody'] = {
+                                            'content': {
+                                                'application/json': {
+                                                    'schema': {'$ref': '#/components/schemas/Academia'}
+                                                }
+                                            },
+                                            'required': True
                                         }
-                                    },
-                                    'required': True
-                                }
+                            except Exception:
+                                # fall back to previous heuristics if anything goes wrong
+                                pass
 
                         operations[m.lower()] = op
 

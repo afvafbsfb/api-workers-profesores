@@ -128,6 +128,10 @@ cd 'C:\Users\Angel FV\Desktop\FORMACION\api-workers-profesores'; .\.venv\Scripts
 Tests unitarios / de integración - instrucciones por fichero (orden exacto usado en CI):
 
 ```powershell
+
+# validacion de end-points (solo valida end point logoff parametro en body de refresh token)
+   pytest -q -s tests/test_openapi_requestbody.py
+
 # A. Academias (ejecutados primero en CI)
 python -m pytest tests/academias/test_altas_bajas_academias.py -q -s
 python -m pytest tests/academias/test_busquedas_academias.py -q -s
@@ -230,6 +234,33 @@ permissions_map.json
 
              genera --> Wrote docs/openapi-auto.json and docs/openapi-auto.yml
 
+                Ver en swagger la especificacion:
+                   python main.py   (levanta el api en local en el puerto 5000)
+
+               Abre en el navegador: http://localhost:5000/docs
+               
+               usuarios de pruebas:
+
+                   {
+                     "email": "admin_plataforma@academia.com",
+                     "password": "admin_academia@academia.com"
+                   }
+
+
+                   {
+                     "email": "admin_academia@academia.com",
+                     "password": "password_admin_academia"
+                   }
+
+                   {
+                     "email": "user_academia_2_1@academia.com",
+                     "password": "password_user_academia_2_1"
+                   }
+
+
+    
+
+
          3) Editar permissions_map.json manualmente añadiendo/ajustando entradas. Convenciones:
             Key = nombre de la función de permiso en permissions.py (ej. can_query_users).
             Campo "operationId" puede ser string o array de strings (p. ej. para PUT/PATCH).
@@ -263,6 +294,10 @@ openapi-auto.json
       Spec generada automáticamente a partir del código (rutas, schemas).
 served-openapi.json
       Spec final consumida por el mediador/servicios externos; contiene x-permissions añadidos por el merge.
+
+      
+
+
 validate_permissions_sync.py
       Validador que comprueba sincronía entre permissions_map.json, permissions.py y la spec (openapi-auto.json); usado en CI.
       test.yml

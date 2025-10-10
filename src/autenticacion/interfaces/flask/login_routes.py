@@ -13,6 +13,7 @@ from src.autenticacion.domain.exceptions import UsuarioBloqueadoException, Crede
 
 login_bp = Blueprint('login_bp', __name__)
 from src.shared.docs.operation_id import operation_id
+from src.shared.docs.openapi_request_body import openapi_request_body
 
 
 class LoginSchema(Schema):
@@ -125,6 +126,11 @@ def refresh_tokens():
 
 @login_bp.route('/logout', methods=['POST'])
 @operation_id('login.logout')
+# Document that this endpoint accepts a JSON body with the refresh_token or a
+# refresh token via the Authorization header. The implementation prefers a
+# body refresh_token when both are provided (this precedence is enforced by
+# the handler logic).
+@openapi_request_body('RefreshRequest')
 def logout():
     try:
         # Allow passing the refresh token either via Authorization header or in the JSON body.

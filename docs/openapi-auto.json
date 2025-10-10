@@ -56,6 +56,18 @@
         },
         "type": "object"
       },
+      "RefreshRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "refresh_token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "refresh_token"
+        ],
+        "type": "object"
+      },
       "Rol": {
         "additionalProperties": false,
         "properties": {
@@ -368,6 +380,16 @@
       "post": {
         "description": "Auto-generated operation for login_bp.logout",
         "operationId": "login.logout",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequest"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Successful response"

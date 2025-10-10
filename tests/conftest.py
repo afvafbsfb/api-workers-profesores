@@ -88,6 +88,7 @@ def print_test_name(request):
 
     # Compose a compact single-line title and trim excessive length
     title = f"{title_part}: {desc}"
+
     # Normalize whitespace and limit to 120 chars
     title = ' '.join(title.split())
     if len(title) > 120:
