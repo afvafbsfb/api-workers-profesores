@@ -5,6 +5,12 @@ Run with: python scripts/dump_openapi.py
 import json
 import yaml
 import os
+import sys
+
+# Ensure the project root is on sys.path so `from app import create_app` works
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
 
 from app import create_app
 from apispec import APISpec
@@ -307,6 +313,67 @@ def dump():
                                     'schema': {'type': p_type}
                                 })
                             op['parameters'] = params
+
+                        # Add query parameters if view function exposes them via attribute
+                        try:
+                            qargs = None
+                            if view_fn is not None:
+                                qargs = getattr(view_fn, 'openapi_query_args', None)
+                                if not qargs:
+                                    wrapped = getattr(view_fn, '__wrapped__', None)
+                                    qargs = getattr(wrapped, 'openapi_query_args', None) if wrapped is not None else None
+
+                            if qargs:
+                                params = op.get('parameters', []) or []
+                                # qargs may be a mapping name->field or name->dict
+                                for qname, qfield in (qargs.items() if isinstance(qargs, dict) else []):
+                                    schema = {}
+                                    # If it's a marshmallow Field instance, map basic types
+                                    try:
+                                        from marshmallow import fields as mfields
+                                        if isinstance(qfield, mfields.Integer) or qfield.__class__.__name__.lower().startswith('int'):
+                                            schema['type'] = 'integer'
+                                        elif isinstance(qfield, mfields.String) or qfield.__class__.__name__.lower().startswith('str'):
+                                            schema['type'] = 'string'
+                                        elif isinstance(qfield, mfields.Boolean) or qfield.__class__.__name__.lower().startswith('bool'):
+                                            schema['type'] = 'boolean'
+                                        else:
+                                            # default to string
+                                            schema['type'] = 'string'
+                                    except Exception:
+                                        # If qfield is a simple dict with 'type'
+                                        if isinstance(qfield, dict) and 'type' in qfield:
+                                            schema['type'] = qfield['type']
+                                        else:
+                                            schema['type'] = 'string'
+
+                                    # If the query parameter is `page` or `size`, inject pagination
+                                    # metadata (defaults/min/max) so the generated OpenAPI shows limits.
+                                    try:
+                                        # import here to avoid import-time side-effects of project packages
+                                        from src.shared.pagination import DEFAULT_PAGE, DEFAULT_SIZE, MAX_PAGE_SIZE
+                                        if qname == 'page':
+                                            schema.setdefault('type', 'integer')
+                                            schema.setdefault('minimum', 1)
+                                            schema.setdefault('default', DEFAULT_PAGE)
+                                        if qname == 'size':
+                                            schema.setdefault('type', 'integer')
+                                            schema.setdefault('minimum', 1)
+                                            schema.setdefault('default', DEFAULT_SIZE)
+                                            schema.setdefault('maximum', MAX_PAGE_SIZE)
+                                    except Exception:
+                                        # best-effort: if import fails, continue without pagination metadata
+                                        pass
+
+                                    params.append({
+                                        'name': qname,
+                                        'in': 'query',
+                                        'required': False,
+                                        'schema': schema
+                                    })
+                                op['parameters'] = params
+                        except Exception:
+                            pass
 
                         # Add requestBody heuristics for certain resources
                         if m.lower() in ('post', 'put', 'patch'):

@@ -132,3 +132,41 @@ def test_profesor_academia_list_other_academia_should_fail(client):
     assert other is not None
     rv = list_academias(client, access, params={'id': other})
     assert rv.status_code == 403
+
+
+def test_admin_plataforma_academias_pagination(client):
+    """Pagination smoke test for academias: page/size restrict and pages differ."""
+    access, refresh = login_and_get_tokens(client, 'admin_plataforma@academia.com', 'password_admin_plataforma')
+    rv = list_academias(client, access, params={'page': 1, 'size': 1})
+    assert rv.status_code == 200
+    p1 = rv.get_json()
+    assert isinstance(p1, list)
+    assert len(p1) <= 1
+
+    rv2 = list_academias(client, access, params={'page': 2, 'size': 1})
+    assert rv2.status_code == 200
+    p2 = rv2.get_json()
+    assert isinstance(p2, list)
+    assert p1 != p2 or len(p2) == 0
+
+
+def test_admin_plataforma_academias_filter_plus_pagination(client):
+    """Filter by nombre combined with pagination (size=1) should respect both."""
+    access, refresh = login_and_get_tokens(client, 'admin_plataforma@academia.com', 'password_admin_plataforma')
+    rv_all = list_academias(client, access)
+    assert rv_all.status_code == 200
+    all_acads = rv_all.get_json()
+    if not all_acads:
+        pytest.skip('No academias present to exercise filter+paging')
+
+    sample_name = all_acads[0].get('nombre')
+    if not sample_name:
+        pytest.skip('Sample academia has no nombre to filter on')
+
+    rv = list_academias(client, access, params={'nombre': sample_name, 'page': 1, 'size': 1})
+    assert rv.status_code == 200
+    page = rv.get_json()
+    assert isinstance(page, list)
+    assert len(page) <= 1
+    for a in page:
+        assert sample_name.lower() in (a.get('nombre') or '').lower()

@@ -106,9 +106,17 @@ jobs:
       - name: Annotate OpenAPI with query parameters
         run: |
           if [ -f docs/openapi-auto.json ]; then
-            python scripts/annotate_openapi_params.py docs/openapi-auto.json || true
+            python scripts/annotate_openapi_params.py docs/openapi-auto.json
           else
             echo "docs/openapi-auto.json not found; skipping annotation"
+          fi
+
+      - name: Validate OpenAPI contains expected query parameters
+        run: |
+          if [ -f docs/openapi-auto.json ]; then
+            python scripts/validate_openapi_params.py --spec docs/openapi-auto.json --fail-on-missing
+          else
+            echo "docs/openapi-auto.json not found; failing" && exit 1
           fi
 
       # NOTE: OpenAPI semantic equality check removed; it previously caused CI failures due to

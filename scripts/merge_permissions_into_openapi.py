@@ -36,13 +36,22 @@ def ensure_paginated(schema_name, item_ref):
     pag_name = f'Paginated{schema_name}'
     if pag_name in schemas:
         return pag_name
+    # Include pagination constraints if available from shared config
+    try:
+        from src.shared.pagination import DEFAULT_PAGE, DEFAULT_SIZE, MAX_PAGE_SIZE
+        page_schema = {'type': 'integer', 'minimum': 1, 'default': DEFAULT_PAGE}
+        size_schema = {'type': 'integer', 'minimum': 1, 'default': DEFAULT_SIZE, 'maximum': MAX_PAGE_SIZE}
+    except Exception:
+        page_schema = {'type': 'integer'}
+        size_schema = {'type': 'integer'}
+
     schemas[pag_name] = {
         'type': 'object',
         'properties': {
             'totalElements': {'type': 'integer'},
             'items': {'type': 'array', 'items': {'$ref': item_ref}},
-            'page': {'type': 'integer'},
-            'size': {'type': 'integer'},
+            'page': page_schema,
+            'size': size_schema,
         }
     }
     return pag_name

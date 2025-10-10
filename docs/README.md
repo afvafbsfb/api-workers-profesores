@@ -23,7 +23,8 @@ Requisitos
 Set-Location 'C:\Users\Angel FV\Desktop\FORMACION\api-workers-profesores'
 
 # Crear y activar virtualenv
-python -m 
+python -m venv .venv
+. .venv\Scripts\Activate.ps1
 
 # Instalar dependencias
 python -m pip install -r requirements.txt
@@ -34,7 +35,8 @@ python -m pip install -r requirements-dev.txt
 
 ```powershell
 # Opcional: ajustar según tu entorno
-# $env:DB_ENV = 'development'
+# $env:DB_ENV = 'developmentAWS'
+
 # $env:DATABASE_URL = 'mysql+pymysql://user:pass@host:port/db'
 # $env:JWT_SECRET_KEY = 'mi-secreto-local'
 ```
@@ -160,7 +162,9 @@ Los tests usan cuentas `reserve_*` creadas por el seeder.
 
 ```powershell
 python scripts/dump_openapi.py
-# Genera: docs/openapi-auto.json y docs/openapi-auto.yml
+# Genera la especificacion: docs/openapi-auto.json y docs/openapi-auto.yml  a partir las rutas/blueprints que create_app() registra (todos los ficheros con blueprints registrados son fuente),
+los attributes/decoradores en las view functions (operation_id, openapi_query_args, etc.),
+los schemas Marshmallow que el script importa explícitamente (auth.py, academia.py), y
 ```
 
 10) Checklist antes de commit/push
@@ -181,24 +185,100 @@ python scripts/dump_openapi.py
 Administración de permisos (roles) — qué leer y cómo se usa
 ---------------------------------------------------------
 
-Resumen rápido
---------------
-La fuente de verdad para la autorización son dos tipos de artefactos dentro del código fuente:
+Fuente única / raíz de verdad
+   Fuente de verdad del comportamiento (reglas reales que se ejecutan en runtime): permissions.py (las funciones can_*) junto con los operationId declarados por las rutas.
+   
+Justificación: permissions.py contiene la lógica aplicada en runtime (scoping, allowed/deny, sanitized payload); operationId en las rutas es cómo se enlazan operaciones con permisos cuando se genera la spec.
+Qué NO es la fuente de verdad (pero sí artefactos importantes):
+permissions.json, permissions_map.json, openapi-auto.json y served-openapi.json son artefactos derivados usados para revisión, mapeo y consumo (mediador), pero se generan a partir de permissions.py y del código de rutas; por tanto no reemplazan la lógica fuente.
 
-- Las reglas de autorización y adaptadores en runtime: `src/shared/application/permissions.py`. Aquí residen las funciones `can_*` que definen la lógica real que se ejecuta cuando el API decide permitir, restringir o transformar una operación.
 
-- Los endpoints instrumentados con un `operationId` determinado en sus rutas (por ejemplo `src/autenticacion/interfaces/flask/login_routes.py`, `src/academias/interfaces/flask/academias_routes.py`, `src/usuarios/interfaces/usuarios_routes.py`). Estas rutas son la fuente de verdad del identificador estable (`operationId`) que usamos para mapear permisos a operaciones.
+ficheros que intervienen en la definición, exportación/transformación y consumo de permisos, y decir cuál es la raíz / fuente única de verdad.
+
+Ficheros que intervienen:
+permissions.py
+      Lógica runtime de autorización: todas las funciones can_* (p. ej. can_query_academias, can_create_user, can_modify_user) — define reglas, scoping y sanización.
+
+academias_routes.py
+      Ejemplo de uso en rutas: llama a can_query_academias(...) y aplica enforced_filters/rechazo según resultado.
+
+usuarios_routes.py
+      Ejemplo de uso en rutas: llama a can_query_users, can_create_user, can_modify_user, can_delete_user.
+
+export_permissions.py
+      (Opcional/diagnóstico) Extrae metadatos de permissions.py y genera permissions.json / permissions.yaml.
+      
+permissions.json / permissions.yaml
+      Artefacto generado que enumera las funciones/permissions extraídas; usado como entrada para el merge.
+
+permissions_map.json
+      Mapa editable (manual) que vincula nombres de permiso (funciones) a operationId de la spec; ayuda a decidir qué permiso aplica a qué operación.
+
+      lo crean/editarán los desarrolladores responsables de la API (propietario del repositorio, equipo de backend o persona que añade el nuevo endpoint/permiso)
+
+      Como se crea:  
+         1) python scripts/export_permissions.py
+
+           # -> genera docs/permissions.json (sugerencia de permisos extraídos)
+
+           Wrote C:\Users\Angel FV\Desktop\FORMACION\api-workers-profesores\docs\permissions.yaml
+
+           Wrote C:\Users\Angel FV\Desktop\FORMACION\api-workers-profesores\docs\permissions.json
+
+         2) Generar spec desde código (para tener operationId actualizados) 
+             python scripts/dump_openapi.py
+
+             genera --> Wrote docs/openapi-auto.json and docs/openapi-auto.yml
+
+         3) Editar permissions_map.json manualmente añadiendo/ajustando entradas. Convenciones:
+            Key = nombre de la función de permiso en permissions.py (ej. can_query_users).
+            Campo "operationId" puede ser string o array de strings (p. ej. para PUT/PATCH).
+            Opciones útiles: allowed_roles, scope o scope_by_role, enforced_filters, mutable_fields_by_role, note.
+            Ejemplo mínimo (tomado del repo): { "can_query_users": { "operationId": "usuarios.listar_usuarios", "allowed_roles": ["admin_plataforma"], "scope": "global" } }
+
+         4) Fusionar permisos en la spec y comprobar:
+
+            python scripts/merge_permissions_into_openapi.py --spec docs/openapi-auto.json --out docs/served-openapi.json
+
+            genera el doc --> Wrote C:\Users\Angel FV\Desktop\FORMACION\api-workers-profesores\docs\served-openapi.json
 
 
-Por claridad: el código (las funciones de `permissions.py` y los `operationId` en las rutas) es la fuente de verdad. Los ficheros en `docs/` son artefactos generados que sirven para consumo del mediador (backend-OpenAI), auditoría y despliegue.
+         5) validar sincronia (local/CI). CI ejecuta estos pasos y fallará si el mapping no está correcto
 
-Cómo se llega desde las fuentes de verdad hasta el artefacto consumible (`docs/served-openapi.json`):
+            python scripts/validate_permissions_sync.py --map scripts/permissions_map.json --code src/shared/application/permissions.py --spec docs/openapi-auto.json
 
-1. `scripts/export_permissions.py` (opcional / diagnóstico): extrae metadatos a partir de `src/shared/application/permissions.py` y genera `docs/permissions.json` / `docs/permissions.yaml`. Esto facilita la revisión humana y sirve como base para el mapeo automático.
+            python scripts/validate_served_openapi_for_mediator.py --spec docs/served-openapi.json
 
-2. `scripts/dump_openapi.py`: recorre las rutas/blueprints del código, genera `docs/openapi-auto.json` (y `.yml`) garantizando que cada operación tenga un `operationId` estable. El `operationId` preferido se extrae de la propiedad aplicada en la view function (decorador/documentación en la ruta); si falta, se deriva con heurísticas.
+      Papel en el flujo y relación con la “fuente de verdad”
+      permissions_map.json es un mapa manual que conecta las funciones reales en permissions.py con operationId en la spec.
+      La lógica ejecutada en runtime sigue siendo permissions.py (esa es la fuente de verdad del comportamiento). permissions_map.json es la fuente de verdad del mapeo permiso → operación que usan los scripts para inyectar x-permissions en served-openapi.json (consumido por el mediador).
 
-3. `scripts/merge_permissions_into_openapi.py`: combina `docs/openapi-auto.json`, `docs/permissions.json` y `scripts/permissions_map.json` (mapa manual) para inyectar por operación el campo `x-permissions` con la metadata necesaria:
+      El backend-OpenAI solo necesita served-openapi.json. Ese fichero ya contiene las operaciones, los x-permissions y las components/schemas referenciadas (los $ref apuntan internamente), así que no requiere permissions_map.json para autorizar/validar en tiempo de ejecución.
+      El campo "source": "permissions_map" que figura en el cuerpo del served-openapi.json es sólo metadato de procedencia (trazabilidad)
+
+
+merge_permissions_into_openapi.py
+      Fusiona openapi-auto.json + permissions.json + permissions_map.json e inyecta x-permissions por operación en served-openapi.json.
+openapi-auto.json
+      Spec generada automáticamente a partir del código (rutas, schemas).
+served-openapi.json
+      Spec final consumida por el mediador/servicios externos; contiene x-permissions añadidos por el merge.
+validate_permissions_sync.py
+      Validador que comprueba sincronía entre permissions_map.json, permissions.py y la spec (openapi-auto.json); usado en CI.
+      test.yml
+
+Flujo CI que ejecuta export/merge/validate para asegurar que served-openapi.json esté actualizado y que haya x-permissions en endpoints críticos.
+
+(Consumidores/ejemplo externo) SpecLoaderService.java & AuthorizationServiceImpl.java
+
+En el proyecto mediador/consumidor: cargan served-openapi.json y usan x-permissions (p. ej. allowed_roles, enforced_filters) para autorizar/transformar peticiones.
+
+
+
+
+
+----
+.`scripts/merge_permissions_into_openapi.py`: combina `docs/openapi-auto.json`, `docs/permissions.json` y `scripts/permissions_map.json` (mapa manual) para inyectar por operación el campo `x-permissions` con la metadata necesaria:
     - `allowed_roles` (lista normalizada de roles)
     - `scope` o `scope_by_role` (p.ej. `own_academia`, `own_user`, `global`)
     - `enforced_filters` (ej. `academia_id: current_user.academia_id`)
@@ -228,6 +308,11 @@ Lista de scripts útiles y qué hacen
    - Recorre el código (blueprints/routes) y genera `docs/openapi-auto.json` y `docs/openapi-auto.yml`.
 
    - Respeta `operation_id` cuando está definido en la view function; aplica heurísticas seguras cuando falta.
+
+-  python scripts/validate_openapi_params.py --spec docs/openapi-auto.json --fail-on-missing
+
+   - Valida que la especificación OpenAPI indicada contenga los parámetros query esperados para operaciones críticas (p. ej. GET /academias y GET /usuarios) y genera un informe JSON con el resultado.
+   Si se pasa --fail-on-missing y falta algún parámetro esperado, imprime el informe y sale con código de error (exit != 0), haciendo fallar el job.
 
 - `scripts/permissions_map.json` (no es un script, es un artefacto editable)
 
@@ -269,15 +354,23 @@ Lista de scripts útiles y qué hacen
 
 Buenas prácticas y flujo en CI
 -----------------------------
-- Añadir un job de CI en el repo API que ejecute, en orden:
-   1. `python scripts/export_permissions.py`
-   2. `python scripts/dump_openapi.py`
-   3. `python scripts/check_operation_ids.py --spec docs/openapi-auto.json`
-      - Comprueba que la spec generada contiene `operationId` para todas las operaciones (falla con código 1 si faltan).
-   3. `python scripts/merge_permissions_into_openapi.py --spec docs/openapi-auto.json --out docs/served-openapi.json`
-   4. `python scripts/validate_permissions_sync.py --map scripts/permissions_map.json --code src/shared/application/permissions.py --spec docs/openapi-auto.json`
-   5. `python scripts/validate_critical_endpoints.py --spec docs/served-openapi.json`
-   6. `python scripts/validate_served_openapi_for_mediator.py --spec docs/served-openapi.json`  (MANDATORY: fails CI when issues are found)
+lo que hace CI (orden exacto):
+
+1. Configura Python e instala dependencias.
+2. Ejecuta el seeder y verifica que la base de datos de pruebas contiene datos (``python init_db_pruebas_test.py --reset`` y comprobaciones internas).
+3. Ejecuta la suite de tests ordenada y genera el informe HTML (pytest).
+4. Exporta permisos si existe el script: ``python scripts/export_permissions.py`` (opcional).
+5. Regenera la especificación desde el código: ``python scripts/dump_openapi.py``.
+6. Anota parámetros en la spec (si procede): ``python scripts/annotate_openapi_params.py docs/openapi-auto.json``.
+7. Valida que la spec contiene los parámetros query esperados (nuevo paso bloqueante): ``python scripts/validate_openapi_params.py --spec docs/openapi-auto.json --fail-on-missing``.
+8. Sincroniza copias raíz (openapi.json/openapi.yml) desde ``docs/openapi-auto.*`` (si procede).
+9. Comprueba que todas las operaciones tienen `operationId`: ``python scripts/check_operation_ids.py --spec docs/openapi-auto.json``.
+10. Fusiona permisos en la spec y produce el artefacto final: ``python scripts/merge_permissions_into_openapi.py --spec docs/openapi-auto.json --out docs/served-openapi.json``.
+11. Valida sincronía de permisos y endpoints críticos:
+    - ``python scripts/validate_permissions_sync.py --map scripts/permissions_map.json --code src/shared/application/permissions.py --spec docs/openapi-auto.json``
+    - ``python scripts/validate_critical_endpoints.py --spec docs/served-openapi.json``
+12. Ejecuta la validación del artefacto para el mediador (bloqueante): ``python scripts/validate_served_openapi_for_mediator.py --spec docs/served-openapi.json``.
+13. Sube artifacts: informe pytest, ``docs/openapi-auto.*``, ``docs/served-openapi.json``, y artefactos de permisos.
 
 - Subir `docs/served-openapi.json` como artifact del job (o publicarlo en un S3/versioned-bucket). El mediador debe descargar ese artifact y no generar su propio mash-up desde el código del API.
 

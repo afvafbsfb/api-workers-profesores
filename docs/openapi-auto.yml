@@ -84,6 +84,32 @@ paths:
     get:
       description: Auto-generated operation for academias.listar_academias
       operationId: academias.listar_academias
+      parameters:
+      - in: query
+        name: id
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: nombre
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+      - in: query
+        name: size
+        required: false
+        schema:
+          default: 25
+          maximum: 100
+          minimum: 1
+          type: integer
       responses:
         '200':
           description: Successful response
@@ -303,6 +329,42 @@ paths:
     get:
       description: Auto-generated operation for usuarios.listar_usuarios
       operationId: usuarios.listar_usuarios
+      parameters:
+      - in: query
+        name: academia_id
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: rol
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: nombre
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: id
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+      - in: query
+        name: size
+        required: false
+        schema:
+          default: 25
+          maximum: 100
+          minimum: 1
+          type: integer
       responses:
         '200':
           description: Successful response

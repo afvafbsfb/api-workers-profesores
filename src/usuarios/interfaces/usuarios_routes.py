@@ -1,4 +1,7 @@
 from flask import Blueprint, jsonify, request, g
+from webargs import fields
+from src.shared.pagination import clamp_pagination, DEFAULT_SIZE, MAX_PAGE_SIZE, DEFAULT_PAGE
+from src.shared.docs.openapi_args import openapi_query_args
 from src.shared.middleware.auth import require_auth
 from src.usuarios.infrastructure.models import Usuario
 from src.shared.application.permissions import can_query_users, can_create_user, can_modify_user, can_delete_user
@@ -6,10 +9,20 @@ from src.shared.database import db
 from src.shared.docs.operation_id import operation_id
 
 usuarios_bp = Blueprint('usuarios', __name__)
+usuarios_list_query_args = {
+    'academia_id': fields.Int(required=False, allow_none=True),
+    'rol': fields.Str(required=False, allow_none=True),
+    'nombre': fields.Str(required=False, allow_none=True),
+    'id': fields.Int(required=False, allow_none=True),
+    'page': fields.Int(required=False, allow_none=True),
+    'size': fields.Int(required=False, allow_none=True),
+}
+
 
 @usuarios_bp.route('/', methods=['GET'])
 @require_auth  # Middleware para validar el token y extraer el rol
 @operation_id('usuarios.listar_usuarios')
+@openapi_query_args(usuarios_list_query_args)
 def listar_usuarios():
     """
     Endpoint para listar usuarios con filtros opcionales.
@@ -27,6 +40,8 @@ def listar_usuarios():
         'rol': request.args.get('rol'),
         'nombre': request.args.get('nombre'),
         'id': request.args.get('id') or request.args.get('usuario_id'),
+        'page': request.args.get('page'),
+        'size': request.args.get('size'),
     }
 
     allowed, effective_filters, reason = can_query_users(user, params)
@@ -52,7 +67,21 @@ def listar_usuarios():
     if params.get('rol'):
         query = query.join(Usuario.rol).filter(Usuario.rol.has(nombre=params.get('rol')))
 
-    usuarios = query.all()
+    # Pagination: parse page/size, apply offset/limit
+    # Parse page/size and clamp to configured maxima/defaults. We prefer to be
+    # tolerant and clamp rather than rejecting requests with large sizes.
+    try:
+        parsed_page = int(params.get('page')) if params.get('page') is not None else None
+    except Exception:
+        parsed_page = None
+    try:
+        parsed_size = int(params.get('size')) if params.get('size') is not None else None
+    except Exception:
+        parsed_size = None
+
+    page, size = clamp_pagination(parsed_page, parsed_size)
+    offset = (page - 1) * size
+    usuarios = query.offset(offset).limit(size).all()
 
     def serialize(u: Usuario):
         return {
@@ -66,6 +95,7 @@ def listar_usuarios():
         }
 
     return jsonify([serialize(u) for u in usuarios])
+
 
 @usuarios_bp.route('/', methods=['POST'])
 @require_auth

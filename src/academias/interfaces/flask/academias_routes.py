@@ -1,4 +1,8 @@
 from flask import Blueprint, request, jsonify, g
+from webargs import fields
+from src.shared.pagination import clamp_pagination, DEFAULT_SIZE, MAX_PAGE_SIZE, DEFAULT_PAGE
+from webargs.flaskparser import use_args
+from src.shared.docs.openapi_args import openapi_query_args
 from src.shared.middleware.auth import require_role, require_auth
 from src.shared.auth_helpers import is_platform_admin, is_academy_admin
 from src.shared.application.permissions import can_query_academias
@@ -57,14 +61,27 @@ def crear_academia():
 
 
 
+
+# Define query parameters so OpenAPI generator (and webargs) know about them
+academias_list_query_args = {
+    'id': fields.Int(required=False, allow_none=True),
+    'nombre': fields.Str(required=False, allow_none=True),
+    # use load_default for Marshmallow 3 compatibility
+    'page': fields.Int(required=False, load_default=1),
+    'size': fields.Int(required=False, load_default=20),
+}
+
+
 @academias_bp.route('', methods=['GET'])
 @require_auth
+@use_args(academias_list_query_args, location='query')
+@openapi_query_args(academias_list_query_args)
 @operation_id('academias.listar_academias')
-def listar_academias():
+def listar_academias(args):
     user = getattr(g, 'current_user', None)
 
     # Normalize incoming params and consult shared permission helper
-    params = {'id': request.args.get('id')}
+    params = {'id': args.get('id')}
     allowed, effective_filters, reason = can_query_academias(user, params)
     if not allowed:
         return jsonify({"ok": False, "error": "forbidden", "reason": reason}), 403
@@ -77,10 +94,33 @@ def listar_academias():
         result = [{"id": acad.id, "nombre": acad.nombre}]
         return jsonify({"ok": True, "result": result}), 200
 
-    # Otherwise (platform admin with no forced filters) return all
-    academias = Academia.query.all()
+    # Otherwise (platform admin with no forced filters) apply optional filters
+    query = Academia.query
+    nombre = args.get('nombre')
+    if nombre:
+        try:
+            query = query.filter(Academia.nombre.ilike(f"%{nombre}%"))
+        except Exception:
+            # Fallback if ilike isn't available for the configured DB dialect
+            query = query.filter(Academia.nombre.like(f"%{nombre}%"))
+
+    # Pagination (simple offset/limit) — parse and clamp using shared helper
+    try:
+        parsed_page = int(args.get('page')) if args.get('page') is not None else None
+    except Exception:
+        parsed_page = None
+    try:
+        parsed_size = int(args.get('size')) if args.get('size') is not None else None
+    except Exception:
+        parsed_size = None
+
+    page, size = clamp_pagination(parsed_page, parsed_size)
+    offset = (max(page, 1) - 1) * max(size, 1)
+    academias = query.offset(offset).limit(size).all()
     result = [{"id": a.id, "nombre": a.nombre} for a in academias]
     return jsonify({"ok": True, "result": result}), 200
+
+# Exposed via @openapi_query_args decorator above
 
 
 @academias_bp.route('/<int:academia_id>', methods=['GET'])

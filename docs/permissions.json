@@ -98,6 +98,124 @@
         "admin_plataforma",
         "profesor_academia"
       ]
+    },
+    {
+      "name": "can_view_academia",
+      "description": "Compatibility wrapper for permissions_map 'can_view_academia'.\n\nDelegates to `can_query_academias` and is intended to enforce scope_by_role\nsemantics for: admin_plataforma, admin_academia, profesor_academia.",
+      "params": [
+        "current_user",
+        "params"
+      ],
+      "detected_roles": []
+    },
+    {
+      "name": "can_login",
+      "description": "Login is a public operation: allow initiation of the flow.\n\nReturns (allowed, info, None). The actual authentication checks happen in the\nauth handlers and token validation paths.",
+      "params": [
+        "current_user",
+        "payload"
+      ],
+      "detected_roles": []
+    },
+    {
+      "name": "can_logout",
+      "description": "Compatibility wrapper: logout requires an authenticated user.",
+      "params": [
+        "current_user"
+      ],
+      "detected_roles": [
+        "not_authenticated"
+      ]
+    },
+    {
+      "name": "can_refresh",
+      "description": "Token refresh requires an authenticated user (or a valid refresh token).\n\nThis is a minimal check; token validation is done elsewhere.",
+      "params": [
+        "current_user"
+      ],
+      "detected_roles": [
+        "not_authenticated"
+      ]
+    },
+    {
+      "name": "can_unblock",
+      "description": "Allow unblocking according to scope_by_role: admin_plataforma global, admin_academia own_academia.",
+      "params": [
+        "current_user",
+        "target_user"
+      ],
+      "detected_roles": [
+        "admin_academia",
+        "admin_plataforma"
+      ]
+    },
+    {
+      "name": "can_view_my_profile",
+      "description": "Allow a user to view their own profile. For simplicity this returns allowed\nif the request is from an authenticated user; further checks can be done by handlers.",
+      "params": [
+        "current_user",
+        "params"
+      ],
+      "detected_roles": [
+        "not_authenticated"
+      ]
+    },
+    {
+      "name": "can_view_user",
+      "description": "Check if current_user can view target_user according to role/academy scope.",
+      "params": [
+        "current_user",
+        "target_user"
+      ],
+      "detected_roles": [
+        "admin_academia",
+        "admin_plataforma",
+        "profesor_academia"
+      ]
+    },
+    {
+      "name": "can_recover_credentials",
+      "description": "Recovery flow: initiation can be public (e.g. user provides email) but\nfinal recovery must be constrained to the own_user (token/email verification).\nWe allow initiation here and rely on the handler to enforce further checks.",
+      "params": [
+        "current_user",
+        "payload"
+      ],
+      "detected_roles": []
+    },
+    {
+      "name": "can_modify_credentials",
+      "description": "Delegate to can_modify_user but ensure semantics are aligned for credentials.\n\nReuses `can_modify_user` which enforces role-based restrictions. Mention\nrole keywords for static heuristics: admin_plataforma, admin_academia, profesor_academia.",
+      "params": [
+        "current_user",
+        "target_user",
+        "payload"
+      ],
+      "detected_roles": []
+    },
+    {
+      "name": "can_modify_role",
+      "description": "Allow changing role according to existing modify rules: only admins, with admin_academia limited to own academy.",
+      "params": [
+        "current_user",
+        "target_user",
+        "payload"
+      ],
+      "detected_roles": [
+        "admin_academia",
+        "admin_plataforma"
+      ]
+    },
+    {
+      "name": "can_modify_status",
+      "description": "Allow status changes only to admins (admin_plataforma global; admin_academia own_academia).",
+      "params": [
+        "current_user",
+        "target_user"
+      ],
+      "detected_roles": [
+        "admin_academia",
+        "admin_plataforma"
+      ]
     }
   ]
 }

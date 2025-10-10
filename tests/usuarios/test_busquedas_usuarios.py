@@ -190,3 +190,42 @@ def test_logout_profesor_academia(client):
     access, refresh = login_and_get_tokens(client, 'reserve_user_academia_1_1@academia.com', 'password_reserve_user_academia_1_1')
     rv = logout_with_refresh(client, refresh)
     assert rv.status_code in (200, 204)
+
+
+def test_admin_plataforma_pagination(client):
+    """Small pagination smoke test for admin_plataforma: page/size limits results and pages differ."""
+    access, refresh = login_and_get_tokens(client, 'admin_plataforma@academia.com', 'password_admin_plataforma')
+    rv = list_users(client, access, params={'page': 1, 'size': 2})
+    assert rv.status_code == 200
+    users_p1 = rv.get_json()
+    assert isinstance(users_p1, list)
+    assert len(users_p1) <= 2
+
+    rv2 = list_users(client, access, params={'page': 2, 'size': 2})
+    assert rv2.status_code == 200
+    users_p2 = rv2.get_json()
+    assert isinstance(users_p2, list)
+    # either different content or second page empty
+    assert users_p1 != users_p2 or len(users_p2) == 0
+
+
+def test_admin_plataforma_filter_plus_pagination(client):
+    """Combine nombre filter with pagination and ensure results respect both."""
+    access, refresh = login_and_get_tokens(client, 'admin_plataforma@academia.com', 'password_admin_plataforma')
+    rv_all = list_users(client, access)
+    assert rv_all.status_code == 200
+    all_users = rv_all.get_json()
+    if not all_users:
+        pytest.skip('No users present to exercise filter+paging')
+
+    sample_name = all_users[0].get('nombre')
+    if not sample_name:
+        pytest.skip('Sample user has no nombre to filter on')
+
+    rv = list_users(client, access, params={'nombre': sample_name, 'page': 1, 'size': 1})
+    assert rv.status_code == 200
+    page = rv.get_json()
+    assert isinstance(page, list)
+    assert len(page) <= 1
+    for u in page:
+        assert sample_name.lower() in (u.get('nombre') or '').lower()
