@@ -83,16 +83,39 @@ def print_test_name(request):
         desc = _first_line_of_doc(func) or _first_line_of_doc(node) or ''
 
     if not title_part:
-        # derive a short title from the function name
-        title_part = short_name
+        # derive a short, more readable title from the function name
+        # remove common 'test_' prefix and replace underscores with spaces
+        derived = short_name
+        if isinstance(derived, str) and derived.startswith('test_'):
+            derived = derived[5:]
+        if isinstance(derived, str):
+            derived = derived.replace('_', ' ')
+        title_part = derived
 
-    # Compose a compact single-line title and trim excessive length
-    title = f"{title_part}: {desc}"
+    # If the test is parametrized, include a compact params summary (k=v,...) in the title
+    params_summary = ''
+    try:
+        callspec = request.node.callspec
+        if callspec and hasattr(callspec, 'params') and callspec.params:
+            pairs = []
+            for k, v in callspec.params.items():
+                # show only the first 40 chars of values to avoid huge lines
+                sval = str(v)
+                if len(sval) > 40:
+                    sval = sval[:37] + '...'
+                pairs.append(f"{k}={sval}")
+            params_summary = ' [' + ', '.join(pairs) + ']'
+    except Exception:
+        params_summary = ''
 
-    # Normalize whitespace and limit to 120 chars
+    # Compose a compact single-line title (Spanish-friendly)
+    desc_text = desc or '(sin descripción)'
+    title = f"{title_part}{params_summary} — {desc_text}"
+
+    # Normalize whitespace and limit length to a generous 200 chars
     title = ' '.join(title.split())
-    if len(title) > 120:
-        title = title[:117].rstrip() + '...'
+    if len(title) > 200:
+        title = title[:197].rstrip() + '...'
 
     # Print this line always (not gated by Config.DEBUG)
     import builtins

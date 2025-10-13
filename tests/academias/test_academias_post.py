@@ -10,6 +10,9 @@ from flask.testing import FlaskClient
 from typing import Generator
 from src.shared.database import db
 from src.academias.infrastructure.models import Academia
+import requests
+
+BASE_URL = "http://127.0.0.1:5000"
 
 
 @pytest.fixture
@@ -23,11 +26,11 @@ def client() -> Generator[FlaskClient, None, None]:
         yield app.test_client()
 
 
-def login_and_get_token(client, email, password, expected_role='Admin_plataforma'):
+def login_and_get_token(email, password, expected_role='Admin_plataforma'):
     """Realiza el login, valida el rol esperado y obtiene los tokens de acceso y refresco para un usuario válido."""
-    rv = client.post('/auth/login', json={'email': email, 'password': password})
-    assert rv.status_code == 200, f"Error en login: {rv.get_json()}"
-    data = rv.get_json()
+    login_response = requests.post(f"{BASE_URL}/auth/login", json={'email': email, 'password': password})
+    assert login_response.status_code == 200, f"Error en login: {login_response.json()}"
+    data = login_response.json()
     assert data['role'] == expected_role, f"Rol incorrecto: {data['role']}"
     access = data['tokens']['access_token']
     refresh = data['tokens']['refresh_token']
@@ -41,16 +44,14 @@ def login_and_get_token(client, email, password, expected_role='Admin_plataforma
             yield self.refresh
         def __str__(self):
             return self.access
-        def __repr__(self):
-            return f"TokenPair(access={self.access!r}, refresh={self.refresh!r})"
 
     return TokenPair(access, refresh)
 
 
 def logout(client, refresh_token):
     """Realiza el logout para un usuario autenticado usando el refresh token."""
-    rv = client.post('/auth/logout', headers={'Authorization': f'Bearer {refresh_token}'})
-    assert rv.status_code == 200, f"Error en logout: {rv.get_json()}"
+    rv = requests.post(f"{BASE_URL}/auth/logout", headers={'Authorization': f'Bearer {refresh_token}'})
+    assert rv.status_code == 200, f"Error en logout: {rv.json()}"
 
 
 # Actualizar las credenciales para usar un usuario válido
@@ -60,10 +61,10 @@ VALID_USER_PASSWORD = 'password_admin_plataforma'  # Contraseña actualizada par
 
 @pytest.mark.meta(title='Crear academia (happy path)', desc='Login como Admin_plataforma y crear una nueva academia')
 def test_login_crear_academia_logout_happy_path(client):
-    access_token, refresh_token = login_and_get_token(client, VALID_USER_EMAIL, VALID_USER_PASSWORD, expected_role='Admin_plataforma')
-    rv = client.post('/academias', json={'nombre': 'Academia Test X'}, headers={'Authorization': f'Bearer {access_token}'},)
-    assert rv.status_code == 201, f"Error en creación: {rv.get_json()}"
-    data = rv.get_json()
+    access_token, refresh_token = login_and_get_token(VALID_USER_EMAIL, VALID_USER_PASSWORD, expected_role='Admin_plataforma')
+    rv = requests.post(f"{BASE_URL}/academias", json={'nombre': 'Academia Test X'}, headers={'Authorization': f'Bearer {access_token}'},)
+    assert rv.status_code == 201, f"Error en creación: {rv.json()}"
+    data = rv.json()
     assert data['ok'] is True
     assert 'result' in data and data['result']['nombre'] == 'Academia Test X'
     logout(client, refresh_token)
@@ -71,31 +72,31 @@ def test_login_crear_academia_logout_happy_path(client):
 
 @pytest.mark.meta(title='Crear academia conflict', desc='Intentar crear academia duplicada y recibir 409')
 def test_login_crear_academia_logout_conflict(client):
-    access_token, refresh_token = login_and_get_token(client, VALID_USER_EMAIL, VALID_USER_PASSWORD, expected_role='Admin_plataforma')
-    rv1 = client.post('/academias', json={'nombre': 'Academia Conflict'}, headers={'Authorization': f'Bearer {access_token}'},)
-    assert rv1.status_code in (200, 201), f"Error en primera creación: {rv1.get_json()}"
-    rv2 = client.post('/academias', json={'nombre': 'Academia Conflict'}, headers={'Authorization': f'Bearer {access_token}'},)
-    assert rv2.status_code == 409, f"Error en conflicto: {rv2.get_json()}"
+    access_token, refresh_token = login_and_get_token(VALID_USER_EMAIL, VALID_USER_PASSWORD, expected_role='Admin_plataforma')
+    rv1 = requests.post(f"{BASE_URL}/academias", json={'nombre': 'Academia Conflict'}, headers={'Authorization': f'Bearer {access_token}'},)
+    assert rv1.status_code in (200, 201), f"Error en primera creación: {rv1.json()}"
+    rv2 = requests.post(f"{BASE_URL}/academias", json={'nombre': 'Academia Conflict'}, headers={'Authorization': f'Bearer {access_token}'},)
+    assert rv2.status_code == 409, f"Error en conflicto: {rv2.json()}"
     logout(client, refresh_token)
 
 
 @pytest.mark.meta(title='Crear academia sin nombre', desc='Validación: nombre requerido devuelve 400')
 def test_login_crear_academia_logout_sin_nombre(client):
-    access_token, refresh_token = login_and_get_token(client, VALID_USER_EMAIL, VALID_USER_PASSWORD, expected_role='Admin_plataforma')
-    rv = client.post('/academias', json={}, headers={'Authorization': f'Bearer {access_token}'},)
-    assert rv.status_code == 400, f"Error en validación de nombre: {rv.get_json()}"
+    access_token, refresh_token = login_and_get_token(VALID_USER_EMAIL, VALID_USER_PASSWORD, expected_role='Admin_plataforma')
+    rv = requests.post(f"{BASE_URL}/academias", json={}, headers={'Authorization': f'Bearer {access_token}'},)
+    assert rv.status_code == 400, f"Error en validación de nombre: {rv.json()}"
     logout(client, refresh_token)
 
 
 @pytest.mark.meta(title='Crear academia prohibido por rol', desc='Admin_academia no puede crear academias')
 def test_crear_academia_forbidden_por_rol(client):
     # Usar un admin de academia (no plataforma) o un usuario normal
-    token = login_and_get_token(client, 'admin_academia@academia.com', 'password_admin_academia', expected_role='Admin_academia')
-    rv = client.post('/academias', json={'nombre': 'Academia Forbidden'}, headers={'Authorization': f'Bearer {token}'},)
+    token = login_and_get_token('admin_academia@academia.com', 'password_admin_academia', expected_role='Admin_academia')
+    rv = requests.post(f"{BASE_URL}/academias", json={'nombre': 'Academia Forbidden'}, headers={'Authorization': f'Bearer {token}'},)
     assert rv.status_code == 403
 
 
 @pytest.mark.meta(title='Crear academia sin autenticar', desc='Petición sin token devuelve 401')
 def test_crear_academia_unauthenticated(client):
-    rv = client.post('/academias', json={'nombre': 'Academia NoAuth'})
+    rv = requests.post(f"{BASE_URL}/academias", json={'nombre': 'Academia NoAuth'})
     assert rv.status_code == 401

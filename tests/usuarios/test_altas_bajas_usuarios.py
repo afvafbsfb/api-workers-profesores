@@ -7,6 +7,7 @@ from config import Config
 import uuid
 from src.shared.database import db
 from src.usuarios.infrastructure.models import Rol
+import requests
 
 
 @pytest.fixture
@@ -18,27 +19,33 @@ def client():
         yield app.test_client()
 
 
-def login_and_get_tokens(client, email, password):
-    rv = client.post('/auth/login', json={'email': email, 'password': password})
-    assert rv.status_code == 200, f"Login failed for {email}: {rv.get_json()}"
-    data = rv.get_json()
+def login_and_get_tokens(email, password):
+    base_url = "http://127.0.0.1:5000"
+
+    login_response = requests.post(f"{base_url}/auth/login", json={'email': email, 'password': password})
+    assert login_response.status_code == 200
+    data = login_response.json()
     tokens = data.get('tokens') or {}
     return tokens.get('access_token'), tokens.get('refresh_token')
 
 
-def logout_with_refresh(client, refresh_token):
-    return client.post('/auth/logout', headers={'Authorization': f'Bearer {refresh_token}'})
+def logout_with_refresh(refresh_token):
+    base_url = "http://127.0.0.1:5000"
+
+    return requests.post(f"{base_url}/auth/logout", headers={'Authorization': f'Bearer {refresh_token}'})
 
 
-def create_user(client, access_token, payload):
+def create_user(access_token, payload):
+    base_url = "http://127.0.0.1:5000"
+
     headers = {'Authorization': f'Bearer {access_token}'} if access_token else {}
-    return client.post('/usuarios/', json=payload, headers=headers)
+    return requests.post(f"{base_url}/usuarios/", json=payload, headers=headers)
 
 
 @pytest.mark.meta(title='Altas y bajas usuarios - flujo básico', desc='Login, crear usuario, intento prohibido, borrar y logout')
 def test_altas_bajas_usuarios_admin_plataforma_and_admin_academia_behaviour(client):
     # Login como admin_plataforma
-    ap_access, ap_refresh = login_and_get_tokens(client, 'admin_plataforma@academia.com', 'password_admin_plataforma')
+    ap_access, ap_refresh = login_and_get_tokens('admin_plataforma@academia.com', 'password_admin_plataforma')
 
     # admin_plataforma crea un usuario nuevo (buscamos un rol no-admin dinámicamente)
     unique = str(uuid.uuid4())[:8]
@@ -54,14 +61,14 @@ def test_altas_bajas_usuarios_admin_plataforma_and_admin_academia_behaviour(clie
         'password': 'secret123',
         'rol_id': non_admin_role_id
     }
-    rv = create_user(client, ap_access, payload)
-    assert rv.status_code == 201, f"admin_plataforma should create user: {rv.get_json()}"
-    created = rv.get_json().get('result') or {}
+    rv = create_user(ap_access, payload)
+    assert rv.status_code == 201, f"admin_plataforma should create user: {rv.json()}"
+    created = rv.json().get('result') or {}
     created_id = created.get('id')
     assert created_id is not None
 
     # Login como admin_academia
-    aa_access, aa_refresh = login_and_get_tokens(client, 'admin_academia@academia.com', 'password_admin_academia')
+    aa_access, aa_refresh = login_and_get_tokens('admin_academia@academia.com', 'password_admin_academia')
 
     # admin_academia intenta crear un usuario con rol admin_plataforma -> debe 403
     payload2 = {
@@ -71,7 +78,7 @@ def test_altas_bajas_usuarios_admin_plataforma_and_admin_academia_behaviour(clie
         # Intenta forzar rol admin_plataforma por nombre
         'rol': 'admin_plataforma'
     }
-    rv2 = create_user(client, aa_access, payload2)
+    rv2 = create_user(aa_access, payload2)
     assert rv2.status_code == 403
 
     # admin_academia crea un usuario sin rol admin_plataforma (debe tener academia_id forzada)
@@ -82,19 +89,20 @@ def test_altas_bajas_usuarios_admin_plataforma_and_admin_academia_behaviour(clie
         'password': 'secret123',
         'rol_id': non_admin_role_id
     }
-    rv3 = create_user(client, aa_access, payload3)
-    assert rv3.status_code in (200, 201), f"admin_academia should create user in own academy: {rv3.get_json()}"
+    rv3 = create_user(aa_access, payload3)
+    assert rv3.status_code in (200, 201), f"admin_academia should create user in own academy: {rv3.json()}"
 
     # admin_plataforma borra (soft-delete) el usuario creado inicialmente
     if created_id:
-        rv_del = client.delete(f'/usuarios/{created_id}', headers={'Authorization': f'Bearer {ap_access}'})
+        base_url = "http://127.0.0.1:5000"
+        rv_del = requests.delete(f"{base_url}/usuarios/{created_id}", headers={'Authorization': f'Bearer {ap_access}'})
         assert rv_del.status_code == 200
 
     # logout tokens
-    rv_logout_ap = logout_with_refresh(client, ap_refresh)
+    rv_logout_ap = logout_with_refresh(ap_refresh)
     assert rv_logout_ap.status_code in (200, 204)
 
-    rv_logout_aa = logout_with_refresh(client, aa_refresh)
+    rv_logout_aa = logout_with_refresh(aa_refresh)
     assert rv_logout_aa.status_code in (200, 204)
 
 

@@ -4,6 +4,9 @@ os.environ['DB_ENV'] = 'developmentAWS'
 import pytest
 from app import create_app
 from config import Config
+import requests
+
+BASE_URL = "http://127.0.0.1:5000"
 
 
 @pytest.fixture
@@ -51,52 +54,53 @@ def ensure_active_academia_for_admin_academia():
         yield acad.id
 
 
-def login_and_get_tokens(client, email, password):
-    rv = client.post('/auth/login', json={'email': email, 'password': password})
-    assert rv.status_code == 200, f"Login failed for {email}: {rv.get_json()}"
-    data = rv.get_json()
+def login_and_get_tokens(email, password):
+    login_response = requests.post(f"{BASE_URL}/auth/login", json={'email': email, 'password': password})
+    assert login_response.status_code == 200, f"Login failed for {email}: {login_response.json()}"
+    data = login_response.json()
     tokens = data.get('tokens') or {}
     return tokens.get('access_token'), tokens.get('refresh_token')
 
 
-def logout_with_refresh(client, refresh_token):
-    return client.post('/auth/logout', headers={'Authorization': f'Bearer {refresh_token}'})
+def logout_with_refresh(refresh_token):
+    return requests.post(f"{BASE_URL}/auth/logout", headers={'Authorization': f'Bearer {refresh_token}'})
 
 
 @pytest.mark.meta(title='Admin_plataforma: alta y baja de academias', desc='Crear y dar de baja una academia (solo platform admin)')
 def test_admin_plataforma_can_create_and_delete_academia(client):
-    access, refresh = login_and_get_tokens(client, 'admin_plataforma@academia.com', 'password_admin_plataforma')
+    access, refresh = login_and_get_tokens('admin_plataforma@academia.com', 'password_admin_plataforma')
     # Crear con nombre único para evitar conflictos con datos seed
     import uuid
     unique_name = f"Academia Test AltaBaja {uuid.uuid4().hex[:8]}"
-    rv = client.post('/academias', json={'nombre': unique_name}, headers={'Authorization': f'Bearer {access}'})
+    rv = requests.post(f"{BASE_URL}/academias", json={'nombre': unique_name}, headers={'Authorization': f'Bearer {access}'})
     assert rv.status_code == 201
-    data = rv.get_json()
+    data = rv.json()
     assert data.get('ok') is True
     created_id = data['result']['id']
 
     # Borrar
-    rv2 = client.delete(f'/academias/{created_id}', headers={'Authorization': f'Bearer {access}'})
+    rv2 = requests.delete(f"{BASE_URL}/academias/{created_id}", headers={'Authorization': f'Bearer {access}'})
     assert rv2.status_code == 200
-
-    logout_with_refresh(client, refresh)
+    logout_with_refresh(refresh)
 
 
 @pytest.mark.meta(title='Admin_academia: modificar academia propia', desc='Admin_academia puede modificar su academia, pero no crear ni dar de baja')
 def test_admin_academia_can_modify_but_not_create_or_delete(client, ensure_active_academia_for_admin_academia):
-    access, refresh = login_and_get_tokens(client, 'admin_academia@academia.com', 'password_admin_academia')
+    access, refresh = login_and_get_tokens('admin_academia@academia.com', 'password_admin_academia')
     # Ensure fixture provided an active academia id
     my_acad = ensure_active_academia_for_admin_academia
     # Intentar crear -> debe fallar por rol
-    rv_create = client.post('/academias', json={'nombre': 'Academia Forbidden Create'}, headers={'Authorization': f'Bearer {access}'})
+    rv_create = requests.post(f"{BASE_URL}/academias", json={'nombre': 'Academia Forbidden Create'}, headers={'Authorization': f'Bearer {access}'})
     assert rv_create.status_code == 403
     # Modificar su academia -> ok
-    rv_patch = client.patch(f'/academias/{my_acad}', json={'nombre': 'Academia Modificada Por AdminAcademia'}, headers={'Authorization': f'Bearer {access}'})
+    import uuid as _uuid
+    unique_patch_name = f"Academia Modificada Por AdminAcademia {_uuid.uuid4().hex[:8]}"
+    rv_patch = requests.patch(f"{BASE_URL}/academias/{my_acad}", json={'nombre': unique_patch_name}, headers={'Authorization': f'Bearer {access}'})
     assert rv_patch.status_code == 200
     # Intentar borrar -> forbidden
-    rv_delete = client.delete(f'/academias/{my_acad}', headers={'Authorization': f'Bearer {access}'})
+    rv_delete = requests.delete(f"{BASE_URL}/academias/{my_acad}", headers={'Authorization': f'Bearer {access}'})
     assert rv_delete.status_code == 403
-    logout_with_refresh(client, refresh)
+    logout_with_refresh(refresh)
 
 
 # ----------------------
@@ -166,19 +170,19 @@ def test_can_delete_academia_only_platform_admin_unit():
 
 @pytest.mark.meta(title='Profesor_academia: solo consultar academias', desc='Profesor no puede crear, modificar ni dar de baja academias')
 def test_profesor_academia_cannot_create_modify_or_delete(client):
-    access, refresh = login_and_get_tokens(client, 'reserve_user_academia_1_1@academia.com', 'password_reserve_user_academia_1_1')
+    access, refresh = login_and_get_tokens('reserve_user_academia_1_1@academia.com', 'password_reserve_user_academia_1_1')
     # Listar academias (debe devolver su academia)
-    rv = client.get('/academias', headers={'Authorization': f'Bearer {access}'})
+    rv = requests.get(f"{BASE_URL}/academias", headers={'Authorization': f'Bearer {access}'})
     assert rv.status_code == 200
     # Intentar crear
-    rv_c = client.post('/academias', json={'nombre': 'Academia Profesor Create'}, headers={'Authorization': f'Bearer {access}'})
+    rv_c = requests.post(f"{BASE_URL}/academias", json={'nombre': 'Academia Profesor Create'}, headers={'Authorization': f'Bearer {access}'})
     assert rv_c.status_code == 403
     # Intentar modificar
-    me = client.get('/usuarios/me', headers={'Authorization': f'Bearer {access}'}).get_json()
+    me = requests.get(f"{BASE_URL}/usuarios/me", headers={'Authorization': f'Bearer {access}'}).json()
     my_acad = me.get('academia_id')
-    rv_m = client.patch(f'/academias/{my_acad}', json={'nombre': 'Academia Profesor Patch'}, headers={'Authorization': f'Bearer {access}'})
+    rv_m = requests.patch(f"{BASE_URL}/academias/{my_acad}", json={'nombre': 'Academia Profesor Patch'}, headers={'Authorization': f'Bearer {access}'})
     assert rv_m.status_code == 403
     # Intentar borrar
-    rv_d = client.delete(f'/academias/{my_acad}', headers={'Authorization': f'Bearer {access}'})
+    rv_d = requests.delete(f"{BASE_URL}/academias/{my_acad}", headers={'Authorization': f'Bearer {access}'})
     assert rv_d.status_code == 403
-    logout_with_refresh(client, refresh)
+    logout_with_refresh(refresh)

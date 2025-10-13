@@ -27,6 +27,7 @@ python -m venv .venv
 . .venv\Scripts\Activate.ps1
 
 # Instalar dependencias
+python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 python -m pip install -r requirements-dev.txt
 ```
@@ -54,6 +55,27 @@ Observa la salida: el script imprime un resumen con usuarios y (temporalmente) l
 4) Arrancar la aplicación (desarrollo)
 
 Opción recomendada (ver logs):
+
+# (opcional) activa el entorno virtual y exporta la secret delegada para pruebas
+$env:JWT_SECRET_KEY = 'mi_secret_app_local_larga';
+$env:DEBUG = '1';
+$env:JWT_DELEGATION_SECRET = 'mi_secret_delegacion_local_larga';
+
+
+
+
+
+# arrancar la app (o con tu comando habitual)
+(.venv) PS C:\Users\Angel FV\Desktop\FORMACION\api-workers-profesores> python .\app.py
+
+#otras opciones arrancar app:
+python -m app
+# o si usas main.pysaa
+python main.py
+
+
+
+
 
 ```powershell
 python main.py
@@ -128,6 +150,19 @@ cd 'C:\Users\Angel FV\Desktop\FORMACION\api-workers-profesores'; .\.venv\Scripts
 Tests unitarios / de integración - instrucciones por fichero (orden exacto usado en CI):
 
 ```powershell
+
+
+ejecutar test para ver los logs: 
+
+# Crear la carpeta logs si no existe
+New-Item -Path .\logs -ItemType Directory -Force
+
+# Ejecutar el test y guardar stdout+stderr en el fichero
+pytest -q tests/usuarios/test_login.py -s 2>&1 | Tee-Object -FilePath .\logs\api_tests.log
+
+
+
+
 
 # validacion de end-points (solo valida end point logoff parametro en body de refresh token)
    pytest -q -s tests/test_openapi_requestbody.py
@@ -243,7 +278,7 @@ permissions_map.json
 
                    {
                      "email": "admin_plataforma@academia.com",
-                     "password": "admin_academia@academia.com"
+                     "password": "password_admin_plataforma"
                    }
 
 

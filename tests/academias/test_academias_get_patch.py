@@ -7,6 +7,9 @@ from src.shared.database import db
 from src.academias.infrastructure.models import Academia
 from src.usuarios.infrastructure.models import Usuario, Rol
 import pytest
+import requests
+
+BASE_URL = "http://127.0.0.1:5000"
 
 
 @pytest.fixture
@@ -20,10 +23,10 @@ def client():
         yield app.test_client()
 
 
-def login(client, email, password, expected_role=None):
-    rv = client.post('/auth/login', json={'email': email, 'password': password})
-    assert rv.status_code == 200, rv.get_json()
-    data = rv.get_json()
+def login(email, password, expected_role=None):
+    login_response = requests.post(f"{BASE_URL}/auth/login", json={'email': email, 'password': password})
+    assert login_response.status_code == 200, login_response.json()
+    data = login_response.json()
     if expected_role:
         assert data['role'] == expected_role
     access = data['tokens']['access_token']
@@ -44,105 +47,105 @@ def login(client, email, password, expected_role=None):
     return TokenPair(access, refresh)
 
 
-def logout(client, token_or_pair):
+def logout(token_or_pair):
     # Accept either raw refresh token string or TokenPair
     refresh = None
     if hasattr(token_or_pair, 'refresh'):
         refresh = token_or_pair.refresh
     else:
         refresh = token_or_pair
-    rv = client.post('/auth/logout', headers={'Authorization': f'Bearer {refresh}'} )
-    assert rv.status_code == 200, rv.get_json()
+    rv = requests.post(f"{BASE_URL}/auth/logout", headers={'Authorization': f'Bearer {refresh}'} )
+    assert rv.status_code == 200, rv.json()
 
 
 @pytest.mark.meta(title='Listar academias (Plataforma)', desc='Listar todas las academias como Admin_plataforma')
 def test_list_academias_admin_plataforma(client):
-    token = login(client, 'admin_plataforma@academia.com', 'password_admin_plataforma', expected_role='Admin_plataforma')
-    rv = client.get('/academias', headers={'Authorization': f'Bearer {token}'})
+    token = login('admin_plataforma@academia.com', 'password_admin_plataforma', expected_role='Admin_plataforma')
+    rv = requests.get(f"{BASE_URL}/academias", headers={'Authorization': f'Bearer {token}'})
     assert rv.status_code == 200
-    data = rv.get_json()
+    data = rv.json()
     assert data['ok'] is True
     assert isinstance(data['result'], list)
-    logout(client, token)
+    logout(token)
 
 
 @pytest.mark.meta(title='Listar academias prohibido', desc='Comprobar que roles no plataforma no pueden listar academias')
 def test_list_academias_forbidden_other_roles(client):
-    token = login(client, 'admin_academia@academia.com', 'password_admin_academia', expected_role='Admin_academia')
-    rv = client.get('/academias', headers={'Authorization': f'Bearer {token}'})
+    token = login('admin_academia@academia.com', 'password_admin_academia', expected_role='Admin_academia')
+    rv = requests.get(f"{BASE_URL}/academias", headers={'Authorization': f'Bearer {token}'})
     # Policy: admin_academia is allowed to list but is scoped to its own academia
     assert rv.status_code == 200
-    data = rv.get_json()
+    data = rv.json()
     assert data.get('ok') is True
     assert isinstance(data.get('result'), list)
     # Ensure returned academias are the user's own
-    me = client.get('/usuarios/me', headers={'Authorization': f'Bearer {token}'}).get_json()
+    me = requests.get(f"{BASE_URL}/usuarios/me", headers={'Authorization': f'Bearer {token}'}).json()
     my_acad = me.get('academia_id')
     assert all(a.get('id') == my_acad for a in data.get('result'))
-    logout(client, token)
+    logout(token)
 
 
 @pytest.mark.meta(title='Obtener academia (Plataforma)', desc='Admin_plataforma puede obtener una academia por id')
 def test_get_academia_admin_plataforma(client):
-    token = login(client, 'admin_plataforma@academia.com', 'password_admin_plataforma', expected_role='Admin_plataforma')
+    token = login('admin_plataforma@academia.com', 'password_admin_plataforma', expected_role='Admin_plataforma')
     # assume seeder creó academias
     academias = Academia.query.limit(1).all()
     assert academias
     a = academias[0]
-    rv = client.get(f'/academias/{a.id}', headers={'Authorization': f'Bearer {token}'})
+    rv = requests.get(f"{BASE_URL}/academias/{a.id}", headers={'Authorization': f'Bearer {token}'})
     assert rv.status_code == 200
-    logout(client, token)
+    logout(token)
 
 
 @pytest.mark.meta(title='Obtener academia (Admin academia)', desc='Admin_academia puede obtener su academia vinculada')
 def test_get_academia_admin_academia_linked(client):
-    token = login(client, 'admin_academia@academia.com', 'password_admin_academia', expected_role='Admin_academia')
+    token = login('admin_academia@academia.com', 'password_admin_academia', expected_role='Admin_academia')
     user = Usuario.query.filter_by(email='admin_academia@academia.com').first()
     assert user and user.academia_id
-    rv = client.get(f'/academias/{user.academia_id}', headers={'Authorization': f'Bearer {token}'})
+    rv = requests.get(f"{BASE_URL}/academias/{user.academia_id}", headers={'Authorization': f'Bearer {token}'})
     assert rv.status_code == 200
-    logout(client, token)
+    logout(token)
 
 
 @pytest.mark.meta(title='Obtener academia no vinculada', desc='Admin_academia no puede ver academias de otra academia')
 def test_get_academia_admin_academia_not_linked_forbidden(client):
-    token = login(client, 'admin_academia@academia.com', 'password_admin_academia', expected_role='Admin_academia')
+    token = login('admin_academia@academia.com', 'password_admin_academia', expected_role='Admin_academia')
     # find an academia not equal to user's academia
     user = Usuario.query.filter_by(email='admin_academia@academia.com').first()
     academia_not_mine = Academia.query.filter(Academia.id != user.academia_id).first()
     assert academia_not_mine
-    rv = client.get(f'/academias/{academia_not_mine.id}', headers={'Authorization': f'Bearer {token}'})
+    rv = requests.get(f"{BASE_URL}/academias/{academia_not_mine.id}", headers={'Authorization': f'Bearer {token}'})
     assert rv.status_code == 403
-    logout(client, token)
+    logout(token)
 
 
 @pytest.mark.meta(title='Modificar academia (Plataforma)', desc='Admin_plataforma puede modificar cualquier academia')
 def test_patch_academia_admin_plataforma(client):
-    token = login(client, 'admin_plataforma@academia.com', 'password_admin_plataforma', expected_role='Admin_plataforma')
+    token = login('admin_plataforma@academia.com', 'password_admin_plataforma', expected_role='Admin_plataforma')
     a = Academia.query.first()
-    rv = client.patch(f'/academias/{a.id}', json={'nombre': 'Academia Patched X'}, headers={'Authorization': f'Bearer {token}'})
+    rv = requests.patch(f"{BASE_URL}/academias/{a.id}", json={'nombre': 'Academia Patched X'}, headers={'Authorization': f'Bearer {token}'})
     assert rv.status_code == 200
-    d = rv.get_json()
+    d = rv.json()
     assert d['ok'] is True
     assert d['result']['nombre'] == 'Academia Patched X'
-    logout(client, token)
+    logout(token)
 
 
 @pytest.mark.meta(title='Modificar academia (Admin academia)', desc='Admin_academia puede modificar su academia vinculada')
 def test_patch_academia_admin_academia_linked(client):
-    token = login(client, 'admin_academia@academia.com', 'password_admin_academia', expected_role='Admin_academia')
+    token = login('admin_academia@academia.com', 'password_admin_academia', expected_role='Admin_academia')
     user = Usuario.query.filter_by(email='admin_academia@academia.com').first()
     a = db.session.get(Academia, user.academia_id)
-    rv = client.patch(f'/academias/{a.id}', json={'nombre': 'Academia Patched Y'}, headers={'Authorization': f'Bearer {token}'})
+    rv = requests.patch(f"{BASE_URL}/academias/{a.id}", json={'nombre': 'Academia Patched Y'}, headers={'Authorization': f'Bearer {token}'})
     assert rv.status_code == 200
-    logout(client, token)
+    logout(token)
 
 
 @pytest.mark.meta(title='Modificar academia no vinculada', desc='Admin_academia no puede modificar academias de otra academia')
 def test_patch_academia_admin_academia_not_linked_forbidden(client):
-    token = login(client, 'admin_academia@academia.com', 'password_admin_academia', expected_role='Admin_academia')
+    token = login('admin_academia@academia.com', 'password_admin_academia', expected_role='Admin_academia')
     user = Usuario.query.filter_by(email='admin_academia@academia.com').first()
     academia_not_mine = Academia.query.filter(Academia.id != user.academia_id).first()
-    rv = client.patch(f'/academias/{academia_not_mine.id}', json={'nombre': 'Academia Patch Z'}, headers={'Authorization': f'Bearer {token}'})
+    rv = requests.patch(f"{BASE_URL}/academias/{academia_not_mine.id}", json={'nombre': 'Academia Patch Z'}, headers={'Authorization': f'Bearer {token}'})
     assert rv.status_code == 403
-    logout(client, token)
+    logout(token)

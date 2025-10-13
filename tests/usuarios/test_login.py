@@ -58,6 +58,7 @@ from config import Config  # Importar la configuración
 from src.usuarios.infrastructure.models import Usuario, UserLoginLog
 from src.shared.database import db
 from src.shared.security import hash_password
+import requests
 
 @pytest.fixture
 def client() -> Generator[FlaskClient, None, None]:
@@ -98,34 +99,50 @@ def test_login_usuario_activo(client):
 
 
 @pytest.mark.meta(title='Mi perfil tras login', desc='Después del login, GET /usuarios/me devuelve los datos del usuario')
-def test_obtener_mi_perfil_despues_login(client):
+def test_obtener_mi_perfil_despues_login():
     """
     Prueba: Tras un login correcto, solicitar /usuarios/me con el access token devuelve los datos del usuario.
     """
     print("\nPrueba: Ejecutando test_obtener_mi_perfil_despues_login - Login y consulta de /usuarios/me")
+
+    # URL base de la API
+    base_url = "http://127.0.0.1:5000"
+
     # Realizar login primero
-    rv = client.post('/auth/login', json={
+    login_response = requests.post(f"{base_url}/auth/login", json={
         'email': 'activo@academia.com',
         'password': 'password_activo'
     })
-    print("Respuesta login:", rv.get_json())
-    assert rv.status_code == 200
-    tokens = rv.get_json().get('tokens') or {}
+    print("Respuesta login:", login_response.json())
+    assert login_response.status_code == 200
+
+    tokens = login_response.json().get('tokens') or {}
     access = tokens.get('access_token')
+    print("Access token recibido:", access)
     assert access, "No se recibió access_token en la respuesta de login"
 
     # Llamar al endpoint protegido /usuarios/me
     headers = { 'Authorization': f'Bearer {access}' }
-    rv2 = client.get('/usuarios/me', headers=headers)
-    print("Respuesta /usuarios/me:", rv2.get_json())
-    assert rv2.status_code == 200
-    perfil = rv2.get_json()
+    perfil_response = requests.get(f"{base_url}/usuarios/me", headers=headers)
+    print("Respuesta /usuarios/me:", perfil_response.json())
+    print("Código de estado recibido:", perfil_response.status_code)
+    assert perfil_response.status_code == 200
+    perfil = perfil_response.json()
     # Comprobar campos esperados
     assert perfil.get('email') == 'activo@academia.com'
     assert perfil.get('nombre') == 'Usuario Activo'
     assert perfil.get('rol') == 'Admin_plataforma'
     assert 'id' in perfil
     assert 'fecha_alta' in perfil
+
+    # Debug logs adicionales
+    print("[DEBUG] Enviando solicitud POST a /auth/login", flush=True)
+    print("[DEBUG] Datos enviados:", { 'email': 'activo@academia.com', 'password': 'password_activo' }, flush=True)
+    print("[DEBUG] Respuesta recibida de /auth/login:", login_response.json(), flush=True)
+
+    print("[DEBUG] Enviando solicitud GET a /usuarios/me", flush=True)
+    print("[DEBUG] Encabezados enviados:", headers, flush=True)
+    print("[DEBUG] Respuesta recibida de /usuarios/me:", perfil_response.json(), flush=True)
 
 @pytest.mark.meta(title='Login usuario inexistente', desc='Inicio de sesión con usuario inexistente devuelve 401')
 def test_login_usuario_no_existente(client):

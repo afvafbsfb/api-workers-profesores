@@ -66,7 +66,11 @@ class Config:
         # Exportar tanto DATABASE_URL (usado por la app/tests) como SQLALCHEMY_DATABASE_URI
         os.environ["DATABASE_URL"] = url
         os.environ["SQLALCHEMY_DATABASE_URI"] = url
-        os.environ["DEBUG"] = "1" if cls.DB_ENV == "development" else "0"
+        # No sobrescribimos DEBUG si ya está definido en el entorno. Esto
+        # permite que scripts de arranque (o CI) fijen DEBUG/FLASK_DEBUG y
+        # que Config.set_environment_variables no los anule.
+        if os.getenv('DEBUG') is None:
+            os.environ["DEBUG"] = "1" if cls.DB_ENV == "development" else "0"
 
 # Ejemplo de uso
 if __name__ == "__main__":

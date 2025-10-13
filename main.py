@@ -39,10 +39,9 @@ try:
     # --- FIN LOGGING ---
 
     # --- DEBUG (activar solo para depuración temporal) ---
-    # Para activar el modo debug, descomenta la siguiente línea:
-    app.debug = True
-    #
-    # IMPORTANTE: Vuelve a comentar esta línea antes de subir a producción.
+    # Nota: no forzamos app.debug aquí para evitar inconsistencias con
+    # las variables de entorno (FLASK_DEBUG/DEBUG). El valor final se
+    # determina más abajo en base a FLASK_DEBUG.
     # --- FIN DEBUG ---
     # Permite CORS para cualquier origen (útil para pruebas, restringe en producción)
     CORS(app, resources={r"/*": {"origins": "*"}})
@@ -283,6 +282,14 @@ try:
     if not os.path.exists('tmp'):
         os.makedirs('tmp')
     logging.basicConfig(filename='tmp/flask_error.log', level=logging.ERROR)
+    logging.basicConfig(level=logging.DEBUG)  # Agregado para asegurar que los logs de depuración se muestren en consola
+
+    from logging import StreamHandler
+
+    # Ensure logs are printed to the console
+    console_handler = StreamHandler()
+    console_handler.setLevel(logging.DEBUG)
+    logging.getLogger().addHandler(console_handler)
 
 
     # Nota: el registro de blueprints se realiza más abajo una vez que
@@ -316,6 +323,63 @@ try:
     print(f"APP_ENV: {APP_ENV}")
     print(f"SQLALCHEMY_DATABASE_URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
+    # Dump relevant environment variables (mask secrets)
+    def mask(v):
+        try:
+            if v is None:
+                return "<null>"
+            s = str(v)
+            if s.strip() == "":
+                return "<blank>"
+            if len(s) <= 8:
+                return s[:4] + "..."
+            return s[:4] + "..."
+        except Exception:
+            return "<err>"
+
+    env_keys = [
+        'APP_ENV', 'FLASK_DEBUG', 'DEBUG', 'JWT_SECRET_KEY', 'JWT_DELEGATION_SECRET',
+        'DATABASE_URL', 'SQLALCHEMY_DATABASE_URI', 'AWS_LAMBDA_FUNCTION_NAME', 'ACADEMIA_API_BASEURL', 'ACADEMIA_API_KEY'
+    ]
+    print("[StartupEnv][INFO] Dumping selected environment variables (masked where appropriate):")
+    for k in env_keys:
+        try:
+            v = os.getenv(k)
+            if k.lower().find('secret') != -1 or k.lower().find('key') != -1 or k.lower().find('pass') != -1:
+                print(f"[StartupEnv][ENV] {k}={mask(v)}")
+            else:
+                print(f"[StartupEnv][ENV] {k}={v}")
+        except Exception as e:
+            print(f"[StartupEnv][ENV] {k}=<error:{e}>")
+
+        # Additionally, print sha256 and length of delegation secret (safe, non-reversible)
+        try:
+            ds = os.getenv('JWT_DELEGATION_SECRET')
+            if ds is None:
+                print("[StartupEnv][ENV] JWT_DELEGATION_SECRET_SHA256=<null>, JWT_DELEGATION_SECRET_LEN=0")
+            elif ds == "":
+                print("[StartupEnv][ENV] JWT_DELEGATION_SECRET_SHA256=<blank>, JWT_DELEGATION_SECRET_LEN=0")
+            else:
+                import hashlib
+                h = hashlib.sha256(ds.encode('utf-8')).hexdigest()
+                print(f"[StartupEnv][ENV] JWT_DELEGATION_SECRET_SHA256={h}, JWT_DELEGATION_SECRET_LEN={len(ds)}")
+        except Exception as e:
+            print(f"[StartupEnv][ENV] JWT_DELEGATION_SECRET_SHA256=<err>, JWT_DELEGATION_SECRET_LEN=<err> - {e}")
+
+    # If running with debug enabled or explicit dump flag, also print unmasked values
+    try:
+        dump_unmasked = (str(os.getenv('DUMP_SECRETS', '')).lower() in ('1', 'true', 'yes')) or app.debug
+        if dump_unmasked:
+            print("[StartupEnv][DEBUG] Dumping UNMASKED environment variables because app.debug or DUMP_SECRETS is set:")
+            for k in env_keys:
+                try:
+                    v = os.getenv(k)
+                    print(f"[StartupEnv][DEBUG] {k}={v}")
+                except Exception as e:
+                    print(f"[StartupEnv][DEBUG] {k}=<error:{e}>")
+    except Exception:
+        pass
+
     # Asegurar que SQLALCHEMY_BINDS esté desactivado durante las pruebas
     if APP_ENV == 'testing':
         app.config['SQLALCHEMY_BINDS'] = None  # Desactiva cualquier configuración adicional de binds
@@ -344,7 +408,8 @@ try:
     # por los scripts de mantenimiento o desde el bloque `if __name__ == '__main__'`.
 
     if __name__ == "__main__":
-        app.run(host="0.0.0.0", port=5000, debug=True)
+        # Use the app.debug value which is derived from FLASK_DEBUG
+        app.run(host="0.0.0.0", port=5000, debug=app.debug)
 except Exception as e:
     init_error = traceback.format_exc()
     print(init_error)

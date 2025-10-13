@@ -1,6 +1,7 @@
 from argon2 import PasswordHasher
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, create_refresh_token
 import os
+from datetime import timedelta
 
 # Inicializar PasswordHasher
 ph = PasswordHasher()

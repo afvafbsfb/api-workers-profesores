@@ -214,6 +214,7 @@ def recuperar_credenciales():
 @require_auth
 @operation_id('usuarios.obtener_mi_perfil')
 def obtener_mi_perfil():
+    print("[DEBUG] Controlador obtener_mi_perfil alcanzado", flush=True)
     user = getattr(g, 'current_user', None)
     if not user:
         return jsonify({"ok": False, "error": "user_not_authenticated"}), 401

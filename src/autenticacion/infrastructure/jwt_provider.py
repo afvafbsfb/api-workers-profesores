@@ -2,6 +2,8 @@ from flask_jwt_extended import create_access_token, create_refresh_token
 from datetime import timedelta
 from typing import Dict, Optional, List
 import json
+import os
+import hashlib
 
 ACCESS_EXPIRES = timedelta(minutes=15)
 REFRESH_EXPIRES = timedelta(days=7)
@@ -43,7 +45,33 @@ class JwtProvider:
             except Exception:
                 additional_claims['profesor_id'] = profesor_id
 
-        return create_access_token(identity=json.dumps(identity), additional_claims=additional_claims or None, expires_delta=ACCESS_EXPIRES)
+        token = create_access_token(identity=json.dumps(identity), additional_claims=additional_claims or None, expires_delta=ACCESS_EXPIRES)
+        # Log a short SHA-256 prefix when DEBUG is enabled so tests and runtime can audit token fingerprints
+        try:
+            if os.getenv('DEBUG', '0').lower() in ('1', 'true', 'yes'):
+                h = hashlib.sha256(token.encode('utf-8')).digest()
+                short = ''.join(f"{b:02x}" for b in h[:4])
+                print(f"[DEBUG] Generated access token SHA256 prefix: {short}")
+        except Exception:
+            pass
+        return token
+
+    @staticmethod
+    def create_access_with_log(usuario_id: int,
+                      token_version: int,
+                      roles: Optional[List[str]] = None,
+                      academia_id: Optional[int] = None,
+                      profesor_id: Optional[int] = None) -> str:
+        """Compatibility wrapper that logs a short SHA-256 prefix of the generated token when DEBUG is enabled."""
+        token = JwtProvider.create_access(usuario_id, token_version, roles=roles, academia_id=academia_id, profesor_id=profesor_id)
+        try:
+            if os.getenv('DEBUG', '0').lower() in ('1', 'true', 'yes'):
+                h = hashlib.sha256(token.encode('utf-8')).digest()
+                short = ''.join(f"{b:02x}" for b in h[:4])
+                print(f"[DEBUG] Generated access token SHA256 prefix: {short}")
+        except Exception:
+            pass
+        return token
 
     @staticmethod
     def create_refresh(usuario_id: int) -> str:

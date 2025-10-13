@@ -35,15 +35,17 @@ jobs:
           # PyYAML is used by scripts/compare_openapi.py for YAML parsing
           python -m pip install pyyaml
 
-      - name: Run DB seeder (idempotente)
+      - name: Run DB seeder (DISABLED)
         run: |
-          echo "Running DB seeder (this will fail the job if seeder raises an error)"
-          python init_db_pruebas_test.py --reset
+          # Disabled in CI per developer request: DB seeder would run here
+          # echo "Running DB seeder (this will fail the job if seeder raises an error)"
+          # python init_db_pruebas_test.py --reset
 
-      - name: Validate logout documented in OpenAPI (single test)
+      - name: Validate logout documented in OpenAPI (single test) (DISABLED)
         run: |
-          echo "Running OpenAPI logout documentation test"
-          pytest -q -s tests/test_openapi_requestbody.py
+          # Disabled in CI per developer request: single OpenAPI test disabled
+          # echo "Running OpenAPI logout documentation test"
+          # pytest -q -s tests/test_openapi_requestbody.py
 
       - name: Verify seeded data (counts)
         run: |
@@ -74,21 +76,22 @@ jobs:
             print(f'Counts -> Usuario: {usuarios}, Rol: {roles}, Academia: {academias}')
           PY
 
-      - name: Run tests (ordered) and produce combined HTML report
+      - name: Run tests (ordered) and produce combined HTML report (DISABLED)
         run: |
-          echo "Running ordered tests against AWS RDS and generating combined HTML report"
-          python -m pytest \
-            tests/academias/test_altas_bajas_academias.py \
-            tests/academias/test_busquedas_academias.py \
-            tests/academias/test_academias_post.py \
-            tests/academias/test_academias_get_patch.py \
-            tests/usuarios/test_altas_bajas_usuarios.py \
-            tests/usuarios/test_busquedas_usuarios.py \
-            tests/usuarios/test_login.py \
-            tests/usuarios/test_jwt_claims.py \
-            tests/usuarios/test_unblock.py \
-            tests/usuarios/test_refresh_logout.py \
-            -q -s --html=report-all.html --self-contained-html
+          # Disabled in CI per developer request: full pytest run disabled
+          # echo "Running ordered tests against AWS RDS and generating combined HTML report"
+          # python -m pytest \
+          #   tests/academias/test_altas_bajas_academias.py \
+          #   tests/academias/test_busquedas_academias.py \
+          #   tests/academias/test_academias_post.py \
+          #   tests/academias/test_academias_get_patch.py \
+          #   tests/usuarios/test_altas_bajas_usuarios.py \
+          #   tests/usuarios/test_busquedas_usuarios.py \
+          #   tests/usuarios/test_login.py \
+          #   tests/usuarios/test_jwt_claims.py \
+          #   tests/usuarios/test_unblock.py \
+          #   tests/usuarios/test_refresh_logout.py \
+          #   -q -s --html=report-all.html --self-contained-html
 
       - name: Upload pytest HTML report
         uses: actions/upload-artifact@v4

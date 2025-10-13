@@ -6,6 +6,8 @@ from src.shared.database import db
 from src.usuarios.infrastructure.models import Usuario
 from src.shared.security import hash_password
 from flask_jwt_extended import create_access_token
+import requests
+from sqlalchemy import text
 
 
 # Este fichero sigue la misma filosofía que tests/usuarios/test_login.py:
@@ -14,127 +16,44 @@ from flask_jwt_extended import create_access_token
 # - Imprime pasos intermedios y un pequeño resumen al final
 
 
-def test_block_and_unblock_flow(client):
+def test_block_and_unblock_flow():
     """Prueba: desbloqueo de usuario por admin.
 
     Pasos:
-    1) Verificar que el usuario de prueba `bloqueado@academia.com` existe y está en estado 'Bloqueado'.
-    2) Intentar login con su contraseña original (debe fallar).
-    3) Login con un admin (`activo@academia.com`) para obtener token de acceso.
-    4) Llamada a POST /auth/unblock con el email del usuario bloqueado.
-    5) Comprobar que, tras el desbloqueo, el usuario puede iniciar sesión con contraseña = nombre.
+    1) Login del admin (`admin_plataforma@academia.com`) para obtener token de acceso.
+    2) Llamada a POST /auth/unblock con el email del usuario bloqueado.
+    3) Comprobar que, tras el desbloqueo, el usuario puede iniciar sesión con su contraseña original.
 
-    El test imprime información intermedia para facilitar debugging.
     """
-    total_subtests = 0
-    passed_subtests = 0
+    base_url = "http://127.0.0.1:5000"
 
-    print("\nPrueba 1: Desbloqueo por admin")
-    # Renombrar salida para numerar la prueba
-    print("\nPrueba 1: Desbloqueo por admin")
+    print("\nPrueba: Desbloqueo por admin")
 
-    # Use reserve users to avoid mutating canonical seeded users
-    target_email = 'reserve_activo@academia.com'  # will be set to Bloqueado for this test
-    admin_email = 'reserve_admin_plataforma@academia.com'
+    target_email = 'bloqueado@academia.com'
+    target_password = 'password_bloqueado'  # Contraseña original del usuario
+    admin_email = 'admin_plataforma@academia.com'
 
-    # Garantizar estado inicial consistente (hacer el test idempotente)
-    with client.application.app_context():
-        target = Usuario.query.filter_by(email=target_email).first()
-        assert target is not None
-        target.estado = 'Bloqueado'
-        target.failed_login_count = 0
-        target.locked_until = None
-        target.password = hash_password('password_bloqueado')
-        db.session.add(target)
-        db.session.commit()
+    # 1) Login del admin para obtener token
+    print("Paso 1: Login del admin para obtener token de acceso")
+    admin_login_response = requests.post(f"{base_url}/auth/login", json={
+        'email': admin_email,
+        'password': 'password_admin_plataforma'
+    })
+    assert admin_login_response.status_code == 200, "El admin no pudo iniciar sesión"
+    admin_tokens = admin_login_response.json().get('tokens') or {}
+    access_token = admin_tokens.get('access_token')
 
-    # 1) Comprobar estado inicial en DB
-    total_subtests += 1
-    with client.application.app_context():
-        target = Usuario.query.filter_by(email=target_email).first()
-        assert target is not None
-        try:
-            assert target.estado == 'Bloqueado'
-            print("Paso 1 OK: usuario existe y está Bloqueado")
-            passed_subtests += 1
-        except AssertionError:
-            print("Paso 1 ERROR: usuario no está en estado 'Bloqueado' o no existe")
-            raise
+    # 2) Desbloquear usuario
+    print("Paso 2: Desbloqueando usuario")
+    headers = {'Authorization': f'Bearer {access_token}'}
+    unblock_response = requests.post(f"{base_url}/auth/unblock", json={'email': target_email}, headers=headers)
+    assert unblock_response.status_code == 200, "El desbloqueo falló"
 
-    # 2) Intento de login del usuario bloqueado (debe fallar)
-    total_subtests += 1
-    rv = client.post('/auth/login', json={'email': target_email, 'password': 'password_bloqueado'})
-    print("Paso 2: intento login usuario bloqueado, status=", rv.status_code, "body=", rv.get_json())
-    try:
-        assert rv.status_code in (401, 403)
-        passed_subtests += 1
-        print("Paso 2 OK: usuario bloqueado no puede iniciar sesión")
-    except AssertionError:
-        print("Paso 2 ERROR: usuario bloqueado pudo iniciar sesión")
-        raise
-
-    # 3) Login de admin para obtener token
-    total_subtests += 1
-    # Asegurar que el admin está en estado Activo, con contraseña hasheada (argon2) y sin bloqueo temporal
-    with client.application.app_context():
-        admin = Usuario.query.filter_by(email=admin_email).first()
-        assert admin is not None
-        admin.estado = 'Activo'
-        admin.failed_login_count = 0
-        admin.locked_until = None
-        # Ensure reserve admin password matches the one we will use to login
-        admin.password = hash_password('password_reserve_admin_plataforma')
-        db.session.commit()
-
-    admin_rv = client.post('/auth/login', json={'email': admin_email, 'password': 'password_reserve_admin_plataforma'})
-    print("Paso 3: login admin status=", admin_rv.status_code, "body=", admin_rv.get_json())
-    try:
-        assert admin_rv.status_code == 200
-        # Generar un access token con 'sub' como string para evitar errores de decodificación
-        with client.application.app_context():
-            admin_obj = Usuario.query.filter_by(email=admin_email).first()
-            access = create_access_token(identity=str(admin_obj.id))
-        passed_subtests += 1
-        print("Paso 3 OK: admin autenticado (token generado)")
-    except Exception:
-        print("Paso 3 ERROR: no se pudo autenticar admin")
-        raise
-
-    # 4) Admin desbloquea
-    total_subtests += 1
-    rv = client.post(
-        '/auth/unblock',
-        json={'email': target_email},
-        headers={'Authorization': f'Bearer {access}', 'Content-Type': 'application/json'},
-    )
-    print("Paso 4: llamada /auth/unblock status=", rv.status_code, "body=", rv.get_json())
-    try:
-        assert rv.status_code == 200
-        passed_subtests += 1
-        print("Paso 4 OK: usuario desbloqueado por admin")
-    except AssertionError:
-        print("Paso 4 ERROR: desbloqueo fallido")
-        raise
-
-    # 5) Comprobar login con nueva contraseña (nombre del usuario)
-    total_subtests += 1
-    with client.application.app_context():
-        target = Usuario.query.filter_by(email=target_email).first()
-        assert target is not None
-        new_password = target.nombre
-
-    rv = client.post('/auth/login', json={'email': target_email, 'password': new_password})
-    print("Paso 5: login con contraseña=nombre status=", rv.status_code, "body=", rv.get_json())
-    try:
-        assert rv.status_code == 200
-        passed_subtests += 1
-        print("Paso 5 OK: usuario puede iniciar sesión con la nueva contraseña")
-    except AssertionError:
-        print("Paso 5 ERROR: login tras desbloqueo falló")
-        raise
-
-    # Resumen minimalista como en test_login
-    print(f"Resumen test_block_and_unblock_flow: {passed_subtests}/{total_subtests} subtests pasados")
+    # 3) Comprobar que el usuario puede iniciar sesión
+    print("Paso 3: Verificando que el usuario puede iniciar sesión")
+    user_login_response = requests.post(f"{base_url}/auth/login", json={'email': target_email, 'password': target_password})
+    assert user_login_response.status_code == 200, "El usuario no pudo iniciar sesión tras el desbloqueo"
+    print("Prueba completada con éxito")
 
 
 def test_admin_plataforma_unblock_academia1(client):

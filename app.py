@@ -18,8 +18,18 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    # Configuración de la clave secreta para JWT
-    app.config['JWT_SECRET_KEY'] = 'super-secret-key'
+    # Configuración de la clave secreta para JWT: preferimos la variable de entorno
+    import hashlib
+    jwt_secret = os.getenv('JWT_SECRET_KEY', 'super-secret-key')
+    app.config['JWT_SECRET_KEY'] = jwt_secret
+    # Loguear una vista enmascarada (prefijo SHA-256 corto) para ayudar a depurar
+    if os.getenv('DEBUG', '0').lower() in ('1', 'true', 'yes'):
+        try:
+            h = hashlib.sha256(jwt_secret.encode('utf-8')).digest()
+            short = ''.join(f"{b:02x}" for b in h[:4])
+            print(f"[DEBUG] JWT_SECRET_KEY SHA256 prefix: {short}")
+        except Exception:
+            pass
 
     # Inicializar extensiones
     db.init_app(app)

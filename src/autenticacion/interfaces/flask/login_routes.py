@@ -10,6 +10,7 @@ import hashlib
 from datetime import datetime, timezone, timedelta
 from src.autenticacion.application.dtos import LoginRequestDTO
 from src.autenticacion.domain.exceptions import UsuarioBloqueadoException, CredencialesInvalidasException
+import json
 
 login_bp = Blueprint('login_bp', __name__)
 from src.shared.docs.operation_id import operation_id
@@ -232,45 +233,73 @@ def logout():
 def unblock_user():
     try:
         identity = get_jwt_identity()
-        caller_id = identity if isinstance(identity, int) or isinstance(identity, str) else identity.get('usuario_id')
+        # Adjusted to handle JSON string identities
+        if isinstance(identity, str):
+            try:
+                identity = json.loads(identity)  # Convert JSON string to dict
+            except json.JSONDecodeError:
+                print(f"[DEBUG][UNBLOCK] Failed to decode JWT identity JSON: {identity}")
+                return jsonify({"ok": False, "error": "invalid_identity_format"}), 401
+
+        if isinstance(identity, dict):
+            caller_id = identity.get('usuario_id')
+        elif isinstance(identity, (int, str)):
+            caller_id = identity
+        else:
+            print(f"[DEBUG][UNBLOCK] Invalid JWT identity format: {identity}")
+            return jsonify({"ok": False, "error": "invalid_identity"}), 401
+
         caller = db.session.get(Usuario, int(caller_id))
         if not caller:
+            print("[DEBUG][UNBLOCK] Caller not found in database.")
             return jsonify({"ok": False, "error": "caller_not_found"}), 401
+
+        print(f"[DEBUG][UNBLOCK] Caller found: {caller.email}, Rol: {caller.rol_id}")
 
         # Comprobar rol de administrador (permitir Admin_plataforma y Admin_academia)
         rol = Rol.query.filter_by(id=caller.rol_id).first()
         if not rol or rol.nombre not in ('Admin_plataforma', 'Admin_academia'):
+            print(f"[DEBUG][UNBLOCK] Caller role invalid or unauthorized: {rol.nombre if rol else 'None'}")
             return jsonify({"ok": False, "error": "forbidden"}), 403
 
         data = request.get_json() or {}
         email = data.get('email')
         if not email:
+            print("[DEBUG][UNBLOCK] Email not provided in request.")
             return jsonify({"ok": False, "error": "email_required"}), 400
 
         usuario = Usuario.query.filter_by(email=email).first()
         if not usuario:
+            print(f"[DEBUG][UNBLOCK] Target user not found: {email}")
             return jsonify({"ok": False, "error": "user_not_found"}), 404
 
+        print(f"[DEBUG][UNBLOCK] Target user found: {usuario.email}, Estado: {usuario.estado}")
+
         if usuario.estado != 'Bloqueado':
+            print(f"[DEBUG][UNBLOCK] Target user is not blocked: {usuario.estado}")
             return jsonify({"ok": False, "error": "user_not_blocked"}), 400
 
         # Validar que el usuario autenticado no se desbloquee a sí mismo
         if caller.email == email:
+            print("[DEBUG][UNBLOCK] Caller attempted to unblock themselves.")
             return jsonify({"ok": False, "error": "self_unblock_forbidden"}), 403
 
         # Validar roles y academias
         if rol.nombre == 'Admin_academia':
             if usuario.academia_id != caller.academia_id:
+                print(f"[DEBUG][UNBLOCK] Academia mismatch: Caller ({caller.academia_id}), Target ({usuario.academia_id})")
                 return jsonify({"ok": False, "error": "forbidden_academia_mismatch"}), 403
         elif rol.nombre == 'Admin_plataforma':
             usuario_rol = Rol.query.filter_by(id=usuario.rol_id).first()
             if usuario_rol and usuario_rol.nombre == 'Admin_plataforma' and usuario.id == caller.id:
+                print("[DEBUG][UNBLOCK] Admin_plataforma attempted to unblock another Admin_plataforma.")
                 return jsonify({"ok": False, "error": "forbidden"}), 403
 
-        # Cambiar password a nombre del usuario (hasheada) y desbloquear
+        # Log the current state of the target user before updating
+        print(f"[DEBUG][UNBLOCK] Target user before update: Email={usuario.email}, Estado={usuario.estado}, Password={usuario.password}")
+
+        # Only update the user's state to 'Activo' without changing the password
         try:
-            new_plain = usuario.nombre
-            usuario.password = hash_password(new_plain)
             usuario.estado = 'Activo'
             usuario.failed_login_count = 0
             usuario.last_failed_login_at = None
@@ -278,10 +307,18 @@ def unblock_user():
             usuario.token_version = (usuario.token_version or 0) + 1
             db.session.add(usuario)
             db.session.commit()
-        except Exception:
+
+            # Log the updated state of the target user
+            print(f"[DEBUG][UNBLOCK] Target user after update: Email={usuario.email}, Estado={usuario.estado}, Password={usuario.password}")
+        except Exception as e:
             db.session.rollback()
-            return jsonify({"ok": False, "error": "db_error"}), 500
+            print(f"[DEBUG][UNBLOCK] Database error while unblocking user: {e}")
+            return jsonify({"ok": False, "error": "db_error", "message": str(e)}), 500
 
         return jsonify({"ok": True}), 200
     except Exception as e:
+        print(f"[DEBUG][UNBLOCK] Unexpected error: {e}")
         return jsonify({"ok": False, "error": "unblock_error", "message": str(e)}), 500
+
+
+
