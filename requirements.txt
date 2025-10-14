@@ -13,3 +13,4 @@ Flask-JWT-Extended
 argon2-cffi
 apispec[marshmallow]
 webargs
+openpyxl

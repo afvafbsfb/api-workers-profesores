@@ -56,6 +56,53 @@
         },
         "type": "object"
       },
+      "PaginatedEnvelope": {
+        "properties": {
+          "has_more": {
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "meta": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "next_page": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "page": {
+            "type": "integer"
+          },
+          "prev_page": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "returned": {
+            "type": "integer"
+          },
+          "size": {
+            "type": "integer"
+          },
+          "total": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
       "RefreshRequest": {
         "additionalProperties": false,
         "properties": {
@@ -640,6 +687,64 @@
         "tags": [
           "Usuarios"
         ]
+      }
+    },
+    "/usuarios/export": {
+      "get": {
+        "description": "Exportar usuarios (CSV/XLSX)",
+        "operationId": "usuarios.exportar_usuarios",
+        "parameters": [
+          {
+            "description": "Formato de export",
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "enum": [
+                "csv",
+                "xlsx"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filtrar por academia_id",
+            "in": "query",
+            "name": "academia_id",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Filtrar por rol",
+            "in": "query",
+            "name": "rol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Buscar por parte del nombre (ilike)",
+            "in": "query",
+            "name": "nombre",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File attachment or stream"
+          },
+          "202": {
+            "description": "Export accepted and processing (async)"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /usuarios/export"
       }
     },
     "/usuarios/me": {

@@ -1,5 +1,13 @@
 d# API Workers Profesores
 
+
+--ejecucion de los scritps para generar y validar la especificacion del api para el mediador backend-chjatopenai:
+
+cd 'c:\Users\Angel FV\Desktop\FORMACION\api-workers-profesores'; python scripts/export_permissions.py; python scripts/dump_openapi.py; python scripts/merge_permissions_into_openapi.py --spec docs/openapi-auto.json --out docs/served-openapi.json; python scripts/validate_permissions_sync.py --map scripts/permissions_map.json --code src/shared/application/permissions.py --spec docs/openapi-auto.json; python scripts/validate_served_openapi_for_mediator.py --spec docs/served-openapi.json
+
+
+
+
 Esto es un README nuevo y completo para desarrollo, pruebas y documentación de la API.
 
 Contenido rápido
@@ -57,6 +65,7 @@ Observa la salida: el script imprime un resumen con usuarios y (temporalmente) l
 Opción recomendada (ver logs):
 
 # (opcional) activa el entorno virtual y exporta la secret delegada para pruebas
+$env:DB_ENV = 'developmentAWS'
 $env:JWT_SECRET_KEY = 'mi_secret_app_local_larga';
 $env:DEBUG = '1';
 $env:JWT_DELEGATION_SECRET = 'mi_secret_delegacion_local_larga';

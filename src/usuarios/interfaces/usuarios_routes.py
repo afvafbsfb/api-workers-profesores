@@ -1,12 +1,16 @@
-from flask import Blueprint, jsonify, request, g
+from flask import Blueprint, jsonify, request, g, Response
 from webargs import fields
-from src.shared.pagination import clamp_pagination, DEFAULT_SIZE, MAX_PAGE_SIZE, DEFAULT_PAGE
+from src.shared.pagination import clamp_pagination, DEFAULT_SIZE, MAX_PAGE_SIZE, DEFAULT_PAGE, build_page_envelope, EXPORT_SYNC_THRESHOLD
 from src.shared.docs.openapi_args import openapi_query_args
 from src.shared.middleware.auth import require_auth
 from src.usuarios.infrastructure.models import Usuario
 from src.shared.application.permissions import can_query_users, can_create_user, can_modify_user, can_delete_user
 from src.shared.database import db
 from src.shared.docs.operation_id import operation_id
+from src.shared.middleware.auth import logger as auth_logger
+import logging
+
+logger = logging.getLogger(__name__)
 
 usuarios_bp = Blueprint('usuarios', __name__)
 usuarios_list_query_args = {
@@ -16,6 +20,9 @@ usuarios_list_query_args = {
     'id': fields.Int(required=False, allow_none=True),
     'page': fields.Int(required=False, allow_none=True),
     'size': fields.Int(required=False, allow_none=True),
+    'with_total': fields.Bool(required=False, allow_none=True),
+    'order_by': fields.Str(required=False, allow_none=True),
+    'order_dir': fields.Str(required=False, allow_none=True),
 }
 
 
@@ -42,11 +49,27 @@ def listar_usuarios():
         'id': request.args.get('id') or request.args.get('usuario_id'),
         'page': request.args.get('page'),
         'size': request.args.get('size'),
+        'with_total': request.args.get('with_total'),
+        'order_by': request.args.get('order_by'),
+        'order_dir': request.args.get('order_dir'),
     }
 
     allowed, effective_filters, reason = can_query_users(user, params)
     if not allowed:
         return jsonify({'ok': False, 'error': 'forbidden', 'reason': reason}), 403
+
+    # Audit log: list request received
+    try:
+        logger.info("usuarios.list_request", extra={
+            'user_id': getattr(user, 'id', None),
+            'action': 'list',
+            'filters': effective_filters,
+            'page': page,
+            'size': size,
+        })
+    except Exception:
+        # best-effort logging
+        auth_logger.debug("Failed to emit audit log for usuarios.list_request")
 
     # Construir la consulta base y aplicar filtros efectivos
     query = Usuario.query
@@ -80,8 +103,55 @@ def listar_usuarios():
         parsed_size = None
 
     page, size = clamp_pagination(parsed_page, parsed_size)
+    # Parse optional with_total and ordering
+    with_total = params.get('with_total') in ('1', 'true', 'True', True)
+
+    # Whitelist of allowed order_by fields to avoid SQL injection
+    ORDER_WHITELIST = {'id', 'nombre', 'email', 'fecha_alta'}
+    order_by = params.get('order_by') if params.get('order_by') in ORDER_WHITELIST else 'id'
+    order_dir = params.get('order_dir') if params.get('order_dir') in ('asc', 'desc') else 'asc'
+
+    # Apply ordering deterministically; add id as tie-breaker
+    if order_by == 'id':
+        if order_dir == 'asc':
+            query = query.order_by(Usuario.id.asc())
+        else:
+            query = query.order_by(Usuario.id.desc())
+    else:
+        # Use SQLAlchemy-safe attributes
+        col = getattr(Usuario, order_by, Usuario.id)
+        if order_dir == 'asc':
+            query = query.order_by(col.asc(), Usuario.id.asc())
+        else:
+            query = query.order_by(col.desc(), Usuario.id.desc())
+
     offset = (page - 1) * size
-    usuarios = query.offset(offset).limit(size).all()
+    # LIMIT+1 strategy to determine has_more without COUNT(*)
+    usuarios_objs = query.offset(offset).limit(size + 1).all()
+
+    def serialize(u: Usuario):
+        return {
+            'id': u.id,
+            'nombre': u.nombre,
+            'email': u.email,
+            'rol': u.rol.nombre if getattr(u, 'rol', None) else None,
+            'academia_id': u.academia_id,
+            'estado': u.estado,
+            'fecha_alta': u.fecha_alta.isoformat() if getattr(u, 'fecha_alta', None) else None,
+        }
+
+    serialized = [serialize(u) for u in usuarios_objs]
+
+    total = None
+    if with_total:
+        try:
+            total = query.order_by(None).count()
+        except Exception:
+            total = None
+
+    envelope = build_page_envelope(serialized, page, size, with_total=with_total, total=total)
+
+    return jsonify(envelope)
 
     def serialize(u: Usuario):
         return {
@@ -134,6 +204,7 @@ def crear_usuario():
 @operation_id('usuarios.obtener_usuario')
 def obtener_usuario(usuario_id):
     return jsonify({"message": f"Detalles del usuario {usuario_id}"})
+    
 @usuarios_bp.route('/<int:usuario_id>', methods=['PUT', 'PATCH'])
 @require_auth
 @operation_id({'put': 'usuarios.actualizar_usuario_put', 'patch': 'usuarios.actualizar_usuario_patch'})
@@ -207,6 +278,127 @@ def actualizar_estado(usuario_id):
 def recuperar_credenciales():
     email = request.args.get('email')
     return jsonify({"message": f"Instrucciones enviadas al correo {email}"})
+
+
+
+@usuarios_bp.route('/export', methods=['GET'])
+@require_auth
+@operation_id('usuarios.exportar_usuarios')
+def exportar_usuarios():
+    """Exportar usuarios a CSV o XLSX. Uses same filters as listar_usuarios.
+
+    Query params: format=csv|xlsx (default csv), same filters as listar_usuarios.
+    """
+    user = getattr(g, 'current_user', None)
+    if not user:
+        return jsonify({'ok': False, 'error': 'user_not_authenticated'}), 401
+
+    fmt = (request.args.get('format') or 'csv').lower()
+
+    # Reuse filters from listar_usuarios to build the same query
+    params = {
+        'academia_id': request.args.get('academia_id'),
+        'rol': request.args.get('rol'),
+        'nombre': request.args.get('nombre'),
+        'id': request.args.get('id') or request.args.get('usuario_id'),
+    }
+
+    allowed, effective_filters, reason = can_query_users(user, params)
+    if not allowed:
+        return jsonify({'ok': False, 'error': 'forbidden', 'reason': reason}), 403
+
+    # Audit log: export request received
+    try:
+        logger.info("usuarios.export_request", extra={
+            'user_id': getattr(user, 'id', None),
+            'action': 'export',
+            'filters': effective_filters,
+            'format': fmt,
+        })
+    except Exception:
+        auth_logger.debug("Failed to emit audit log for usuarios.export_request")
+
+    query = Usuario.query
+    if 'academia_id' in effective_filters:
+        query = query.filter(Usuario.academia_id == effective_filters['academia_id'])
+    if params.get('id'):
+        try:
+            uid = int(params.get('id'))
+            query = query.filter(Usuario.id == uid)
+        except ValueError:
+            return jsonify({'ok': False, 'error': 'invalid_id'}), 400
+    if params.get('nombre'):
+        query = query.filter(Usuario.nombre.ilike(f"%{params.get('nombre')}%"))
+    if params.get('rol'):
+        query = query.join(Usuario.rol).filter(Usuario.rol.has(nombre=params.get('rol')))
+
+    # Estimate rows; use count for decision making (acceptable here)
+    try:
+        rows = query.order_by(None).count()
+    except Exception:
+        rows = None
+
+    # If small enough, stream CSV/XLSX synchronously
+    if rows is None or (rows is not None and rows <= EXPORT_SYNC_THRESHOLD):
+        users = query.order_by(Usuario.id.asc()).all()
+
+        def generate_csv():
+            import csv
+            from io import StringIO
+
+            si = StringIO()
+            writer = csv.writer(si)
+            writer.writerow(['id', 'nombre', 'email', 'rol', 'academia_id', 'estado', 'fecha_alta'])
+            yield si.getvalue()
+            si.seek(0)
+            si.truncate(0)
+
+            for u in users:
+                writer.writerow([
+                    u.id,
+                    u.nombre,
+                    u.email,
+                    u.rol.nombre if getattr(u, 'rol', None) else None,
+                    u.academia_id,
+                    u.estado,
+                    u.fecha_alta.isoformat() if getattr(u, 'fecha_alta', None) else None,
+                ])
+                yield si.getvalue()
+                si.seek(0)
+                si.truncate(0)
+
+        if fmt == 'csv':
+            headers = {
+                'Content-Type': 'text/csv',
+                'Content-Disposition': 'attachment; filename="usuarios.csv"'
+            }
+            return Response(generate_csv(), headers=headers)
+        elif fmt == 'xlsx':
+            # create in-memory workbook
+            from io import BytesIO
+            from openpyxl import Workbook
+
+            wb = Workbook(write_only=True)
+            ws = wb.create_sheet(title='usuarios')
+            ws.append(['id', 'nombre', 'email', 'rol', 'academia_id', 'estado', 'fecha_alta'])
+            for u in users:
+                ws.append([
+                    u.id,
+                    u.nombre,
+                    u.email,
+                    u.rol.nombre if getattr(u, 'rol', None) else None,
+                    u.academia_id,
+                    u.estado,
+                    u.fecha_alta.isoformat() if getattr(u, 'fecha_alta', None) else None,
+                ])
+
+            bio = BytesIO()
+            wb.save(bio)
+            bio.seek(0)
+            return Response(bio.read(), mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', headers={'Content-Disposition': 'attachment; filename="usuarios.xlsx"'})
+
+    # Otherwise, return accepted and job placeholder (async implementation)
+    return jsonify({'ok': True, 'status': 'accepted', 'message': 'export_started_async', 'job_id': None}), 202
 
 
 # Endpoint para obtener los datos del usuario autenticado

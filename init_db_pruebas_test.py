@@ -494,6 +494,45 @@ def seed():
                 db.session.rollback()
                 print(f"[init_db_pruebas_test] No se pudo normalizar usuario reserva {user.email}: {e}")
 
+    # Crear dos usuarios Profesores de prueba (idempotente)
+    usuarios_profesores_test = [
+        dict(email='profesor_test_1@academia.com', plain_password='password_profesor1', nombre='Profesor Test 1', rol_id=rol_profesor.id, estado='Activo', academia_id=academia_1.id),
+        dict(email='profesor_test_2@academia.com', plain_password='password_profesor2', nombre='Profesor Test 2', rol_id=rol_profesor.id, estado='Activo', academia_id=academia_2.id),
+    ]
+
+    for u in usuarios_profesores_test:
+        user_filters = dict(email=u['email'])
+        defaults = {k: v for k, v in u.items() if k != 'email'}
+        if 'plain_password' in defaults:
+            plain = defaults.pop('plain_password')
+            defaults['password'] = hash_password(plain)
+        user, created = get_or_create(Usuario, defaults=defaults, **user_filters)
+        if created:
+            print(f"[init_db_pruebas_test] Profesor creado: {user.email} (id={user.id})")
+        else:
+            print(f"[init_db_pruebas_test] Profesor ya existe: {user.email}")
+            try:
+                user.password = defaults.get('password', user.password)
+                user.estado = defaults.get('estado', user.estado).capitalize() if isinstance(defaults.get('estado', user.estado), str) else user.estado
+                user.rol_id = defaults.get('rol_id', user.rol_id)
+                user.academia_id = defaults.get('academia_id', user.academia_id)
+                user.failed_login_count = 0
+                user.last_failed_login_at = None
+                user.locked_until = None
+                db.session.add(user)
+                db.session.commit()
+                print(f"[init_db_pruebas_test] Profesor normalizado: {user.email}")
+            except Exception as e:
+                db.session.rollback()
+                print(f"[init_db_pruebas_test] No se pudo normalizar profesor {user.email}: {e}")
+
+    # Añadir estos usuarios al listado combinado para el resumen
+    try:
+        all_seed_users += usuarios_profesores_test
+    except Exception:
+        # Si por alguna razón all_seed_users no existe todavía, ignorar
+        pass
+
     # Mostrar resumen al final del seeding con roles primero
     def mostrar_resumen():
         print("\n[Resumen de datos creados]")

@@ -51,7 +51,9 @@ def test_login_admin_academia_and_search_without_academia_should_succeed(client)
     access, refresh = login_and_get_tokens('admin_academia@academia.com', 'password_admin_academia')
     rv = list_users(access)
     assert rv.status_code == 200
-    users = rv.json()
+    resp = rv.json()
+    assert isinstance(resp, dict)
+    users = resp.get('items', [])
     assert isinstance(users, list)
     assert len(users) > 0
     # Comprobar que todos los usuarios devueltos pertenecen a la academia del caller
@@ -71,7 +73,8 @@ def test_admin_academia_search_with_academia_id_that_exists_should_succeed(clien
     my_academia = me.get('academia_id')
     rv = list_users(access, params={'academia_id': my_academia})
     assert rv.status_code == 200
-    users = rv.json()
+    resp = rv.json()
+    users = resp.get('items', [])
     assert all(u.get('academia_id') == my_academia for u in users)
 
 
@@ -92,7 +95,8 @@ def test_login_admin_plataforma_and_search_without_academia_should_succeed(clien
     access, refresh = login_and_get_tokens('admin_plataforma@academia.com', 'password_admin_plataforma')
     rv = list_users(access)
     assert rv.status_code == 200
-    users = rv.json()
+    resp = rv.json()
+    users = resp.get('items', [])
     assert isinstance(users, list) and len(users) > 0
 
 
@@ -103,7 +107,8 @@ def test_admin_plataforma_search_with_other_academia_should_succeed(client):
     access, refresh = login_and_get_tokens('admin_plataforma@academia.com', 'password_admin_plataforma')
     # Obtener una academia_id presente en los resultados
     rv_all = list_users(access)
-    users = rv_all.json()
+    resp_all = rv_all.json()
+    users = resp_all.get('items', [])
     other_acad = None
     for u in users:
         if u.get('academia_id'):
@@ -112,7 +117,8 @@ def test_admin_plataforma_search_with_other_academia_should_succeed(client):
     assert other_acad is not None, "No se encontró ninguna academia en los usuarios para probar"
     rv = list_users(access, params={'academia_id': other_acad})
     assert rv.status_code == 200
-    users2 = rv.json()
+    resp2 = rv.json()
+    users2 = resp2.get('items', [])
     assert all(u.get('academia_id') == other_acad for u in users2)
 
 
@@ -123,7 +129,8 @@ def test_admin_plataforma_search_with_own_academia_should_succeed(client):
     access, refresh = login_and_get_tokens('admin_plataforma@academia.com', 'password_admin_plataforma')
     # Usamos la misma lógica: tomar una academia de la lista
     rv_all = list_users(access)
-    users = rv_all.json()
+    resp_all = rv_all.json()
+    users = resp_all.get('items', [])
     some_acad = None
     for u in users:
         if u.get('academia_id'):
@@ -152,7 +159,8 @@ def test_login_profesor_academia_and_search_without_academia_should_succeed_but_
     access, refresh = login_and_get_tokens('reserve_user_academia_1_1@academia.com', 'password_reserve_user_academia_1_1')
     rv = list_users(access)
     assert rv.status_code == 200
-    users = rv.json()
+    resp = rv.json()
+    users = resp.get('items', [])
     me = requests.get('http://127.0.0.1:5000/usuarios/me', headers={'Authorization': f'Bearer {access}'}).json()
     my_academia = me.get('academia_id')
     assert all(u.get('academia_id') == my_academia for u in users)
@@ -166,7 +174,8 @@ def test_profesor_academia_search_with_other_academia_should_fail(client):
     # Obtener una academia diferente mediante el usuario admin_plataforma
     ap_access, _ = login_and_get_tokens('admin_plataforma@academia.com', 'password_admin_plataforma')
     rv_all = list_users(ap_access)
-    users = rv_all.json()
+    resp_all = rv_all.json()
+    users = resp_all.get('items', [])
     other_acad = None
     for u in users:
         me_acad = requests.get('http://127.0.0.1:5000/usuarios/me', headers={'Authorization': f'Bearer {access}'}).json().get('academia_id')
@@ -204,13 +213,15 @@ def test_admin_plataforma_pagination(client):
     access, refresh = login_and_get_tokens('admin_plataforma@academia.com', 'password_admin_plataforma')
     rv = list_users(access, params={'page': 1, 'size': 2})
     assert rv.status_code == 200
-    users_p1 = rv.json()
+    resp1 = rv.json()
+    users_p1 = resp1.get('items', [])
     assert isinstance(users_p1, list)
     assert len(users_p1) <= 2
 
     rv2 = list_users(access, params={'page': 2, 'size': 2})
     assert rv2.status_code == 200
-    users_p2 = rv2.json()
+    resp2 = rv2.json()
+    users_p2 = resp2.get('items', [])
     assert isinstance(users_p2, list)
     # either different content or second page empty
     assert users_p1 != users_p2 or len(users_p2) == 0
@@ -221,7 +232,7 @@ def test_admin_plataforma_filter_plus_pagination(client):
     access, refresh = login_and_get_tokens('admin_plataforma@academia.com', 'password_admin_plataforma')
     rv_all = list_users(access)
     assert rv_all.status_code == 200
-    all_users = rv_all.json()
+    all_users = rv_all.json().get('items', [])
     if not all_users:
         pytest.skip('No users present to exercise filter+paging')
 
@@ -232,7 +243,8 @@ def test_admin_plataforma_filter_plus_pagination(client):
     rv = list_users(access, params={'nombre': sample_name, 'page': 1, 'size': 1})
     assert rv.status_code == 200
     page = rv.json()
-    assert isinstance(page, list)
-    assert len(page) <= 1
-    for u in page:
+    items = page.get('items', [])
+    assert isinstance(items, list)
+    assert len(items) <= 1
+    for u in items:
         assert sample_name.lower() in (u.get('nombre') or '').lower()
