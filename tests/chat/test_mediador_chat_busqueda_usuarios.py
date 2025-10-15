@@ -94,7 +94,7 @@ def test_mediador_busqueda_usuarios_admin_academia(client):
     # a diferenciar correctamente usuarios, se podrá duplicar/separar este test.
     payload = {
         'messages': [
-            {'role': openai_role, 'content': 'Quiero ver el listado de las academias que están dadas de alta'}
+            {'role': openai_role, 'content': 'quiero el listado de usuarios que existen'}
         ]
     }
     resp = requests.post(url, json=payload, headers=headers, timeout=90)

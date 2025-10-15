@@ -12,7 +12,7 @@ TEST_EMAIL = 'admin_academia@academia.com'
 TEST_PASSWORD = 'password_admin_academia'
 
 def login_and_get_access(email: str, password: str) -> str:
-    base_url = TEST_API_URL
+    base_url = API_WORKER_URL
 
     login_response = requests.post(f"{base_url}/auth/login", json={'email': email, 'password': password})
     assert login_response.status_code == 200
@@ -97,7 +97,7 @@ def test_mediator_welcome_after_login_admin_academia(email, password, role_desc)
 def test_mediator_list_requests_admin_academia(email, password, role_desc, message, expected_keyword):
     """Integración (admin_academia): mediador responde a solicitudes de listados."""
     access = login_and_get_access(email, password)
-    login_info = requests.post(f"{TEST_API_URL}/auth/login", json={'email': email, 'password': password}).json()
+    login_info = requests.post(f"{API_WORKER_URL}/auth/login", json={'email': email, 'password': password}).json()
     assert 'role' in login_info, 'Role not returned in login response'  # Validar que el rol esté presente
     role = login_info['role']  # Obtener el rol directamente de la respuesta del login
 
@@ -141,4 +141,63 @@ def test_mediator_list_requests_admin_academia(email, password, role_desc, messa
         or data.get('type') == expected_keyword
         or expected_keyword in items_join
     ), f"No se detecta '{expected_keyword}' en envelope: {envelope}"
+    assert envelope.get('error') in (None, {}), 'error debe ser nulo en success'
+
+
+@pytest.mark.parametrize("email,password,role_desc,user_message", [
+    ("admin_academia@academia.com", "password_admin_academia", "Admin_academia", "dime el total de academias y el total de alumnos que tenemos"),
+])
+def test_mediator_totals_academias_y_alumnos(email, password, role_desc, user_message):
+    """Integración (admin_academia): pedir totales de academias y alumnos."""
+    access = login_and_get_access(email, password)
+
+    # Opcional: recuperar info de login (rol), aunque forzamos role='user' hacia OpenAI
+    login_info = requests.post(f"{API_WORKER_URL}/auth/login", json={'email': email, 'password': password}).json()
+    assert 'role' in login_info, 'Role not returned in login response'
+
+    mediator_url = MEDIATOR_URL
+    assert wait_for_mediator(mediator_url, timeout=90), f"Mediator at {mediator_url} not available"
+    url = f"{mediator_url.rstrip('/')}/chat"
+
+    flow_id = str(uuid.uuid4())
+    headers = {
+        'Authorization': f'Bearer {access}',
+        'Content-Type': 'application/json',
+        'X-Flow-Diagram': 'true',
+        'X-Flow-Id': flow_id,
+    }
+
+    payload = {
+        'messages': [
+            {'role': 'user', 'content': user_message}
+        ]
+    }
+
+    resp = requests.post(url, json=payload, headers=headers, timeout=90)
+    assert resp.status_code == 200, f"Mediator /chat returned {resp.status_code}: {resp.text}"
+
+    try:
+        envelope = resp.json()
+    except Exception:
+        pytest.fail('Mediator did not return JSON envelope')
+
+    assert isinstance(envelope, dict), 'Envelope debe ser dict'
+    assert envelope.get('status') == 'success', f"status inesperado: {envelope.get('status')}"
+
+    # El mensaje debe mencionar academias/alumnos/total y, razonablemente, contener alguna cifra
+    main_message = (envelope.get('message') or '').lower()
+    assert any(k in main_message for k in ('academia', 'academias', 'alumno', 'alumnos', 'total')), (
+        f"Mensaje no menciona academias/alumnos/total: {main_message}"
+    )
+    assert any(ch.isdigit() for ch in main_message), (
+        f"Mensaje no contiene ninguna cifra aparente de totales: {main_message}"
+    )
+
+    # data puede venir vacío para este tipo de respuesta; si existe, validar estructura mínima
+    data = envelope.get('data') or {}
+    if data:
+        assert 'items' in data, 'Falta items en data'
+        assert isinstance(data.get('items'), list), 'items debe ser lista'
+
+    # error no debe estar
     assert envelope.get('error') in (None, {}), 'error debe ser nulo en success'
