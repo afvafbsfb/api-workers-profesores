@@ -1,6 +1,5 @@
 d# API Workers Profesores
 
-
 --ejecucion de los scritps para generar y validar la especificacion del api para el mediador backend-chjatopenai:
 
 cd 'c:\Users\Angel FV\Desktop\FORMACION\api-workers-profesores'; python scripts/export_permissions.py; python scripts/dump_openapi.py; python scripts/merge_permissions_into_openapi.py --spec docs/openapi-auto.json --out docs/served-openapi.json; python scripts/validate_permissions_sync.py --map scripts/permissions_map.json --code src/shared/application/permissions.py --spec docs/openapi-auto.json; python scripts/validate_served_openapi_for_mediator.py --spec docs/served-openapi.json
@@ -35,8 +34,8 @@ python -m venv .venv
 . .venv\Scripts\Activate.ps1
 
 # Instalar dependencias
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+python -m pip install --upgrade pip;
+python -m pip install -r requirements.txt;
 python -m pip install -r requirements-dev.txt
 ```
 
