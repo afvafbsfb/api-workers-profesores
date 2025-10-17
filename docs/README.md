@@ -130,6 +130,46 @@ $access = $resp.tokens.access_token
 $refresh = $resp.tokens.refresh_token
 ```
 
+Nuevo (oct-2025): claim display_name en el access token
+-------------------------------------------------------
+
+Con el objetivo de ahorrar una llamada extra al endpoint "mi perfil" en consumidores como el backend de chat, el access token ahora incluye un claim de nombre amigable:
+
+- Claves incluidas: `display_name` y (alias) `name` con el mismo valor.
+- Origen del valor: `Usuario.nombre` en el momento del login.
+- Dónde se añade: en `additional_claims` del access token (NO se añade al refresh token).
+- Compatibilidad: 100% retrocompatible. Servicios que no usen este claim lo ignoran.
+- TTL: se recomienda mantener el TTL corto del access (15 min) para que posibles cambios de nombre se reflejen con rapidez.
+
+Ejemplo de payload (parcial) del access token tras decodificar JWT:
+
+```json
+{
+   "sub": "{\"usuario_id\":123,\"token_version\":2}",
+   "type": "access",
+   "roles": ["Admin_academia"],
+   "academia_id": 77,
+   "display_name": "Ana Pérez",
+   "name": "Ana Pérez",
+   "iat": 173...,
+   "exp": 173...
+}
+```
+
+Notas y buenas prácticas:
+- No se añade al refresh token (mantenerlo mínimo y sin PII).
+- Es un dato no sensible y de tamaño pequeño pensado para personalización.
+- Consumidores OIDC pueden usar también claves estándar como `name`.
+
+Verificación rápida (PowerShell):
+
+```powershell
+# Decodificar payload (base64url) del access y comprobar que aparecen display_name/name
+$parts = $access.Split('.')
+$payloadJson = [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String(($parts[1].Replace('-', '+').Replace('_','/').PadRight($parts[1].Length + (4 - $parts[1].Length % 4) % 4, '='))))
+$payloadJson | Out-Host
+```
+
 Logout usando body + header access (caso Swagger UI):
 
 ```powershell

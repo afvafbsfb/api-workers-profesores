@@ -22,7 +22,8 @@ class JwtProvider:
                       token_version: int,
                       roles: Optional[List[str]] = None,
                       academia_id: Optional[int] = None,
-                      profesor_id: Optional[int] = None) -> str:
+                      profesor_id: Optional[int] = None,
+                      display_name: Optional[str] = None) -> str:
         """Genera un access token incluyendo claims adicionales opcionales.
 
         identity: se serializa como JSON para mantener compatibilidad con
@@ -44,6 +45,17 @@ class JwtProvider:
                 additional_claims['profesor_id'] = int(profesor_id)
             except Exception:
                 additional_claims['profesor_id'] = profesor_id
+        # Optional friendly display name to avoid extra profile lookups in downstream services
+        if display_name:
+            try:
+                dn = str(display_name).strip()
+                if dn:
+                    # Include both a project-specific key and a common alias for compatibility
+                    additional_claims['display_name'] = dn
+                    additional_claims['name'] = dn
+                
+            except Exception:
+                pass
 
         token = create_access_token(identity=json.dumps(identity), additional_claims=additional_claims or None, expires_delta=ACCESS_EXPIRES)
         # Log a short SHA-256 prefix when DEBUG is enabled so tests and runtime can audit token fingerprints
@@ -61,9 +73,10 @@ class JwtProvider:
                       token_version: int,
                       roles: Optional[List[str]] = None,
                       academia_id: Optional[int] = None,
-                      profesor_id: Optional[int] = None) -> str:
+                      profesor_id: Optional[int] = None,
+                      display_name: Optional[str] = None) -> str:
         """Compatibility wrapper that logs a short SHA-256 prefix of the generated token when DEBUG is enabled."""
-        token = JwtProvider.create_access(usuario_id, token_version, roles=roles, academia_id=academia_id, profesor_id=profesor_id)
+        token = JwtProvider.create_access(usuario_id, token_version, roles=roles, academia_id=academia_id, profesor_id=profesor_id, display_name=display_name)
         try:
             if os.getenv('DEBUG', '0').lower() in ('1', 'true', 'yes'):
                 h = hashlib.sha256(token.encode('utf-8')).digest()

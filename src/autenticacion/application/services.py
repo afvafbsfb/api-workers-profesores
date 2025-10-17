@@ -105,7 +105,8 @@ class AuthService:
         academia_id = getattr(user, 'academia_id', None)
         # profesor_id no está explícito en Usuario; si necesitas un id de profesor
         # extrae del modelo correspondiente. Por ahora lo dejamos None.
-        access = JwtProvider.create_access(user.id, token_version, roles=roles, academia_id=academia_id)
+        # Incluir display_name en el access token para evitar llamadas de perfil aguas abajo
+        access = JwtProvider.create_access(user.id, token_version, roles=roles, academia_id=academia_id, display_name=getattr(user, 'nombre', None))
         refresh = JwtProvider.create_refresh(user.id)
 
         if Config.DEBUG:
