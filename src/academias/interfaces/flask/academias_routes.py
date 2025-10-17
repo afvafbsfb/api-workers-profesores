@@ -66,6 +66,7 @@ def crear_academia():
 academias_list_query_args = {
     'id': fields.Int(required=False, allow_none=True),
     'nombre': fields.Str(required=False, allow_none=True),
+    'nombre_contains': fields.Str(required=False, allow_none=True),
     # use load_default for Marshmallow 3 compatibility
     'page': fields.Int(required=False, load_default=1),
     'size': fields.Int(required=False, load_default=20),
@@ -96,13 +97,13 @@ def listar_academias(args):
 
     # Otherwise (platform admin with no forced filters) apply optional filters
     query = Academia.query
-    nombre = args.get('nombre')
-    if nombre:
+    # mantener compat: nombre actúa como contains; añadimos nombre_contains explícito
+    nombre_contains = args.get('nombre_contains') or args.get('nombre')
+    if nombre_contains:
         try:
-            query = query.filter(Academia.nombre.ilike(f"%{nombre}%"))
+            query = query.filter(Academia.nombre.ilike(f"%{nombre_contains}%"))
         except Exception:
-            # Fallback if ilike isn't available for the configured DB dialect
-            query = query.filter(Academia.nombre.like(f"%{nombre}%"))
+            query = query.filter(Academia.nombre.like(f"%{nombre_contains}%"))
 
     # Pagination (simple offset/limit) — parse and clamp using shared helper
     try:

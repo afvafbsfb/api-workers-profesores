@@ -2,7 +2,46 @@ d# API Workers Profesores
 
 --ejecucion de los scritps para generar y validar la especificacion del api para el mediador backend-chjatopenai:
 
+
+Lo más probable: inicialmente el script no pudo generar por dependencias/entorno y estabas viendo un openapi-auto.json viejo. Después instalaste/ejecutaste correctamente y entonces el script pudo importar la app, detectar openapi_query_args y escribir el spec actualizado.
+Para evitarlo en el futuro: guarda cambios, usa siempre el mismo intérprete/virtualenv, borra el openapi-auto.json viejo antes de generar y fíjate en la salida del script.
+
+
+cd "c:\Users\Angel FV\Desktop\FORMACION\api-workers-profesores"
+# borrar auto-spec viejo
+if (Test-Path .\docs\openapi-auto.json) { Remove-Item .\docs\openapi-auto.json -Force }
+
+verificar que ¿Se puede importar apispec y marshmallow?:
+python -c "import apispec, marshmallow; print('ok')"
+
+
+
+
+# regenerar
+python .\scripts\dump_openapi.py
+# confirmar salida: debería decir "Wrote docs/openapi-auto.json and docs/openapi-auto.yml"
+
+
 cd 'c:\Users\Angel FV\Desktop\FORMACION\api-workers-profesores'; python scripts/export_permissions.py; python scripts/dump_openapi.py; python scripts/merge_permissions_into_openapi.py --spec docs/openapi-auto.json --out docs/served-openapi.json; python scripts/validate_permissions_sync.py --map scripts/permissions_map.json --code src/shared/application/permissions.py --spec docs/openapi-auto.json; python scripts/validate_served_openapi_for_mediator.py --spec docs/served-openapi.json
+
+--ejecucion de los scritps para generar y validar la especificacion del api para el mediador backend-chjatopenai y para la especificacion swagger 
+cd "c:\Users\Angel FV\Desktop\FORMACION\api-workers-profesores"
+python .\scripts\dump_openapi.py
+
+# Anotar parámetros (genera cambios en docs/openapi-auto.json)
+python .\scripts\annotate_openapi_params.py docs\openapi-auto.json
+
+# Fusionar permisos y generar served-openapi.json
+python .\scripts\merge_permissions_into_openapi.py docs\openapi-auto.json docs\served-openapi.json
+
+
+python scripts/validate_permissions_sync.py --map scripts/permissions_map.json --code src/shared/application/permissions.py --spec docs/openapi-auto.json; python scripts/validate_served_openapi_for_mediator.py --spec docs/served-openapi.json
+
+# Ejecutar los tests (ejecuta todos los tests; puedes limitar a carpetas si quieres)
+pytest -q
+
+
+
 
 
 
@@ -353,6 +392,9 @@ permissions_map.json
          4) Fusionar permisos en la spec y comprobar:
 
             python scripts/merge_permissions_into_openapi.py --spec docs/openapi-auto.json --out docs/served-openapi.json
+
+            # Regenerar auto-spec (ya lo ejecutaste, pero por si acaso)
+
 
             genera el doc --> Wrote C:\Users\Angel FV\Desktop\FORMACION\api-workers-profesores\docs\served-openapi.json
 

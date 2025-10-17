@@ -150,7 +150,7 @@ def test_admin_plataforma_academias_filter_plus_pagination(client):
     if not sample_name:
         pytest.skip('Sample academia has no nombre to filter on')
 
-    rv = list_academias(access, params={'nombre': sample_name, 'page': 1, 'size': 1})
+    rv = list_academias(access, params={'nombre_contains': sample_name, 'page': 1, 'size': 1})
     assert rv.status_code == 200
     page = rv.json().get('result', [])
     assert isinstance(page, list)

@@ -16,13 +16,27 @@ usuarios_bp = Blueprint('usuarios', __name__)
 usuarios_list_query_args = {
     'academia_id': fields.Int(required=False, allow_none=True),
     'rol': fields.Str(required=False, allow_none=True),
+    # nombre legacy: mantiene comportamiento contains; añadimos nombre_contains explícito
     'nombre': fields.Str(required=False, allow_none=True),
+    'nombre_contains': fields.Str(required=False, allow_none=True),
+    # nuevos filtros
+    'email': fields.Str(required=False, allow_none=True),
+    'email_contains': fields.Str(required=False, allow_none=True),
+    'estado': fields.Str(required=False, allow_none=True),
+    'rol_id': fields.Int(required=False, allow_none=True),
     'id': fields.Int(required=False, allow_none=True),
     'page': fields.Int(required=False, allow_none=True),
     'size': fields.Int(required=False, allow_none=True),
     'with_total': fields.Bool(required=False, allow_none=True),
     'order_by': fields.Str(required=False, allow_none=True),
     'order_dir': fields.Str(required=False, allow_none=True),
+    # rangos de fechas (ISO)
+    'fecha_alta_gte': fields.Str(required=False, allow_none=True),
+    'fecha_alta_lte': fields.Str(required=False, allow_none=True),
+    'fecha_baja_gte': fields.Str(required=False, allow_none=True),
+    'fecha_baja_lte': fields.Str(required=False, allow_none=True),
+    'fecha_ultima_modificacion_gte': fields.Str(required=False, allow_none=True),
+    'fecha_ultima_modificacion_lte': fields.Str(required=False, allow_none=True),
 }
 
 
@@ -46,12 +60,23 @@ def listar_usuarios():
         'academia_id': request.args.get('academia_id'),
         'rol': request.args.get('rol'),
         'nombre': request.args.get('nombre'),
+        'nombre_contains': request.args.get('nombre_contains'),
+        'email': request.args.get('email'),
+        'email_contains': request.args.get('email_contains'),
+        'estado': request.args.get('estado'),
+        'rol_id': request.args.get('rol_id'),
         'id': request.args.get('id') or request.args.get('usuario_id'),
         'page': request.args.get('page'),
         'size': request.args.get('size'),
         'with_total': request.args.get('with_total'),
         'order_by': request.args.get('order_by'),
         'order_dir': request.args.get('order_dir'),
+        'fecha_alta_gte': request.args.get('fecha_alta_gte'),
+        'fecha_alta_lte': request.args.get('fecha_alta_lte'),
+        'fecha_baja_gte': request.args.get('fecha_baja_gte'),
+        'fecha_baja_lte': request.args.get('fecha_baja_lte'),
+        'fecha_ultima_modificacion_gte': request.args.get('fecha_ultima_modificacion_gte'),
+        'fecha_ultima_modificacion_lte': request.args.get('fecha_ultima_modificacion_lte'),
     }
 
     allowed, effective_filters, reason = can_query_users(user, params)
@@ -84,11 +109,69 @@ def listar_usuarios():
         except ValueError:
             return jsonify({'ok': False, 'error': 'invalid_id'}), 400
 
-    if params.get('nombre'):
-        query = query.filter(Usuario.nombre.ilike(f"%{params.get('nombre')}%"))
+    # nombre: mantenemos compatibilidad (nombre trabaja como contains); nombre_contains también soportado
+    nombre_contains = params.get('nombre_contains') or params.get('nombre')
+    if nombre_contains:
+        query = query.filter(Usuario.nombre.ilike(f"%{nombre_contains}%"))
+
+    # email exacto / contains (si se usa exacto, ignora contains)
+    email_exact = params.get('email')
+    email_like = params.get('email_contains')
+    if email_exact:
+        query = query.filter(Usuario.email == email_exact)
+    elif email_like:
+        query = query.filter(Usuario.email.ilike(f"%{email_like}%"))
 
     if params.get('rol'):
         query = query.join(Usuario.rol).filter(Usuario.rol.has(nombre=params.get('rol')))
+
+    # rol_id directo si se provee
+    if params.get('rol_id'):
+        try:
+            rid = int(params.get('rol_id'))
+            query = query.filter(Usuario.rol_id == rid)
+        except Exception:
+            return jsonify({'ok': False, 'error': 'invalid_rol_id'}), 400
+
+    # estado
+    if params.get('estado'):
+        query = query.filter(Usuario.estado == params.get('estado'))
+
+    # rangos de fecha
+    from datetime import datetime
+    def parse_dt(v: str):
+        if not v:
+            return None
+        try:
+            # intenta datetime ISO completo
+            return datetime.fromisoformat(v)
+        except Exception:
+            try:
+                # intenta solo fecha
+                return datetime.fromisoformat(v + 'T00:00:00')
+            except Exception:
+                return None
+    fa_gte = parse_dt(params.get('fecha_alta_gte'))
+    fa_lte = parse_dt(params.get('fecha_alta_lte'))
+    fb_gte = parse_dt(params.get('fecha_baja_gte'))
+    fb_lte = parse_dt(params.get('fecha_baja_lte'))
+    fum_gte = parse_dt(params.get('fecha_ultima_modificacion_gte'))
+    fum_lte = parse_dt(params.get('fecha_ultima_modificacion_lte'))
+    try:
+        if fa_gte:
+            query = query.filter(Usuario.fecha_alta >= fa_gte)
+        if fa_lte:
+            query = query.filter(Usuario.fecha_alta <= fa_lte)
+        if fb_gte:
+            query = query.filter(Usuario.fecha_baja >= fb_gte)
+        if fb_lte:
+            query = query.filter(Usuario.fecha_baja <= fb_lte)
+        if fum_gte:
+            query = query.filter(Usuario.fecha_ultima_modificacion >= fum_gte)
+        if fum_lte:
+            query = query.filter(Usuario.fecha_ultima_modificacion <= fum_lte)
+    except Exception:
+        return jsonify({'ok': False, 'error': 'invalid_date_range'}), 400
 
     # Pagination: parse page/size, apply offset/limit
     # Parse page/size and clamp to configured maxima/defaults. We prefer to be

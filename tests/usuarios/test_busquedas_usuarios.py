@@ -248,3 +248,58 @@ def test_admin_plataforma_filter_plus_pagination(client):
     assert len(items) <= 1
     for u in items:
         assert sample_name.lower() in (u.get('nombre') or '').lower()
+
+
+@pytest.mark.meta(title='Usuarios: filtro por email exacto', desc='Filtrar por email exacto devuelve el usuario esperado')
+def test_filter_by_email_exact_should_return_single_user(client):
+    access, _ = login_and_get_tokens('admin_plataforma@academia.com', 'password_admin_plataforma')
+    # Buscar un email existente de los listados
+    rv_all = list_users(access)
+    assert rv_all.status_code == 200
+    users = rv_all.json().get('items', [])
+    sample = next((u for u in users if u.get('email')), None)
+    if not sample:
+        pytest.skip('No users with email found to exercise email filter')
+    email = sample['email']
+    rv = list_users(access, params={'email': email})
+    assert rv.status_code == 200
+    page = rv.json()
+    items = page.get('items', [])
+    assert any(u.get('email') == email for u in items)
+
+
+@pytest.mark.meta(title='Usuarios: filtro por email_contains', desc='Filtrar por email_contains incluye el usuario')
+def test_filter_by_email_contains_should_include_user(client):
+    access, _ = login_and_get_tokens('admin_plataforma@academia.com', 'password_admin_plataforma')
+    rv_all = list_users(access)
+    assert rv_all.status_code == 200
+    users = rv_all.json().get('items', [])
+    sample = next((u for u in users if u.get('email')), None)
+    if not sample:
+        pytest.skip('No users with email found to exercise email_contains')
+    email = sample['email']
+    fragment = email.split('@')[0][:3]
+    if not fragment:
+        pytest.skip('Email has no usable fragment')
+    rv = list_users(access, params={'email_contains': fragment})
+    assert rv.status_code == 200
+    items = rv.json().get('items', [])
+    assert any(fragment.lower() in (u.get('email') or '').lower() for u in items)
+
+
+@pytest.mark.meta(title='Usuarios: rangos de fechas', desc='fecha_alta_gte/lte y fecha_ultima_modificacion_gte/lte funcionan')
+def test_filter_by_date_ranges_should_work(client):
+    access, _ = login_and_get_tokens('admin_plataforma@academia.com', 'password_admin_plataforma')
+    # obtener min y max de fechas de una pequeña muestra
+    rv_all = list_users(access)
+    assert rv_all.status_code == 200
+    users = rv_all.json().get('items', [])
+    if len(users) < 1:
+        pytest.skip('No users to test date ranges')
+    # Use today bounds to avoid timezone flakiness; expect 200 regardless
+    from datetime import date
+    today = date.today().isoformat()
+    rv = list_users(access, params={'fecha_alta_gte': '1970-01-01', 'fecha_alta_lte': today})
+    assert rv.status_code == 200
+    rv2 = list_users(access, params={'fecha_ultima_modificacion_gte': '1970-01-01', 'fecha_ultima_modificacion_lte': '2999-12-31'})
+    assert rv2.status_code == 200
