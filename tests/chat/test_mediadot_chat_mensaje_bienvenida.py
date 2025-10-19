@@ -88,3 +88,124 @@ def test_chat_mensaje_bienvenida_minimo():
     # Log breve para depuración manual
     msg = env.get('message') or ''
     print(f"[BIENVENIDA] message_head={msg[:160]}")
+
+
+def test_chat_me_llamo_angel():
+    """
+    Envío de un único POST con el mensaje "me llamo angel".
+    Debe responder 200 con envelope de éxito y texto no vacío.
+    """
+    print("[TEST] Presentación del usuario: 'me llamo angel'")
+    access = login_and_get_access(TEST_EMAIL, TEST_PASSWORD)
+    assert wait_for_mediator(MEDIATOR_URL, timeout=90), f"Mediator at {MEDIATOR_URL} not available"
+    url = f"{MEDIATOR_URL.rstrip('/')}/chat"
+    messages = [ {'role': 'user', 'content': 'me llamo angel'} ]
+    resp = send_chat(url, access, messages=messages)
+    env = assert_success_envelope(resp)
+    msg = env.get('message') or ''
+    print(f"[ME_LLAMO_ANGEL] message_head={msg[:160]}")
+
+
+def test_chat_calculo_5_por_5():
+    """
+    Envío "quería saber cuanto son 5 x 5" y valida éxito.
+    """
+    print("[TEST] Consulta aritmética: 'quería saber cuanto son 5 x 5'")
+    access = login_and_get_access(TEST_EMAIL, TEST_PASSWORD)
+    assert wait_for_mediator(MEDIATOR_URL, timeout=90), f"Mediator at {MEDIATOR_URL} not available"
+    url = f"{MEDIATOR_URL.rstrip('/')}/chat"
+    messages = [ {'role': 'user', 'content': 'quería saber cuanto son 5 x 5'} ]
+    resp = send_chat(url, access, messages=messages)
+    env = assert_success_envelope(resp)
+    msg = env.get('message') or ''
+    print(f"[CALCULO_5x5] message_head={msg[:160]}")
+
+
+def test_chat_modificar_una_academia():
+    """
+    Envío "quería modificar una academia" y valida éxito.
+    """
+    print("[TEST] Intención de modificación: 'quería modificar una academia'")
+    access = login_and_get_access(TEST_EMAIL, TEST_PASSWORD)
+    assert wait_for_mediator(MEDIATOR_URL, timeout=90), f"Mediator at {MEDIATOR_URL} not available"
+    url = f"{MEDIATOR_URL.rstrip('/')}/chat"
+    messages = [ {'role': 'user', 'content': 'quería modificar una academia'} ]
+    resp = send_chat(url, access, messages=messages)
+    env = assert_success_envelope(resp)
+    msg = env.get('message') or ''
+    print(f"[MODIFICAR_ACADEMIA] message_head={msg[:160]}")
+
+
+def test_chat_modificar_un_perro():
+    """
+    Envío "quería modificar un perro" (dominio inexistente) y valida éxito.
+    """
+    print("[TEST] Dominio inexistente: 'quería modificar un perro'")
+    access = login_and_get_access(TEST_EMAIL, TEST_PASSWORD)
+    assert wait_for_mediator(MEDIATOR_URL, timeout=90), f"Mediator at {MEDIATOR_URL} not available"
+    url = f"{MEDIATOR_URL.rstrip('/')}/chat"
+    messages = [ {'role': 'user', 'content': 'quería modificar un perro'} ]
+    resp = send_chat(url, access, messages=messages)
+    env = assert_success_envelope(resp)
+    msg = env.get('message') or ''
+    print(f"[MODIFICAR_PERRO] message_head={msg[:160]}")
+
+
+def test_chat_modificar_un_alumno():
+    """
+    Envío "quería modificar un alumno" y valida éxito.
+    """
+    print("[TEST] Intención de modificación: 'quería modificar un alumno'")
+    access = login_and_get_access(TEST_EMAIL, TEST_PASSWORD)
+    assert wait_for_mediator(MEDIATOR_URL, timeout=90), f"Mediator at {MEDIATOR_URL} not available"
+    url = f"{MEDIATOR_URL.rstrip('/')}/chat"
+    messages = [ {'role': 'user', 'content': 'quería modificar un alumno'} ]
+    resp = send_chat(url, access, messages=messages)
+    env = assert_success_envelope(resp)
+    msg = env.get('message') or ''
+    print(f"[MODIFICAR_ALUMNO] message_head={msg[:160]}")
+
+
+def test_chat_consultar_un_usuario():
+    """
+    Envío "querái consultar un usuario" (tal cual el texto indicado) y valida éxito.
+    """
+    print("[TEST] Consulta de recurso: 'querái consultar un usuario'")
+    access = login_and_get_access(TEST_EMAIL, TEST_PASSWORD)
+    assert wait_for_mediator(MEDIATOR_URL, timeout=90), f"Mediator at {MEDIATOR_URL} not available"
+    url = f"{MEDIATOR_URL.rstrip('/')}/chat"
+    messages = [ {'role': 'user', 'content': 'querái consultar un usuario'} ]
+    resp = send_chat(url, access, messages=messages)
+    env = assert_success_envelope(resp)
+    msg = env.get('message') or ''
+    print(f"[CONSULTAR_USUARIO] message_head={msg[:160]}")
+
+
+def test_chat_totales_academias_y_usuarios():
+    """
+    Envío "quería saber el total de academias y el total de usuarios que estan registrados" y valida éxito.
+    """
+    print("[TEST] Totales globales: academias y usuarios registrados")
+    access = login_and_get_access(TEST_EMAIL, TEST_PASSWORD)
+    assert wait_for_mediator(MEDIATOR_URL, timeout=90), f"Mediator at {MEDIATOR_URL} not available"
+    url = f"{MEDIATOR_URL.rstrip('/')}/chat"
+    messages = [ {'role': 'user', 'content': 'quería saber el total de academias y el total de usuarios que estan registrados'} ]
+    resp = send_chat(url, access, messages=messages)
+    env = assert_success_envelope(resp)
+    msg = env.get('message') or ''
+    print(f"[TOTALES_ACAD_USU] message_head={msg[:160]}")
+
+
+def test_chat_totales_activos_academias_y_usuarios():
+    """
+    Envío "quería saber el total de academias activas y el total de usuarios activos que están registrados" y valida éxito.
+    """
+    print("[TEST] Totales activos: academias activas y usuarios activos")
+    access = login_and_get_access(TEST_EMAIL, TEST_PASSWORD)
+    assert wait_for_mediator(MEDIATOR_URL, timeout=90), f"Mediator at {MEDIATOR_URL} not available"
+    url = f"{MEDIATOR_URL.rstrip('/')}/chat"
+    messages = [ {'role': 'user', 'content': 'quería saber el total de academias activas y el total de usuarios activos que están registrados'} ]
+    resp = send_chat(url, access, messages=messages)
+    env = assert_success_envelope(resp)
+    msg = env.get('message') or ''
+    print(f"[TOTALES_ACTIVOS] message_head={msg[:160]}")
