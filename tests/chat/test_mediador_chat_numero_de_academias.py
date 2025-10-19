@@ -47,6 +47,7 @@ def wait_for_mediator(mediator_url: str, timeout: int = 30):
 ])
 def test_mediator_welcome_after_login_admin_academia(email, password, role_desc):
     """Integración (admin_academia): login y saludo del mediador (/chat)."""
+    print(f">>> PRUEBA: mediador bienvenida [rol={role_desc}]")
     access = login_and_get_access(email, password)
     login_info = requests.post(f"{API_WORKER_URL}/auth/login", json={'email': email, 'password': password}).json()
     assert 'role' in login_info, 'Role not returned in login response'  # Validar que el rol esté presente
@@ -96,6 +97,10 @@ def test_mediator_welcome_after_login_admin_academia(email, password, role_desc)
 ])
 def test_mediator_list_requests_admin_academia(email, password, role_desc, message, expected_keyword):
     """Integración (admin_academia): mediador responde a solicitudes de listados."""
+    short_msg = (message or "")
+    if len(short_msg) > 60:
+        short_msg = short_msg[:57] + "..."
+    print(f">>> PRUEBA: mediador listados [rol={role_desc}] msg='{short_msg}' espera='{expected_keyword}'")
     access = login_and_get_access(email, password)
     login_info = requests.post(f"{API_WORKER_URL}/auth/login", json={'email': email, 'password': password}).json()
     assert 'role' in login_info, 'Role not returned in login response'  # Validar que el rol esté presente
@@ -149,6 +154,10 @@ def test_mediator_list_requests_admin_academia(email, password, role_desc, messa
 ])
 def test_mediator_totals_academias_y_alumnos(email, password, role_desc, user_message):
     """Integración (admin_academia): pedir totales de academias y alumnos."""
+    short_msg = (user_message or "")
+    if len(short_msg) > 60:
+        short_msg = short_msg[:57] + "..."
+    print(f">>> PRUEBA: mediador totales [rol={role_desc}] msg='{short_msg}'")
     access = login_and_get_access(email, password)
 
     # Opcional: recuperar info de login (rol), aunque forzamos role='user' hacia OpenAI

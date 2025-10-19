@@ -79,6 +79,35 @@ python -m pip install -r requirements-dev.txt
 ```
 
 2) Variables de entorno útiles (solo para la sesión actual)
+´
+# desde la raíz del repo api-workers-profesores. Levantar API (usa RDS dev: DB_ENV=developmentAWS)
+$env:DB_ENV = 'developmentAWS';
+$env:JWT_SECRET_KEY = 'mi_secret_app_local_larga';
+$env:JWT_DELEGATION_SECRET = 'mi_secret_delegacion_local_larga';
+$env:DEBUG = '1';
+$env:FLASK_DEBUG = '1';
+$env:APP_ENV = 'development';
+$env:JWT_DELEGATION_EXPIRATIONMINUTES = '5' 
+$env:DUMP_SECRETS = '1' 
+
+if (Test-Path '.venv\Scripts\Activate.ps1') { . '.venv\Scripts\Activate.ps1' }
+python -u main.py
+
+o bien usar:
+
+.\scripts\run_api_with_cleanup.ps1 -JwtSecret 'mi_secret_app_local_larga' -DelegationSecret 'mi_secret_delegacion_local_larga'
+
+
+Levantar backend-chat (apuntar a http://localhost:5000)
+coge las propiedades de los ficheros de properties, ya no es necesario definir antes las vbles de entorno:
+
+
+ademas de tener el ficheor configurado  application-properties en resources del backend-chat --> ((openai.mock=false))
+#$env:DEBUG = '1';
+#$env:OPENAI_API_KEY = 'sk-proj-8j.....'
+#$env:JWT_DELEGATION_SECRET="mi_secret_delegacion_local_larga";
+#$env:JWT_DELEGATION_EXPIRATIONMINUTES = '5' 
+#$env:DUMP_SECRETS = '1' 
 
 ```powershell
 # Opcional: ajustar según tu entorno

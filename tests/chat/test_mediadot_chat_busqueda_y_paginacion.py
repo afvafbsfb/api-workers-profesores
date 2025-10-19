@@ -117,6 +117,44 @@ def assert_success_envelope(resp):
     return env
 
 
+# Helpers para ui_suggestions y tokens de paginación (nuevo contrato)
+def _get_ui_suggestions(env: dict):
+    if not isinstance(env, dict):
+        return []
+    return env.get('uiSuggestions') or env.get('ui_suggestions') or []
+
+
+def _pick_pagination_token(ui_suggestions: list, want: str = 'next') -> str | None:
+    want = (want or '').lower()
+    # Preferimos coincidir por type+pagination.direction
+    for s in (ui_suggestions or []):
+        try:
+            if s.get('type') == 'Paginacion':
+                pag = s.get('pagination') or {}
+                direction = (pag.get('direction') or '').lower()
+                if direction == want:
+                    tok = s.get('contextToken') or s.get('context_token')
+                    if tok:
+                        return tok
+        except Exception:
+            pass
+    # Fallback: por displayText/descripcion
+    for s in (ui_suggestions or []):
+        try:
+            text = (s.get('displayText') or s.get('text') or '').lower()
+            if want == 'next' and (('siguiente' in text) or ('ver más' in text) or ('ver mas' in text)):
+                tok = s.get('contextToken') or s.get('context_token')
+                if tok:
+                    return tok
+            if want == 'prev' and ('anterior' in text):
+                tok = s.get('contextToken') or s.get('context_token')
+                if tok:
+                    return tok
+        except Exception:
+            pass
+    return None
+
+
 # Parameterized test cases for each POST (5 en total)
 @pytest.mark.parametrize(
     "step_number, messages, expected_description",
@@ -131,19 +169,16 @@ def assert_success_envelope(resp):
             {'role': 'user', 'content': 'quiero el listado de usuarios'}
         ], "Listado de usuarios (página 1)"),
 
-        # 3) Siguiente página con mini-historial (assistant + contexto + user)
+        # 3) Siguiente página usando ui_suggestions + Paginacion_token
         (3, [
-            {'role': 'assistant', 'content': 'Mostrando página 1 de usuarios'},
-            # Contexto mínimo requerido por el backend (no incluir campos opcionales para evitar divergencias)
-            {'role': 'assistant', 'content': 'Contexto_paginacion: {"type": "usuarios", "page": 1, "size": 20, "next_page": 2}'},
-            {'role': 'user', 'content': 'Siguiente'}
+            # En este paso realizaremos dos llamadas: una para obtener el token, y otra para navegar con él
+            {'role': 'user', 'content': 'quiero el listado de usuarios'}
         ], "Navegar a página 2 (Siguiente)"),
 
-        # 4) Anterior con mini-historial (assistant + contexto + user)
+        # 4) Anterior usando ui_suggestions + Paginacion_token
         (4, [
-            {'role': 'assistant', 'content': 'Mostrando página 2 de usuarios'},
-            {'role': 'assistant', 'content': 'Contexto_paginacion: {"type": "usuarios", "page": 2, "size": 20, "prev_page": 1}'},
-            {'role': 'user', 'content': 'Anterior'}
+            # Igual que en el 3, haremos dos llamadas en el cuerpo del test
+            {'role': 'user', 'content': 'quiero el listado de usuarios'}
         ], "Navegar a página 1 (Anterior)"),
 
         # 5) Cambio de tipo: academias
@@ -171,14 +206,14 @@ def test_chat_busqueda_y_paginacion_steps(step_number, messages, expected_descri
     try:
         user_msgs = [m.get('content') for m in messages if isinstance(m, dict) and (m.get('role') == 'user')]
         user_prompt = user_msgs[-1] if user_msgs else expected_description
-        print(f"TEST {step_number}: POST {user_prompt}")
+        print(f"TEST {step_number}: {expected_description} — POST {user_prompt}")
     except Exception:
         print(f"TEST {step_number}: {expected_description}")
 
     # Log the messages being sent
     _print_sent_messages(step_number, messages)
 
-    # Send the chat messages
+    # Send the chat messages (primer envío del paso)
     resp = send_chat(url, access, flow_id, messages=messages)
     env = assert_success_envelope(resp)
 
@@ -194,22 +229,77 @@ def test_chat_busqueda_y_paginacion_steps(step_number, messages, expected_descri
         print(f"[STEP{step_number}] type={data.get('type')} page={pag.get('page')} size={pag.get('size')} returned={pag.get('returned')} next={pag.get('nextPage')} items_ids_head={ids[:5]}")
         assert isinstance(items, list) and len(items) > 0, 'Listado de usuarios vacío en página 1'
     elif step_number == 3:
-        data = env.get('data') or {}
+        # 3a) ya tenemos un listado (página 1), extraer token 'next' de ui_suggestions
+        ui = _get_ui_suggestions(env)
+        token_next = _pick_pagination_token(ui, 'next')
+        assert token_next, 'No se encontró contextToken de Siguiente en ui_suggestions'
+        try:
+            masked = (token_next[:6] + '...' + token_next[-6:]) if isinstance(token_next, str) and len(token_next) > 16 else '<masked>'
+            print(f"[STEP{step_number}] token_next(masked)={masked}")
+        except Exception:
+            pass
+        # 3b) llamar al mediador con aceptación del token y la intención del usuario
+        nav_messages = [
+            {'role': 'assistant', 'content': 'Mostrando página 1 de usuarios'},
+            {'role': 'assistant', 'content': f'Paginacion_token: {{"token":"{token_next}"}}'},
+            {'role': 'user', 'content': 'Siguiente'}
+        ]
+        _print_sent_messages(step_number, nav_messages)
+        resp2 = send_chat(url, access, flow_id, messages=nav_messages)
+        env2 = assert_success_envelope(resp2)
+        data = env2.get('data') or {}
         items = data.get('items') or []
         pag = data.get('pagination') or {}
         ids = extract_ids(items)
-        print(f"[STEP{step_number}] type={data.get('type')} page={pag.get('page')} size={pag.get('size')} returned={pag.get('returned')} next={pag.get('nextPage')} prev={pag.get('prevPage')} items_ids_head={ids[:5]}")
+        print(f"[STEP{step_number}] NAV -> type={data.get('type')} page={pag.get('page')} size={pag.get('size')} returned={pag.get('returned')} next={pag.get('nextPage')} prev={pag.get('prevPage')} items_ids_head={ids[:5]}")
         if pag:
-            assert pag.get('page') in (2, '2'), f"Se esperaba page=2, got {pag}"
+            assert str(pag.get('page')) == '2', f"Se esperaba page=2, got {pag}"
         assert isinstance(items, list), 'items debe ser lista'
     elif step_number == 4:
-        data = env.get('data') or {}
+        # 4a) extraer token 'prev' de ui_suggestions (desde página 2)
+        # Para aislar el paso, primero navegamos a página 2 (como en el paso 3) y sacamos el token prev
+        # 4a.1) obtener token 'next' desde el listado inicial
+        ui = _get_ui_suggestions(env)
+        token_next = _pick_pagination_token(ui, 'next')
+        assert token_next, 'No se encontró contextToken de Siguiente en ui_suggestions (preparación para ir a 2)'
+        try:
+            masked = (token_next[:6] + '...' + token_next[-6:]) if isinstance(token_next, str) and len(token_next) > 16 else '<masked>'
+            print(f"[STEP{step_number}] token_next(masked)={masked}")
+        except Exception:
+            pass
+        # 4a.2) navegar a página 2
+        nav_to_2 = [
+            {'role': 'assistant', 'content': 'Mostrando página 1 de usuarios'},
+            {'role': 'assistant', 'content': f'Paginacion_token: {{"token":"{token_next}"}}'},
+            {'role': 'user', 'content': 'Siguiente'}
+        ]
+        resp2 = send_chat(url, access, flow_id, messages=nav_to_2)
+        env2 = assert_success_envelope(resp2)
+        # 4a.3) desde la respuesta en 2, leer token 'prev'
+        ui2 = _get_ui_suggestions(env2)
+        token_prev = _pick_pagination_token(ui2, 'prev')
+        assert token_prev, 'No se encontró contextToken de Anterior en ui_suggestions (página 2)'
+        try:
+            maskedp = (token_prev[:6] + '...' + token_prev[-6:]) if isinstance(token_prev, str) and len(token_prev) > 16 else '<masked>'
+            print(f"[STEP{step_number}] token_prev(masked)={maskedp}")
+        except Exception:
+            pass
+        # 4b) navegar a página 1 con el token prev
+        nav_messages = [
+            {'role': 'assistant', 'content': 'Mostrando página 2 de usuarios'},
+            {'role': 'assistant', 'content': f'Paginacion_token: {{"token":"{token_prev}"}}'},
+            {'role': 'user', 'content': 'Anterior'}
+        ]
+        _print_sent_messages(step_number, nav_messages)
+        resp3 = send_chat(url, access, flow_id, messages=nav_messages)
+        env3 = assert_success_envelope(resp3)
+        data = env3.get('data') or {}
         items = data.get('items') or []
         pag = data.get('pagination') or {}
         ids = extract_ids(items)
-        print(f"[STEP{step_number}] type={data.get('type')} page={pag.get('page')} size={pag.get('size')} returned={pag.get('returned')} next={pag.get('nextPage')} prev={pag.get('prevPage')} items_ids_head={ids[:5]}")
+        print(f"[STEP{step_number}] NAV -> type={data.get('type')} page={pag.get('page')} size={pag.get('size')} returned={pag.get('returned')} next={pag.get('nextPage')} prev={pag.get('prevPage')} items_ids_head={ids[:5]}")
         if pag:
-            assert pag.get('page') in (1, '1'), f"Se esperaba page=1, got {pag}"
+            assert str(pag.get('page')) == '1', f"Se esperaba page=1, got {pag}"
         assert isinstance(items, list), 'items debe ser lista'
     elif step_number == 5:
         # Validación ligera: éxito y texto relacionado con academias

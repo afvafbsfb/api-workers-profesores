@@ -526,6 +526,97 @@ def seed():
                 db.session.rollback()
                 print(f"[init_db_pruebas_test] No se pudo normalizar profesor {user.email}: {e}")
 
+    # ==========================
+    # Bloque adicional: alcanzar ~52 usuarios para pruebas de paginación
+    # - Añadimos 3 admins de academia extra (uno por Academia Central, 1 y 2)
+    # - Añadimos 28 profesores (10 Central, 9 A1, 9 A2)
+    # Este bloque es idempotente y no elimina usuarios previos necesarios para otros tests.
+    # ==========================
+
+    # 3 administradores adicionales de academia (2 por academia objetivo en total)
+    admins_extra = [
+        dict(email='admin_academia_central_2@academia.com', plain_password='password_admin_academia_central_2', nombre='Admin Academia Central 2', rol_id=rol_academia.id, estado='Activo', academia_id=academia.id),
+        dict(email='admin_academia_1_2@academia.com', plain_password='password_admin_academia_1_2', nombre='Admin Academia 1 (2)', rol_id=rol_academia.id, estado='Activo', academia_id=academia_1.id),
+        dict(email='admin_academia_2_2@academia.com', plain_password='password_admin_academia_2_2', nombre='Admin Academia 2 (2)', rol_id=rol_academia.id, estado='Activo', academia_id=academia_2.id),
+    ]
+
+    for u in admins_extra:
+        user_filters = dict(email=u['email'])
+        defaults = {k: v for k, v in u.items() if k != 'email'}
+        if 'plain_password' in defaults:
+            plain = defaults.pop('plain_password')
+            defaults['password'] = hash_password(plain)
+        user, created = get_or_create(Usuario, defaults=defaults, **user_filters)
+        if created:
+            print(f"[init_db_pruebas_test] Admin academia extra creado: {user.email} (id={user.id})")
+        else:
+            print(f"[init_db_pruebas_test] Admin academia extra ya existe: {user.email}")
+            try:
+                user.password = defaults.get('password', user.password)
+                user.estado = defaults.get('estado', user.estado).capitalize() if isinstance(defaults.get('estado', user.estado), str) else user.estado
+                user.rol_id = defaults.get('rol_id', user.rol_id)
+                user.academia_id = defaults.get('academia_id', user.academia_id)
+                user.failed_login_count = 0
+                user.last_failed_login_at = None
+                user.locked_until = None
+                db.session.add(user)
+                db.session.commit()
+                print(f"[init_db_pruebas_test] Admin academia extra normalizado: {user.email}")
+            except Exception as e:
+                db.session.rollback()
+                print(f"[init_db_pruebas_test] No se pudo normalizar admin academia extra {user.email}: {e}")
+
+    # 28 profesores adicionales distribuidos 10/9/9 entre Central/A1/A2
+    profesores_central = [
+        dict(email=f'prof_central_{i:02d}@academia.com', plain_password=f'password_prof_central_{i:02d}', nombre=f'Profesor Central {i:02d}', rol_id=rol_profesor.id, estado='Activo', academia_id=academia.id)
+        for i in range(1, 11)
+    ]
+    profesores_a1 = [
+        dict(email=f'prof_a1_{i:02d}@academia.com', plain_password=f'password_prof_a1_{i:02d}', nombre=f'Profesor A1 {i:02d}', rol_id=rol_profesor.id, estado='Activo', academia_id=academia_1.id)
+        for i in range(1, 10)
+    ]
+    profesores_a2 = [
+        dict(email=f'prof_a2_{i:02d}@academia.com', plain_password=f'password_prof_a2_{i:02d}', nombre=f'Profesor A2 {i:02d}', rol_id=rol_profesor.id, estado='Activo', academia_id=academia_2.id)
+        for i in range(1, 10)
+    ]
+
+    for lst, etiqueta in [
+        (profesores_central, 'Central'),
+        (profesores_a1, 'A1'),
+        (profesores_a2, 'A2'),
+    ]:
+        for u in lst:
+            user_filters = dict(email=u['email'])
+            defaults = {k: v for k, v in u.items() if k != 'email'}
+            if 'plain_password' in defaults:
+                plain = defaults.pop('plain_password')
+                defaults['password'] = hash_password(plain)
+            user, created = get_or_create(Usuario, defaults=defaults, **user_filters)
+            if created:
+                print(f"[init_db_pruebas_test] Profesor {etiqueta} creado: {user.email} (id={user.id})")
+            else:
+                print(f"[init_db_pruebas_test] Profesor {etiqueta} ya existe: {user.email}")
+                try:
+                    user.password = defaults.get('password', user.password)
+                    user.estado = defaults.get('estado', user.estado).capitalize() if isinstance(defaults.get('estado', user.estado), str) else user.estado
+                    user.rol_id = defaults.get('rol_id', user.rol_id)
+                    user.academia_id = defaults.get('academia_id', user.academia_id)
+                    user.failed_login_count = 0
+                    user.last_failed_login_at = None
+                    user.locked_until = None
+                    db.session.add(user)
+                    db.session.commit()
+                    print(f"[init_db_pruebas_test] Profesor {etiqueta} normalizado: {user.email}")
+                except Exception as e:
+                    db.session.rollback()
+                    print(f"[init_db_pruebas_test] No se pudo normalizar profesor {etiqueta} {user.email}: {e}")
+
+    # Añadir estos nuevos usuarios a la lista combinada para el resumen
+    try:
+        all_seed_users += admins_extra + profesores_central + profesores_a1 + profesores_a2
+    except Exception:
+        pass
+
     # Añadir estos usuarios al listado combinado para el resumen
     try:
         all_seed_users += usuarios_profesores_test

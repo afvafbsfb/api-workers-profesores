@@ -63,6 +63,7 @@ def test_mediator_welcome_after_login(email, password, role_desc):
     - Espera a que el mediador esté UP antes de llamar (consulta /actuator/health).
     - Flexible assertions: valida que la respuesta sea JSON o texto json-encapsulado y que contenga el nombre de usuario o listados de academias.
     """
+    print(f">>> PRUEBA: mediador bienvenida [rol={role_desc}]")
     access = login_and_get_access(email, password)
     login_info = requests.post(f"{TEST_API_URL}/auth/login", json={'email': email, 'password': password}).json()
     assert 'role' in login_info, 'Role not returned in login response'  # Validar que el rol esté presente
@@ -119,6 +120,10 @@ def test_mediator_list_requests(email, password, role_desc, message, expected_ke
     Comprueba que, para admin_plataforma y distintos mensajes, el mediador devuelve texto o estructuras
     que contienen la palabra clave esperada (p. ej. 'usuarios' o 'academias').
     """
+    short_msg = (message or "")
+    if len(short_msg) > 60:
+        short_msg = short_msg[:57] + "..."
+    print(f">>> PRUEBA: mediador listados [rol={role_desc}] msg='{short_msg}' espera='{expected_keyword}'")
     access = login_and_get_access(email, password)
 
     mediator_url = os.environ.get('MEDIATOR_URL', 'http://localhost:8080')

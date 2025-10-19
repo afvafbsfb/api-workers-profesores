@@ -65,6 +65,7 @@ def test_mediador_busqueda_usuarios_admin_academia(client):
     This test performs only a login and a single /chat request that asks for the list of users.
     It asserts the mediator returns JSON and that the text contains the word 'usuarios'.
     """
+    print(">>> PRUEBA: mediador búsqueda usuarios [rol=Admin_plataforma] msg='quiero el listado de usuarios que existen'")
     access = login_and_get_access(TEST_EMAIL, TEST_PASSWORD)
 
     # Obtener el rol del usuario después del login
