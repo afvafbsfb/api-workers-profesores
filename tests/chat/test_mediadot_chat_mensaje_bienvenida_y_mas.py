@@ -136,6 +136,48 @@ def test_chat_modificar_una_academia():
     print(f"[MODIFICAR_ACADEMIA] message_head={msg[:160]}")
 
 
+def test_chat_modificar_un_usuario_concreto():
+    """
+    Envío "quería modificar el usuario cuyo email es admin_plataforma@academia.com" y valida éxito.
+    """
+    print("[TEST] Intención de modificación: 'quería modificar el usuario cuyo email es admin_plataforma@academia.com'")
+    access = login_and_get_access(TEST_EMAIL, TEST_PASSWORD)
+    assert wait_for_mediator(MEDIATOR_URL, timeout=90), f"Mediator at {MEDIATOR_URL} not available"
+    url = f"{MEDIATOR_URL.rstrip('/')}/chat"
+    messages = [ {'role': 'user', 'content': 'quería modificar el usuario cuyo email es admin_plataforma@academia.com'} ]
+    resp = send_chat(url, access, messages=messages)
+    env = assert_success_envelope(resp)
+    msg = env.get('message') or ''
+    print(f"[MODIFICAR_USUARIO] message_head={msg[:160]}")
+
+def test_chat_modificar_mi_usuario():
+    """
+    Envío "hola, queria modificar los datos de mi usuario" y valida éxito.
+    """
+    print("[TEST] Intención de modificación: 'hola, queria modificar los datos de mi usuario'")
+    access = login_and_get_access(TEST_EMAIL, TEST_PASSWORD)
+    assert wait_for_mediator(MEDIATOR_URL, timeout=90), f"Mediator at {MEDIATOR_URL} not available"
+    url = f"{MEDIATOR_URL.rstrip('/')}/chat"
+    messages = [ {'role': 'user', 'content': 'hola, queria modificar los datos de mi usuario'} ]
+    resp = send_chat(url, access, messages=messages)
+    env = assert_success_envelope(resp)
+    msg = env.get('message') or ''
+    print(f"[MODIFICAR_USUARIO] message_head={msg[:160]}")
+
+def test_chat_consultar_mi_usuario():
+    """
+    Envío "hola, queria consultar los datos de mi usuario" y valida éxito.
+    """
+    print("[TEST] Intención de modificación: 'hola, queria consultar los datos de mi usuario'")
+    access = login_and_get_access(TEST_EMAIL, TEST_PASSWORD)
+    assert wait_for_mediator(MEDIATOR_URL, timeout=90), f"Mediator at {MEDIATOR_URL} not available"
+    url = f"{MEDIATOR_URL.rstrip('/')}/chat"
+    messages = [ {'role': 'user', 'content': 'hola, queria consultar los datos de mi usuario'} ]
+    resp = send_chat(url, access, messages=messages)
+    env = assert_success_envelope(resp)
+    msg = env.get('message') or ''
+    print(f"[CONSULTAR_USUARIO] message_head={msg[:160]}")
+
 def test_chat_modificar_un_perro():
     """
     Envío "quería modificar un perro" (dominio inexistente) y valida éxito.
@@ -164,6 +206,52 @@ def test_chat_modificar_un_alumno():
     env = assert_success_envelope(resp)
     msg = env.get('message') or ''
     print(f"[MODIFICAR_ALUMNO] message_head={msg[:160]}")
+
+
+def test_chat_modificar_un_usuario():
+    """
+    Envío "quiero modificar el usuario cuyo email es admin_plataforma@academia.com, quiero que se llame Angelillo" y valida éxito.
+    """
+    print("[TEST] Intención de modificación: 'quiero modificar el usuario cuyo email es admin_plataforma@academia.com, quiero que se llame Angelillo'")
+    access = login_and_get_access(TEST_EMAIL, TEST_PASSWORD)
+    assert wait_for_mediator(MEDIATOR_URL, timeout=90), f"Mediator at {MEDIATOR_URL} not available"
+    url = f"{MEDIATOR_URL.rstrip('/')}/chat"
+    messages = [ {'role': 'user', 'content': 'quiero modificar el usuario cuyo email es admin_plataforma@academia.com, quiero que se llame Angelillo'} ]
+    resp = send_chat(url, access, messages=messages)
+    env = assert_success_envelope(resp)
+    msg = env.get('message') or ''
+    print(f"[MODIFICAR_USUARIO] message_head={msg[:160]}")
+
+def test_chat_modificar_un_usuario_confirmacion():
+    """
+    Envío "Si, confirmo" y valida éxito.
+    """
+    print("[TEST] Intención de modificación: 'Si, confirmo'")
+    access = login_and_get_access(TEST_EMAIL, TEST_PASSWORD)
+    assert wait_for_mediator(MEDIATOR_URL, timeout=90), f"Mediator at {MEDIATOR_URL} not available"
+    url = f"{MEDIATOR_URL.rstrip('/')}/chat"
+    messages = [ {'role': 'user', 'content': 'Si, confirmo'} ]
+    resp = send_chat(url, access, messages=messages)
+    env = assert_success_envelope(resp)
+    msg = env.get('message') or ''
+    print(f"[MODIFICAR_USUARIO_confirmacion] message_head={msg[:160]}")
+
+
+
+def test_chat_modificar_un_usuario():
+    """
+    Envío "quiero modificar el usuario cuyo email es admin_plataforma@academia.com, quiero que se llame Angelilto y te confirmo en este mensaje que por favor lo modifiques" y valida éxito.
+    """
+    print("[TEST] Intención de modificación: 'quiero modificar el usuario cuyo email es admin_plataforma@academia.com, quiero que se llame Angelilto y te confirmo en este mensaje que por favor lo modifiques'")
+    access = login_and_get_access(TEST_EMAIL, TEST_PASSWORD)
+    assert wait_for_mediator(MEDIATOR_URL, timeout=90), f"Mediator at {MEDIATOR_URL} not available"
+    url = f"{MEDIATOR_URL.rstrip('/')}/chat"
+    messages = [ {'role': 'user', 'content': 'quiero modificar el usuario cuyo email es admin_plataforma@academia.com, quiero que se llame Angelilto y te confirmo en este mensaje que por favor lo modifiques'} ]
+    resp = send_chat(url, access, messages=messages)
+    env = assert_success_envelope(resp)
+    msg = env.get('message') or ''
+    print(f"[MODIFICAR_USUARIO] message_head={msg[:160]}")
+
 
 
 def test_chat_consultar_un_usuario():
