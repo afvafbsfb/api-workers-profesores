@@ -17,6 +17,14 @@ def create_app():
     # Configuración de la base de datos: usar explícitamente la URL definida en Config
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    # Estabilizar conexiones del pool (evitar 'MySQL server has gone away')
+    # pool_pre_ping valida la conexión antes de usarla y pool_recycle la renueva periódicamente
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        "pool_pre_ping": True,
+        # reciclar conexiones antes de que caduque el wait_timeout del servidor (p. ej., 300s)
+        # 280s es un valor conservador para dev; ajustar según entorno si es necesario
+        "pool_recycle": 280,
+    }
 
     # Configuración de la clave secreta para JWT: preferimos la variable de entorno
     import hashlib
