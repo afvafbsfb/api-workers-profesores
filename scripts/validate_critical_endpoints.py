@@ -29,7 +29,7 @@ import re
 import sys
 from typing import Dict, List, Tuple, Any
 
-CRITICAL_TAGS = {"Usuarios", "Academias", "login", "oauth", "Admin"}
+CRITICAL_TAGS = {"Usuarios", "Academias", "login", "jwt", "Admin"}
 SENSITIVE_KEYWORDS = re.compile(
     r"usuario|usuarios|academia|academias|credentials|role|roles|me|profile|recuperar|obtener|sensitive|private",
     re.IGNORECASE,

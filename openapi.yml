@@ -38,6 +38,45 @@ components:
           additionalProperties: {}
           type: object
       type: object
+    PaginatedEnvelope:
+      properties:
+        has_more:
+          type: boolean
+        items:
+          items:
+            type: object
+          type: array
+        meta:
+          type:
+          - object
+          - 'null'
+        next_page:
+          type:
+          - integer
+          - 'null'
+        page:
+          type: integer
+        prev_page:
+          type:
+          - integer
+          - 'null'
+        returned:
+          type: integer
+        size:
+          type: integer
+        total:
+          type:
+          - integer
+          - 'null'
+      type: object
+    RefreshRequest:
+      additionalProperties: false
+      properties:
+        refresh_token:
+          type: string
+      required:
+      - refresh_token
+      type: object
     Rol:
       additionalProperties: false
       properties:
@@ -83,6 +122,38 @@ paths:
   /academias:
     get:
       description: Auto-generated operation for academias.listar_academias
+      operationId: academias.listar_academias
+      parameters:
+      - in: query
+        name: id
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: nombre
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: nombre_contains
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+      - in: query
+        name: size
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
       responses:
         '200':
           description: Successful response
@@ -97,6 +168,7 @@ paths:
       - Academias
     post:
       description: Auto-generated operation for academias.crear_academia
+      operationId: academias.crear_academia
       requestBody:
         content:
           application/json:
@@ -118,6 +190,7 @@ paths:
   /academias/{academia_id}:
     delete:
       description: Auto-generated operation for academias.eliminar_academia
+      operationId: academias.eliminar_academia
       parameters:
       - in: path
         name: academia_id
@@ -138,6 +211,7 @@ paths:
       - Academias
     get:
       description: Auto-generated operation for academias.obtener_academia
+      operationId: academias.obtener_academia
       parameters:
       - in: path
         name: academia_id
@@ -158,6 +232,7 @@ paths:
       - Academias
     patch:
       description: Auto-generated operation for academias.modificar_academia
+      operationId: academias.modificar_academia
       parameters:
       - in: path
         name: academia_id
@@ -185,6 +260,7 @@ paths:
   /auth/login:
     post:
       description: Inicio de sesión con email y password
+      operationId: login.login
       requestBody:
         content:
           application/json:
@@ -206,6 +282,13 @@ paths:
   /auth/logout:
     post:
       description: Auto-generated operation for login_bp.logout
+      operationId: login.logout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+        required: true
       responses:
         '200':
           description: Successful response
@@ -221,6 +304,7 @@ paths:
   /auth/refresh:
     post:
       description: Auto-generated operation for login_bp.refresh_tokens
+      operationId: login.refresh_tokens
       responses:
         '200':
           description: Successful response
@@ -236,6 +320,7 @@ paths:
   /auth/unblock:
     post:
       description: Auto-generated operation for login_bp.unblock_user
+      operationId: login.unblock_user
       responses:
         '200':
           description: Successful response
@@ -251,6 +336,7 @@ paths:
   /docs:
     get:
       description: Auto-generated operation for docs.docs_ui
+      operationId: docs.docs_ui
       responses:
         '200':
           description: Successful response
@@ -264,6 +350,7 @@ paths:
   /health:
     get:
       description: Auto-generated operation for health
+      operationId: health
       responses:
         '200':
           description: Successful response
@@ -277,6 +364,7 @@ paths:
   /openapi.json:
     get:
       description: Auto-generated operation for docs.openapi_json
+      operationId: docs.openapi_json
       responses:
         '200':
           description: Successful response
@@ -290,6 +378,113 @@ paths:
   /usuarios/:
     get:
       description: Auto-generated operation for usuarios.listar_usuarios
+      operationId: usuarios.listar_usuarios
+      parameters:
+      - in: query
+        name: academia_id
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: rol
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: nombre
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: nombre_contains
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: email
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: email_contains
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: estado
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: rol_id
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: id
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+      - in: query
+        name: size
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+      - in: query
+        name: with_total
+        required: false
+        schema:
+          type: boolean
+      - in: query
+        name: order_by
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: order_dir
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: fecha_alta_gte
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: fecha_alta_lte
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: fecha_baja_gte
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: fecha_baja_lte
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: fecha_ultima_modificacion_gte
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: fecha_ultima_modificacion_lte
+        required: false
+        schema:
+          type: string
       responses:
         '200':
           description: Successful response
@@ -304,6 +499,7 @@ paths:
       - Usuarios
     post:
       description: Auto-generated operation for usuarios.crear_usuario
+      operationId: usuarios.crear_usuario
       requestBody:
         content:
           application/json:
@@ -322,9 +518,26 @@ paths:
       summary: POST /usuarios/
       tags:
       - Usuarios
+  /usuarios/export:
+    get:
+      description: Auto-generated operation for usuarios.exportar_usuarios
+      operationId: usuarios.exportar_usuarios
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+      - bearerAuth: []
+      summary: GET /usuarios/export
+      tags:
+      - Usuarios
   /usuarios/me:
     get:
       description: Auto-generated operation for usuarios.obtener_mi_perfil
+      operationId: usuarios.obtener_mi_perfil
       responses:
         '200':
           content:
@@ -344,6 +557,7 @@ paths:
   /usuarios/recover:
     get:
       description: Auto-generated operation for usuarios.recuperar_credenciales
+      operationId: usuarios.recuperar_credenciales
       responses:
         '200':
           description: Successful response
@@ -359,6 +573,7 @@ paths:
   /usuarios/{usuario_id}:
     delete:
       description: Auto-generated operation for usuarios.eliminar_usuario
+      operationId: usuarios.eliminar_usuario
       parameters:
       - in: path
         name: usuario_id
@@ -379,6 +594,7 @@ paths:
       - Usuarios
     get:
       description: Auto-generated operation for usuarios.obtener_usuario
+      operationId: usuarios.obtener_usuario
       parameters:
       - in: path
         name: usuario_id
@@ -399,6 +615,7 @@ paths:
       - Usuarios
     patch:
       description: Auto-generated operation for usuarios.actualizar_usuario
+      operationId: usuarios.actualizar_usuario_patch
       parameters:
       - in: path
         name: usuario_id
@@ -425,6 +642,7 @@ paths:
       - Usuarios
     put:
       description: Auto-generated operation for usuarios.actualizar_usuario
+      operationId: usuarios.actualizar_usuario_put
       parameters:
       - in: path
         name: usuario_id
@@ -452,6 +670,7 @@ paths:
   /usuarios/{usuario_id}/credentials:
     put:
       description: Auto-generated operation for usuarios.actualizar_credenciales
+      operationId: usuarios.actualizar_credenciales
       parameters:
       - in: path
         name: usuario_id
@@ -479,6 +698,7 @@ paths:
   /usuarios/{usuario_id}/role:
     put:
       description: Auto-generated operation for usuarios.actualizar_rol
+      operationId: usuarios.actualizar_rol
       parameters:
       - in: path
         name: usuario_id
@@ -506,6 +726,7 @@ paths:
   /usuarios/{usuario_id}/status:
     put:
       description: Auto-generated operation for usuarios.actualizar_estado
+      operationId: usuarios.actualizar_estado
       parameters:
       - in: path
         name: usuario_id
@@ -533,11 +754,13 @@ paths:
 tags:
 - description: Inicio de sesión (email/password).
   name: login
-- description: Refresh, logout y gestión de tokens.
+- description: ''
   name: oauth
 - description: Operaciones relacionadas con academias y su configuración.
   name: Academias
 - description: Gestión de usuarios, perfiles y credenciales.
   name: Usuarios
+- description: Refresh, logout y gestión de tokens JWT.
+  name: jwt
 - description: Documentación y endpoints de salud.
   name: Docs/Health

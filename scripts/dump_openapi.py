@@ -115,7 +115,7 @@ def dump():
                 # Tag descriptions (can be extended)
                 TAG_DESCRIPTIONS = {
                     'login': 'Inicio de sesión (email/password).',
-                    'oauth': 'Refresh, logout y gestión de tokens.',
+                    'jwt': 'Refresh, logout y gestión de tokens JWT.',
                     'Usuarios': 'Gestión de usuarios, perfiles y credenciales.',
                     'Academias': 'Operaciones relacionadas con academias y su configuración.',
                     'Cursos': 'Gestión de cursos, horarios e inscripciones.',
@@ -130,9 +130,9 @@ def dump():
                 def choose_tag(path, endpoint):
                     # Explicit mappings for blueprints or exact paths
                     bp_map = {
-                        # Blueprint 'login_bp' contains multiple auth endpoints; treat them as oauth
-                        'login_bp': 'oauth',
-                        'auth': 'oauth',
+                        # Blueprint 'login_bp' contains multiple auth endpoints; treat them as jwt
+                        'login_bp': 'jwt',
+                        'auth': 'jwt',
                         'usuarios': 'Usuarios',
                         'academias': 'Academias',
                         'cursos': 'Cursos',
@@ -165,11 +165,11 @@ def dump():
 
                     # Map common prefixes to tags
                     try:
-                        # /auth/* except /auth/login -> oauth
+                        # /auth/* except /auth/login -> jwt
                         if path.startswith('/auth'):
                             # already handled /auth/login above
-                            tags_found.add('oauth')
-                            return 'oauth'
+                            tags_found.add('jwt')
+                            return 'jwt'
                         if path.startswith('/login'):
                             tags_found.add('login')
                             return 'login'
@@ -443,12 +443,12 @@ def dump():
 
                 # Register tags metadata in the spec
                 try:
-                    # Preferred ordering: login first, oauth second, Docs/Health last
+                    # Preferred ordering: login first, jwt second, Docs/Health last
                     preferred = []
                     if 'login' in tags_found:
                         preferred.append('login')
-                    if 'oauth' in tags_found:
-                        preferred.append('oauth')
+                    if 'jwt' in tags_found:
+                        preferred.append('jwt')
 
                     # Middle tags: everything except preferred/start/end
                     middle = sorted([t for t in tags_found if t not in preferred and t != 'Docs/Health'])
@@ -569,7 +569,7 @@ def dump():
 
                         ordered_names = []
                         # Preferred start
-                        for name in ('login', 'oauth'):
+                        for name in ('login', 'jwt'):
                             if name in tag_map and name not in ordered_names:
                                 ordered_names.append(name)
 

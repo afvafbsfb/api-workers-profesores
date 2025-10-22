@@ -38,37 +38,6 @@ components:
           additionalProperties: {}
           type: object
       type: object
-    PaginatedEnvelope:
-      properties:
-        has_more:
-          type: boolean
-        items:
-          items:
-            type: object
-          type: array
-        meta:
-          type:
-          - object
-          - 'null'
-        next_page:
-          type:
-          - integer
-          - 'null'
-        page:
-          type: integer
-        prev_page:
-          type:
-          - integer
-          - 'null'
-        returned:
-          type: integer
-        size:
-          type: integer
-        total:
-          type:
-          - integer
-          - 'null'
-      type: object
     RefreshRequest:
       additionalProperties: false
       properties:
@@ -300,7 +269,7 @@ paths:
       - bearerAuth: []
       summary: POST /auth/logout
       tags:
-      - oauth
+      - jwt
   /auth/refresh:
     post:
       description: Auto-generated operation for login_bp.refresh_tokens
@@ -316,7 +285,7 @@ paths:
       - bearerAuth: []
       summary: POST /auth/refresh
       tags:
-      - oauth
+      - jwt
   /auth/unblock:
     post:
       description: Auto-generated operation for login_bp.unblock_user
@@ -332,7 +301,7 @@ paths:
       - bearerAuth: []
       summary: POST /auth/unblock
       tags:
-      - oauth
+      - jwt
   /docs:
     get:
       description: Auto-generated operation for docs.docs_ui
@@ -754,8 +723,8 @@ paths:
 tags:
 - description: Inicio de sesión (email/password).
   name: login
-- description: Refresh, logout y gestión de tokens.
-  name: oauth
+- description: Refresh, logout y gestión de tokens JWT.
+  name: jwt
 - description: Operaciones relacionadas con academias y su configuración.
   name: Academias
 - description: Gestión de usuarios, perfiles y credenciales.
