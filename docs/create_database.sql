@@ -203,6 +203,7 @@ CREATE TABLE Curso_Profesores (
 -- Tabla Sesion (actualizada sin curso_id redundante)
 CREATE TABLE Sesion (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    horario_curso_id INT NOT NULL,
     aula_id INT NOT NULL,
     curso_profesor_id INT NOT NULL,
     timestamp_alta DATETIME NOT NULL,
@@ -212,6 +213,7 @@ CREATE TABLE Sesion (
     motivo_baja VARCHAR(255),
     notas_sesion TEXT,
     notas_materia TEXT,
+    FOREIGN KEY (horario_curso_id) REFERENCES HorarioCurso(id),
     FOREIGN KEY (curso_profesor_id) REFERENCES Curso_Profesores(id),
     FOREIGN KEY (aula_id) REFERENCES Aula(id)
 );

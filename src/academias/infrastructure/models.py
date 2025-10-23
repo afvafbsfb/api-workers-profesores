@@ -51,6 +51,9 @@ class HorarioCurso(Base):
     dia_semana = Column(String(20), nullable=False)
     hora_inicio = Column(Time, nullable=False)
     hora_fin = Column(Time, nullable=False)
+    
+    # Relationships
+    sesiones = relationship('Sesion', back_populates='horario_curso')
 
 class Tarifa(Base):
     __tablename__ = 'Tarifa'

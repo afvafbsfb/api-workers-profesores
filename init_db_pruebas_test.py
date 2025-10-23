@@ -320,8 +320,8 @@ def seed():
             print(f"[init_db_pruebas_test] Curso_Profesor creado id={cp.id}")
 
     # Sesion
-    if 'cp' in locals() and cp:
-        ses_filters = dict(aula_id=aula.id, curso_profesor_id=cp.id)
+    if 'cp' in locals() and cp and 'horario' in locals() and horario:
+        ses_filters = dict(horario_curso_id=horario.id, aula_id=aula.id, curso_profesor_id=cp.id)
         ses_defaults = dict(timestamp_alta=db.func.current_timestamp(), hora_inicio=time(9, 0), hora_fin=time(11, 0))
         ses, created = get_or_create(Sesion, defaults=ses_defaults, **ses_filters)
         if created:

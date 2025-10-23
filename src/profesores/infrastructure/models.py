@@ -28,6 +28,7 @@ class CursoProfesores(Base):
 class Sesion(Base):
     __tablename__ = 'Sesion'
     id = Column(Integer, primary_key=True, autoincrement=True)
+    horario_curso_id = Column(Integer, ForeignKey('HorarioCurso.id'), nullable=False)
     aula_id = Column(Integer, ForeignKey('Aula.id'), nullable=False)
     curso_profesor_id = Column(Integer, ForeignKey('Curso_Profesores.id'), nullable=False)
     timestamp_alta = Column(DateTime, nullable=False, server_default=func.current_timestamp())
@@ -38,6 +39,7 @@ class Sesion(Base):
     notas_sesion = Column(String, nullable=True)
     notas_materia = Column(String, nullable=True)
 
+    horario_curso = relationship('HorarioCurso', back_populates='sesiones')
     curso_profesor = relationship('CursoProfesores', back_populates='sesiones')
     aula = relationship('Aula', back_populates='sesiones')
 
