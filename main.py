@@ -297,9 +297,6 @@ try:
     # para que `main` pueda ser importado por scripts (como init_db.py)
     # sin intentar registrar blueprints antes de sus importaciones.
 
-    # Registrar blueprints y mostrar un par de mensajes de diagnóstico
-    rutas = [rule.rule for rule in app.url_map.iter_rules()]
-
     # Configurar cabeceras de seguridad y CORS
     @app.after_request
     def set_security_and_cors_headers(resp):
@@ -392,11 +389,14 @@ try:
     from src.usuarios.interfaces.usuarios_routes import usuarios_bp
     from src.usuarios.login_routes import login_bp
     from src.academias.interfaces.flask.academias_routes import academias_bp
+    from src.academias.interfaces.flask.tarifas_routes import tarifas_bp
     app.register_blueprint(usuarios_bp, url_prefix='/usuarios')
     app.register_blueprint(login_bp, url_prefix='/auth')
     app.register_blueprint(academias_bp, url_prefix='/academias')
+    app.register_blueprint(tarifas_bp, url_prefix='/tarifas')
 
-    # Log rutas registradas en un único punto (útil en desarrollo)
+    # Log rutas registradas DESPUÉS de registrar blueprints
+    rutas = [rule.rule for rule in app.url_map.iter_rules()]
     print(f"Rutas registradas: {rutas}")
     print("Blueprints registrados en main.py.")
 

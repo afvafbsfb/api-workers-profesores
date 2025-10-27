@@ -37,6 +37,9 @@ usuarios_list_query_args = {
     'fecha_baja_lte': fields.Str(required=False, allow_none=True),
     'fecha_ultima_modificacion_gte': fields.Str(required=False, allow_none=True),
     'fecha_ultima_modificacion_lte': fields.Str(required=False, allow_none=True),
+    'expand': fields.Str(required=False, allow_none=True, metadata={
+        'description': 'Expandir relaciones. Valores: "academia" (añade objeto con id y nombre de la academia)'
+    }),
 }
 
 
@@ -54,6 +57,10 @@ def listar_usuarios():
     user = getattr(g, 'current_user', None)
     if not user:
         return jsonify({'ok': False, 'error': 'user_not_authenticated'}), 401
+
+    # Parsear parámetro expand
+    expand_param = request.args.get('expand', '') or ''
+    expand = [e.strip() for e in expand_param.split(',') if e.strip()]
 
     # Recopilar parámetros tal como llegarían desde la petición
     params = {
@@ -213,7 +220,7 @@ def listar_usuarios():
     usuarios_objs = query.offset(offset).limit(size + 1).all()
 
     def serialize(u: Usuario):
-        return {
+        result = {
             'id': u.id,
             'nombre': u.nombre,
             'email': u.email,
@@ -222,6 +229,23 @@ def listar_usuarios():
             'estado': u.estado,
             'fecha_alta': u.fecha_alta.isoformat() if getattr(u, 'fecha_alta', None) else None,
         }
+        
+        # Expandir academia si se solicita
+        if 'academia' in expand:
+            if u.academia_id:
+                from src.academias.infrastructure.models import Academia
+                academia = db.session.get(Academia, u.academia_id)
+                if academia:
+                    result['academia'] = {
+                        'id': academia.id,
+                        'nombre': academia.nombre
+                    }
+                else:
+                    result['academia'] = None
+            else:
+                result['academia'] = None
+        
+        return result
 
     serialized = [serialize(u) for u in usuarios_objs]
 

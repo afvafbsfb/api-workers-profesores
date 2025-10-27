@@ -147,5 +147,42 @@
     "allowed_roles": ["admin_plataforma", "admin_academia"],
     "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia"},
     "note": "Cambio de estado de usuario: admins"
+  },
+
+  "can_query_tarifas": {
+    "operationId": "tarifas.listar_tarifas",
+    "allowed_roles": ["admin_plataforma", "admin_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia"},
+    "enforced_filters": { "academia_id": "current_user.academia_id" },
+    "note": "Listado de tarifas: admin_plataforma puede ver todas; admin_academia solo de su academia"
+  },
+
+  "can_create_tarifa": {
+    "operationId": "tarifas.crear_tarifa",
+    "allowed_roles": ["admin_plataforma", "admin_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia"},
+    "note": "Crear tarifa: admin_plataforma requiere academia_id; admin_academia usa su academia vinculada"
+  },
+
+  "can_view_tarifa": {
+    "operationId": "tarifas.obtener_tarifa",
+    "allowed_roles": ["admin_plataforma", "admin_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia"},
+    "note": "Ver tarifa: admin_plataforma puede ver cualquiera; admin_academia solo de su academia"
+  },
+
+  "can_modify_tarifa": {
+    "operationId": ["tarifas.actualizar_tarifa_put", "tarifas.actualizar_tarifa_patch"],
+    "allowed_roles": ["admin_plataforma", "admin_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia"},
+    "mutable_fields": ["descripcion", "precio_base"],
+    "note": "Modificar tarifa: admin_plataforma puede modificar cualquiera; admin_academia solo de su academia"
+  },
+
+  "can_delete_tarifa": {
+    "operationId": "tarifas.eliminar_tarifa",
+    "allowed_roles": ["admin_plataforma", "admin_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia"},
+    "note": "Eliminar tarifa (soft-delete): admin_plataforma puede eliminar cualquiera; admin_academia solo de su academia. Bloqueado si hay cursos activos asociados"
   }
 }

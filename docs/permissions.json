@@ -216,6 +216,67 @@
         "admin_academia",
         "admin_plataforma"
       ]
+    },
+    {
+      "name": "can_query_tarifas",
+      "description": "Decide si `current_user` puede listar/consultar tarifas con `params`.\n\nReturns: (allowed, effective_filters, reason)\n- effective_filters puede contener 'academia_id' forzada para limitar al ámbito del usuario.",
+      "params": [
+        "current_user",
+        "params"
+      ],
+      "detected_roles": [
+        "admin_academia",
+        "admin_plataforma"
+      ]
+    },
+    {
+      "name": "can_create_tarifa",
+      "description": "Decide si current_user puede crear una tarifa.\n\nReglas:\n- admin_plataforma: puede crear tarifas para cualquier academia (academia_id obligatorio)\n- admin_academia: puede crear tarifas solo para su academia\n- profesor_academia: no puede crear tarifas",
+      "params": [
+        "current_user",
+        "payload"
+      ],
+      "detected_roles": [
+        "admin_academia",
+        "admin_plataforma"
+      ]
+    },
+    {
+      "name": "can_view_tarifa",
+      "description": "Decide si current_user puede ver una tarifa específica.\n\nReglas:\n- admin_plataforma: puede ver cualquier tarifa\n- admin_academia: solo tarifas de su academia\n- profesor_academia: no puede ver tarifas",
+      "params": [
+        "current_user",
+        "target_tarifa"
+      ],
+      "detected_roles": [
+        "admin_academia",
+        "admin_plataforma"
+      ]
+    },
+    {
+      "name": "can_modify_tarifa",
+      "description": "Decide si current_user puede modificar `target_tarifa`.\n\nReglas:\n- admin_plataforma: puede modificar cualquier tarifa\n- admin_academia: solo tarifas de su academia\n- profesor_academia: no puede modificar tarifas\n- Campos mutables: descripcion, precio_base",
+      "params": [
+        "current_user",
+        "target_tarifa",
+        "payload"
+      ],
+      "detected_roles": [
+        "admin_academia",
+        "admin_plataforma"
+      ]
+    },
+    {
+      "name": "can_delete_tarifa",
+      "description": "Decide si current_user puede borrar (soft-delete) `target_tarifa`.\n\nReglas:\n- admin_plataforma: puede eliminar cualquier tarifa\n- admin_academia: solo tarifas de su academia\n- profesor_academia: no puede eliminar tarifas\n- La validación de cursos activos se hace en la capa de servicio/routes",
+      "params": [
+        "current_user",
+        "target_tarifa"
+      ],
+      "detected_roles": [
+        "admin_academia",
+        "admin_plataforma"
+      ]
     }
   ]
 }

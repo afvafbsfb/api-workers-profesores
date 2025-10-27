@@ -22,20 +22,24 @@ python .\scripts\dump_openapi.py
 # confirmar salida: debería decir "Wrote docs/openapi-auto.json and docs/openapi-auto.yml"
 
 
-cd 'c:\Users\Angel FV\Desktop\FORMACION\api-workers-profesores'; python scripts/export_permissions.py; python scripts/dump_openapi.py; python scripts/merge_permissions_into_openapi.py --spec docs/openapi-auto.json --out docs/served-openapi.json; python scripts/validate_permissions_sync.py --map scripts/permissions_map.json --code src/shared/application/permissions.py --spec docs/openapi-auto.json; python scripts/validate_served_openapi_for_mediator.py --spec docs/served-openapi.json
+cd 'c:\Users\Angel FV\Desktop\FORMACION\api-workers-profesores'; 
+python scripts/export_permissions.py; 
 
---ejecucion de los scritps para generar y validar la especificacion del api para el mediador backend-chjatopenai y para la especificacion swagger 
-cd "c:\Users\Angel FV\Desktop\FORMACION\api-workers-profesores"
-python .\scripts\dump_openapi.py
+python scripts/dump_openapi.py; 
+
 
 # Anotar parámetros (genera cambios en docs/openapi-auto.json)
 python .\scripts\annotate_openapi_params.py docs\openapi-auto.json
 
-# Fusionar permisos y generar served-openapi.json
-python .\scripts\merge_permissions_into_openapi.py docs\openapi-auto.json docs\served-openapi.json
+
+python scripts/merge_permissions_into_openapi.py --spec docs/openapi-auto.json --out docs/served-openapi.json; 
+
+python scripts/validate_permissions_sync.py --map scripts/permissions_map.json --code src/shared/application/permissions.py --spec docs/openapi-auto.json; 
+
+python scripts/validate_served_openapi_for_mediator.py --spec docs/served-openapi.json
 
 
-python scripts/validate_permissions_sync.py --map scripts/permissions_map.json --code src/shared/application/permissions.py --spec docs/openapi-auto.json; python scripts/validate_served_openapi_for_mediator.py --spec docs/served-openapi.json
+
 
 # Ejecutar los tests (ejecuta todos los tests; puedes limitar a carpetas si quieres)
 pytest -q
@@ -165,6 +169,63 @@ flask run --port 5000
 ```
 
 5) Documentación y Swagger UI
+para generarla: 
+- comprobar que los permisos de los roles están correctamente definidos en cada end-point
+
+- comprobar que los permisos de los roles están correctamente creados en src/shared/application/permissiones.py 
+
+- comprobar que los id-operation y sus funciones de permisos (can_*) estan correctamente mapeados en el fichero permissions-map.json
+
+# 1. Exportar permisos desde permissions.py
+python scripts/export_permissions.py
+
+
+export_permissions.py: Extrae metadata de las funciones can_* en permissions.py → genera permissions.json
+
+# 2. Generar especificación OpenAPI desde las rutas
+python scripts/dump_openapi.py
+
+Lee blueprints/rutas/schemas → genera openapi-auto.json y openapi-auto.yml
+
+# 3. Anotar parámetros en la especificación
+python scripts/annotate_openapi_params.py docs/openapi-auto.json
+
+Agrega anotaciones a parámetros query esperados
+
+# 4. Fusionar permisos en la especificación (genera served-openapi.json)
+python scripts/merge_permissions_into_openapi.py --spec docs/openapi-auto.json --out docs/served-openapi.json
+
+Fusiona permisos en la spec → genera served-openapi.json (consumido por backend-chat)
+
+# 5. Validar sincronización de permisos
+python scripts/validate_permissions_sync.py --map scripts/permissions_map.json --code src/shared/application/permissions.py --spec docs/openapi-auto.json
+
+Verifica que permissions_map.json, permissions.py y openapi-auto.json estén sincronizados
+
+
+# 6. Validar especificación para el mediador
+python scripts/validate_served_openapi_for_mediator.py --spec docs/served-openapi.json
+
+Valida que served-openapi.json contenga toda la info necesaria para el mediador
+
+# VALIDACIONES DEL PROCESO DE CREACION DE NUEVOS END-POINTS
+
+# Verificar que los endpoints de tarifas aparecen en la spec
+# Ver endpoints de tarifas en openapi-auto.json
+python -c "import json; spec=json.load(open('docs/openapi-auto.json')); print([p for p in spec.get('paths',{}).keys() if 'tarifas' in p])"
+
+# Ver operationIds de tarifas
+python -c "import json; spec=json.load(open('docs/openapi-auto.json')); paths=spec.get('paths',{}); print({p: {m: paths[p][m].get('operationId') for m in paths[p] if m in ['get','post','put','patch','delete']} for p in paths if 'tarifas' in p})"
+
+# Verificar x-permissions en served-openapi.json
+# Ver si los endpoints de tarifas tienen x-permissions
+python -c "import json; spec=json.load(open('docs/served-openapi.json')); paths=spec.get('paths',{}); print({p: {m: paths[p][m].get('x-permissions',{}).get('allowed_roles') for m in paths[p] if m in ['get','post','put','patch','delete'] and 'x-permissions' in paths[p][m]} for p in paths if 'tarifas' in p})"
+
+# Prueba manual en Swagger UI
+Abre http://localhost:5000/docs
+
+Ver si los schemas de Tarifa están definidos
+python -c "import json; spec=json.load(open('docs/openapi-auto.json')); schemas=spec.get('components',{}).get('schemas',{}); print([s for s in schemas.keys() if 'Tarifa' in s])"
 
 - Abre en el navegador: `http://localhost:5000/docs`
 - La UI carga la especificación desde `/openapi.json`. También existe `/openapi-auto.json` (archivo generado en `docs/`).

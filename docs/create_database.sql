@@ -5,7 +5,7 @@
 DROP DATABASE IF EXISTS api_workers;
 
 -- Script para crear la base de datos y las tablas actualizadas
-
+Tarifa
 CREATE DATABASE IF NOT EXISTS api_workers CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE api_workers;
 

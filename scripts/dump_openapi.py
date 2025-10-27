@@ -19,6 +19,8 @@ from src.schemas.auth import LoginRequestSchema, LoginResponseSchema
 from src.schemas.academia import AcademiaSchema
 # New: register refresh request schema
 from src.schemas.refresh import RefreshRequestSchema
+# New: register tarifa schemas
+from src.schemas.tarifa import TarifaSchema, TarifaCreateSchema, TarifaUpdateSchema
 import re
 
 # Basic programmatic schemas for Usuario and Rol derived from models.py
@@ -66,6 +68,10 @@ def dump():
                 apispec.components.schema('RefreshRequest', schema=RefreshRequestSchema)
                 apispec.components.schema('Rol', schema=RolSchema)
                 apispec.components.schema('Usuario', schema=UsuarioSchema)
+                # Tarifa schemas
+                apispec.components.schema('Tarifa', schema=TarifaSchema)
+                apispec.components.schema('TarifaCreate', schema=TarifaCreateSchema)
+                apispec.components.schema('TarifaUpdate', schema=TarifaUpdateSchema)
 
                 # Register a bearer (JWT) security scheme so Swagger UI can authorize
                 apispec.components.security_scheme('bearerAuth', {
@@ -421,6 +427,25 @@ def dump():
                                             },
                                             'required': True
                                         }
+                                    elif path.startswith('/tarifas'):
+                                        if m.lower() == 'post':
+                                            op['requestBody'] = {
+                                                'content': {
+                                                    'application/json': {
+                                                        'schema': {'$ref': '#/components/schemas/TarifaCreate'}
+                                                    }
+                                                },
+                                                'required': True
+                                            }
+                                        elif m.lower() in ('put', 'patch'):
+                                            op['requestBody'] = {
+                                                'content': {
+                                                    'application/json': {
+                                                        'schema': {'$ref': '#/components/schemas/TarifaUpdate'}
+                                                    }
+                                                },
+                                                'required': True
+                                            }
                             except Exception:
                                 # fall back to previous heuristics if anything goes wrong
                                 pass
@@ -481,67 +506,57 @@ def dump():
 
                 # --- Post-process: ensure PaginatedEnvelope schema and /usuarios/export path ---
                 try:
-                    auto_path = os.path.join(ROOT, 'docs', 'openapi-auto.json')
-                    if os.path.exists(auto_path):
-                        with open(auto_path, 'r', encoding='utf-8') as f:
-                            auto_spec = json.load(f)
+                    # Work with the freshly generated spec, not the old file
+                    # Ensure components.schemas.PaginatedEnvelope
+                    comps = spec.setdefault('components', {}).setdefault('schemas', {})
+                    comps.setdefault('PaginatedEnvelope', {
+                        'type': 'object',
+                        'properties': {
+                            'items': {'type': 'array', 'items': {'type': 'object'}},
+                            'page': {'type': 'integer'},
+                            'size': {'type': 'integer'},
+                            'returned': {'type': 'integer'},
+                            'has_more': {'type': 'boolean'},
+                            'next_page': {'type': ['integer', 'null']},
+                            'prev_page': {'type': ['integer', 'null']},
+                            'total': {'type': ['integer', 'null']},
+                            'meta': {'type': ['object', 'null']},
+                        }
+                    })
 
-                        # Ensure components.schemas.PaginatedEnvelope
-                        comps = auto_spec.setdefault('components', {}).setdefault('schemas', {})
-                        comps.setdefault('PaginatedEnvelope', {
-                            'type': 'object',
-                            'properties': {
-                                'items': {'type': 'array', 'items': {'type': 'object'}},
-                                'page': {'type': 'integer'},
-                                'size': {'type': 'integer'},
-                                'returned': {'type': 'integer'},
-                                'has_more': {'type': 'boolean'},
-                                'next_page': {'type': ['integer', 'null']},
-                                'prev_page': {'type': ['integer', 'null']},
-                                'total': {'type': ['integer', 'null']},
-                                'meta': {'type': ['object', 'null']},
+                    paths = spec.setdefault('paths', {})
+                    # Try to copy x-permissions from /usuarios get if present
+                    x_perms = None
+                    usuario_entry = paths.get('/usuarios') or paths.get('/usuarios/')
+                    if usuario_entry and isinstance(usuario_entry, dict):
+                        get_op = usuario_entry.get('get')
+                        if get_op and isinstance(get_op, dict):
+                            x_perms = get_op.get('x-permissions')
+
+                    # Add /usuarios/export if missing
+                    if '/usuarios/export' not in paths:
+                        paths['/usuarios/export'] = {
+                            'get': {
+                                'summary': 'GET /usuarios/export',
+                                'description': 'Exportar usuarios (CSV/XLSX)',
+                                'operationId': 'usuarios.exportar_usuarios',
+                                'parameters': [
+                                    {'name': 'format', 'in': 'query', 'schema': {'type': 'string', 'enum': ['csv', 'xlsx']}, 'description': 'Formato de export'},
+                                    {'name': 'academia_id', 'in': 'query', 'schema': {'type': 'integer'}, 'description': 'Filtrar por academia_id'},
+                                    {'name': 'rol', 'in': 'query', 'schema': {'type': 'string'}, 'description': 'Filtrar por rol'},
+                                    {'name': 'nombre', 'in': 'query', 'schema': {'type': 'string'}, 'description': 'Buscar por parte del nombre (ilike)'},
+                                ],
+                                'responses': {
+                                    '200': {'description': 'File attachment or stream'},
+                                    '202': {'description': 'Export accepted and processing (async)'}
+                                },
+                                'security': [{'bearerAuth': []}],
                             }
-                        })
+                        }
+                        if x_perms:
+                            paths['/usuarios/export']['get']['x-permissions'] = x_perms
 
-                        paths = auto_spec.setdefault('paths', {})
-                        # Try to copy x-permissions from /usuarios get if present
-                        x_perms = None
-                        usuario_entry = paths.get('/usuarios') or paths.get('/usuarios/')
-                        if usuario_entry and isinstance(usuario_entry, dict):
-                            get_op = usuario_entry.get('get')
-                            if get_op and isinstance(get_op, dict):
-                                x_perms = get_op.get('x-permissions')
-
-                        # Add /usuarios/export if missing
-                        if '/usuarios/export' not in paths:
-                            paths['/usuarios/export'] = {
-                                'get': {
-                                    'summary': 'GET /usuarios/export',
-                                    'description': 'Exportar usuarios (CSV/XLSX)',
-                                    'operationId': 'usuarios.exportar_usuarios',
-                                    'parameters': [
-                                        {'name': 'format', 'in': 'query', 'schema': {'type': 'string', 'enum': ['csv', 'xlsx']}, 'description': 'Formato de export'},
-                                        {'name': 'academia_id', 'in': 'query', 'schema': {'type': 'integer'}, 'description': 'Filtrar por academia_id'},
-                                        {'name': 'rol', 'in': 'query', 'schema': {'type': 'string'}, 'description': 'Filtrar por rol'},
-                                        {'name': 'nombre', 'in': 'query', 'schema': {'type': 'string'}, 'description': 'Buscar por parte del nombre (ilike)'},
-                                    ],
-                                    'responses': {
-                                        '200': {'description': 'File attachment or stream'},
-                                        '202': {'description': 'Export accepted and processing (async)'}
-                                    },
-                                    'security': [{'bearerAuth': []}],
-                                }
-                            }
-                            if x_perms:
-                                paths['/usuarios/export']['get']['x-permissions'] = x_perms
-
-                        # Persist modified auto_spec so downstream pipeline picks it up
-                        with open(auto_path, 'w', encoding='utf-8') as f:
-                            json.dump(auto_spec, f, indent=2, ensure_ascii=False)
-
-                        # Merge into generated spec in memory so final output includes changes
-                        spec.setdefault('components', {}).setdefault('schemas', {}).update(comps)
-                        spec.setdefault('paths', {}).update(paths)
+                    # No need to write here - will write once at the end
                 except Exception:
                     # best-effort; do not abort dump if postprocess fails
                     pass

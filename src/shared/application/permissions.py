@@ -446,3 +446,190 @@ def can_modify_status(current_user, target_user) -> Tuple[bool, Optional[str]]:
             return False, 'forbidden_other_academia'
         return True, None
     return False, 'forbidden'
+
+
+# ---------------------------------------------------------------------------
+# Reglas para Tarifas
+# ---------------------------------------------------------------------------
+def can_query_tarifas(current_user, params: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si `current_user` puede listar/consultar tarifas con `params`.
+
+    Returns: (allowed, effective_filters, reason)
+    - effective_filters puede contener 'academia_id' forzada para limitar al ámbito del usuario.
+    """
+    user_role = None
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    effective_filters = {}
+
+    if user_role == 'admin_plataforma':
+        # Puede ver tarifas de cualquier academia
+        if 'academia_id' in params and params.get('academia_id'):
+            try:
+                effective_filters['academia_id'] = int(params.get('academia_id'))
+            except Exception:
+                return False, {}, 'invalid_academia_id'
+        return True, effective_filters, None
+
+    if user_role == 'admin_academia':
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        # Forzar academia_id del usuario
+        if 'academia_id' in params and params.get('academia_id'):
+            try:
+                if int(params.get('academia_id')) != int(acad_id):
+                    return False, {}, 'forbidden_other_academia'
+            except Exception:
+                return False, {}, 'invalid_academia_id'
+        effective_filters['academia_id'] = int(acad_id)
+        return True, effective_filters, None
+
+    # profesor_academia no tiene acceso
+    return False, {}, 'forbidden'
+
+
+def can_create_tarifa(current_user, payload: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si current_user puede crear una tarifa.
+
+    Reglas:
+    - admin_plataforma: puede crear tarifas para cualquier academia (academia_id obligatorio)
+    - admin_academia: puede crear tarifas solo para su academia
+    - profesor_academia: no puede crear tarifas
+    """
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    effective = dict(payload or {})
+
+    if user_role == 'admin_plataforma':
+        # academia_id es obligatorio
+        if 'academia_id' not in effective or not effective.get('academia_id'):
+            return False, {}, 'academia_id_required'
+        return True, effective, None
+
+    if user_role == 'admin_academia':
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        
+        # Si academia_id viene en el payload, validar que coincida
+        if 'academia_id' in effective and effective.get('academia_id'):
+            try:
+                if int(effective.get('academia_id')) != int(acad_id):
+                    return False, {}, 'forbidden_other_academia'
+            except Exception:
+                return False, {}, 'invalid_academia_id'
+        
+        # Forzar academia_id del usuario
+        effective['academia_id'] = int(acad_id)
+        return True, effective, None
+
+    return False, {}, 'forbidden'
+
+
+def can_view_tarifa(current_user, target_tarifa) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si current_user puede ver una tarifa específica.
+
+    Reglas:
+    - admin_plataforma: puede ver cualquier tarifa
+    - admin_academia: solo tarifas de su academia
+    - profesor_academia: no puede ver tarifas
+    """
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    if user_role == 'admin_plataforma':
+        return True, {}, None
+
+    if user_role == 'admin_academia':
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        if getattr(target_tarifa, 'academia_id', None) != int(acad_id):
+            return False, {}, 'forbidden_other_academia'
+        return True, {}, None
+
+    return False, {}, 'forbidden'
+
+
+def can_modify_tarifa(current_user, target_tarifa, payload: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si current_user puede modificar `target_tarifa`.
+
+    Reglas:
+    - admin_plataforma: puede modificar cualquier tarifa
+    - admin_academia: solo tarifas de su academia
+    - profesor_academia: no puede modificar tarifas
+    - Campos mutables: descripcion, precio_base
+    """
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    sanitized = {}
+    payload = payload or {}
+
+    if user_role == 'admin_plataforma':
+        # Permitir modificar descripcion y precio_base
+        for k in ('descripcion', 'precio_base'):
+            if k in payload:
+                sanitized[k] = payload[k]
+        return True, sanitized, None
+
+    if user_role == 'admin_academia':
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        if getattr(target_tarifa, 'academia_id', None) != int(acad_id):
+            return False, {}, 'forbidden_other_academia'
+        # Permitir modificar descripcion y precio_base
+        for k in ('descripcion', 'precio_base'):
+            if k in payload:
+                sanitized[k] = payload[k]
+        return True, sanitized, None
+
+    return False, {}, 'forbidden'
+
+
+def can_delete_tarifa(current_user, target_tarifa) -> Tuple[bool, Optional[str]]:
+    """Decide si current_user puede borrar (soft-delete) `target_tarifa`.
+
+    Reglas:
+    - admin_plataforma: puede eliminar cualquier tarifa
+    - admin_academia: solo tarifas de su academia
+    - profesor_academia: no puede eliminar tarifas
+    - La validación de cursos activos se hace en la capa de servicio/routes
+    """
+    if not current_user:
+        return False, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    if user_role == 'admin_plataforma':
+        return True, None
+
+    if user_role == 'admin_academia':
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, 'user_has_no_academy'
+        if getattr(target_tarifa, 'academia_id', None) != int(acad_id):
+            return False, 'forbidden_other_academia'
+        return True, None
+
+    return False, 'forbidden'
