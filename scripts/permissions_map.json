@@ -116,6 +116,14 @@
     "note": "Lectura de usuario: admin_plataforma global; admin_academia y profesor_academia limitados a su academia"
   },
 
+  "can_query_roles": {
+    "operationId": "roles.listar_roles",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope": "global",
+    "transform_to": null,
+    "note": "Listado de roles disponibles: todos los usuarios autenticados pueden consultar para conocer los roles disponibles al crear/modificar usuarios. transform_to=null evita transformación automática a roles.obtener_role"
+  },
+
   "can_recover_credentials": {
     "operationId": "usuarios.recuperar_credenciales",
     "allowed_roles": [],

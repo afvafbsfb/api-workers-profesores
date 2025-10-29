@@ -236,9 +236,9 @@ def seed():
 
     # Usuarios de prueba: crear solo si email no existe
     usuarios_prueba = [
-        dict(nombre="Usuario Activo", email="activo@academia.com", plain_password="password_activo", password=hash_password("password_activo"), rol_id=rol.id, estado="Activo", academia_id=academia.id),
-        dict(nombre="Usuario Bloqueado", email="bloqueado@academia.com", plain_password="password_bloqueado", password=hash_password("password_bloqueado"), rol_id=rol.id, estado="Bloqueado", academia_id=academia.id),
-        dict(nombre="Usuario Baja", email="baja@academia.com", plain_password="password_baja", password=hash_password("password_baja"), rol_id=rol.id, estado="Baja", academia_id=academia.id),
+        dict(nombre="Usuario Activo", email="activo@academia.com", plain_password="password_activo", password=hash_password("password_activo"), rol_id=rol.id, estado="Activo", academia_id=None),
+        dict(nombre="Usuario Bloqueado", email="bloqueado@academia.com", plain_password="password_bloqueado", password=hash_password("password_bloqueado"), rol_id=rol.id, estado="Bloqueado", academia_id=None),
+        dict(nombre="Usuario Baja", email="baja@academia.com", plain_password="password_baja", password=hash_password("password_baja"), rol_id=rol.id, estado="Baja", academia_id=None),
         dict(nombre="Admin Plataforma", email="admin_plataforma@academia.com", plain_password="password_admin_plataforma", password=hash_password("password_admin_plataforma"), rol_id=rol.id, estado="Activo", academia_id=None),
         dict(nombre="Admin Academia", email="admin_academia@academia.com", plain_password="password_admin_academia", password=hash_password("password_admin_academia"), rol_id=rol_academia.id, estado="Activo", academia_id=academia.id),
     ]

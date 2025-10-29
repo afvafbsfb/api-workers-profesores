@@ -85,6 +85,9 @@ class AuthService:
 
             raise CredencialesInvalidasException("Credenciales inválidas")
 
+        # Detectar si el usuario está usando password temporal (password == email)
+        must_change_password = request.password.lower() == user.email.lower()
+
         # login correcto: reset campos temporales, no cambiar estado
         try:
             user.failed_login_count = 0
@@ -136,5 +139,6 @@ class AuthService:
             tokens={"access_token": access, "refresh_token": refresh},
             role=role,
             name=name,
-            status=200
+            status=200,
+            must_change_password=must_change_password
         )

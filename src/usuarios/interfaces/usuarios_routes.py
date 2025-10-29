@@ -284,14 +284,14 @@ def crear_usuario():
     if not allowed:
         return jsonify({"ok": False, "error": "forbidden", "reason": reason}), 403
 
-    # Minimal creation logic: expect nombre, email, password, rol_id
+    # Minimal creation logic: expect nombre, email, rol_id (password opcional)
     nombre = effective.get('nombre')
     email = effective.get('email')
-    password = effective.get('password')
+    password = effective.get('password', email)  # Si no se proporciona password, usar email
     rol_id = effective.get('rol_id')
     academia_id = effective.get('academia_id')
 
-    if not nombre or not email or not password or not rol_id:
+    if not nombre or not email or not rol_id:
         return jsonify({"ok": False, "error": "missing_fields"}), 400
 
     # Check email uniqueness
@@ -363,10 +363,80 @@ def eliminar_usuario(usuario_id):
         return jsonify({"ok": False, "error": "db_error", "message": str(e)}), 500
 
 @usuarios_bp.route('/<int:usuario_id>/credentials', methods=['PUT'])
+@require_auth
 @operation_id('usuarios.actualizar_credenciales')
 def actualizar_credenciales(usuario_id):
-    data = request.get_json()
-    return jsonify({"message": f"Credenciales del usuario {usuario_id} actualizadas", "data": data})
+    """
+    Cambiar contraseña de un usuario.
+    Body esperado: { "current_password": "...", "new_password": "..." }
+    
+    Reglas:
+    - El usuario solo puede cambiar su propia contraseña
+    - Debe proporcionar la contraseña actual correcta
+    - La nueva contraseña debe ser diferente y cumplir requisitos mínimos
+    """
+    user = getattr(g, 'current_user', None)
+    if not user:
+        return jsonify({"ok": False, "error": "user_not_authenticated"}), 401
+    
+    # Solo puede cambiar su propia contraseña
+    if user.id != usuario_id:
+        return jsonify({"ok": False, "error": "forbidden", "reason": "can_only_change_own_password"}), 403
+    
+    data = request.get_json() or {}
+    current_password = data.get('current_password', '').strip()
+    new_password = data.get('new_password', '').strip()
+    
+    # Validaciones básicas
+    if not current_password or not new_password:
+        return jsonify({"ok": False, "error": "missing_fields", "message": "Faltan campos obligatorios"}), 400
+    
+    if len(new_password) < 6:
+        return jsonify({"ok": False, "error": "validation_error", "message": "La nueva contraseña debe tener al menos 6 caracteres"}), 400
+    
+    if current_password == new_password:
+        return jsonify({"ok": False, "error": "validation_error", "message": "La nueva contraseña debe ser diferente de la actual"}), 400
+    
+    # Obtener usuario y verificar contraseña actual
+    from src.autenticacion.infrastructure.hasher import Hasher
+    target_user = db.session.get(Usuario, usuario_id)
+    if not target_user:
+        return jsonify({"ok": False, "error": "not_found", "message": "Usuario no encontrado"}), 404
+    
+    if not Hasher.verify(current_password, target_user.password):
+        return jsonify({"ok": False, "error": "invalid_credentials", "message": "La contraseña actual es incorrecta"}), 401
+    
+    # Validar que la nueva contraseña no sea igual al email
+    if new_password.lower() == target_user.email.lower():
+        return jsonify({"ok": False, "error": "validation_error", "message": "La contraseña no puede ser igual a tu email"}), 400
+    
+    # Actualizar contraseña
+    try:
+        # El setter de password en el modelo Usuario ya hashea automáticamente
+        target_user.password = new_password
+        # Incrementar token_version para invalidar tokens anteriores
+        target_user.token_version = (target_user.token_version or 0) + 1
+        db.session.add(target_user)
+        db.session.commit()
+        return jsonify({"ok": True, "message": "Contraseña actualizada correctamente"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"ok": False, "error": "db_error", "message": "Error al actualizar la contraseña"}), 500
+
+@usuarios_bp.route('/me/credentials', methods=['PUT'])
+@require_auth
+@operation_id('usuarios.actualizar_mis_credenciales')
+def actualizar_mis_credenciales():
+    """
+    Cambiar mi propia contraseña (atajo para /usuarios/<mi_id>/credentials).
+    Body esperado: { "current_password": "...", "new_password": "..." }
+    """
+    user = getattr(g, 'current_user', None)
+    if not user:
+        return jsonify({"ok": False, "error": "user_not_authenticated"}), 401
+    
+    # Delegar al endpoint genérico
+    return actualizar_credenciales(user.id)
 
 @usuarios_bp.route('/<int:usuario_id>/role', methods=['PUT'])
 @operation_id('usuarios.actualizar_rol')

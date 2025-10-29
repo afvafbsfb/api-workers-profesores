@@ -234,6 +234,8 @@ for perm in perms:
                     xp['enforced_filters'] = metadata['enforced_filters']
                 if 'note' in metadata:
                     xp['note'] = metadata['note']
+                if 'transform_to' in metadata:
+                    xp['transform_to'] = metadata['transform_to']
 
                 # scope (single string)
                 if 'scope' in metadata:
@@ -360,6 +362,8 @@ for name, mapped in perm_map.items():
                 xp['enforced_filters'] = metadata['enforced_filters']
             if 'note' in metadata:
                 xp['note'] = metadata['note']
+            if 'transform_to' in metadata:
+                xp['transform_to'] = metadata['transform_to']
             if 'scope' in metadata:
                 xp['scope'] = metadata['scope']
                 # if explicitly public scope, ensure the OpenAPI operation has no security requirements

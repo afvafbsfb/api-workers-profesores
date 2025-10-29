@@ -120,6 +120,19 @@ permissions:
       - current_user
       - payload
     detected_roles: []
+  - name: can_query_roles
+    description: |
+      Decide si `current_user` puede listar roles disponibles.
+      
+      Todos los usuarios autenticados pueden consultar roles para conocer
+      los roles disponibles al crear/modificar usuarios.
+      
+      Returns: (allowed, effective_filters, reason)
+    params:
+      - current_user
+      - params
+    detected_roles:
+      - not_authenticated
   - name: can_logout
     description: |
       Compatibility wrapper: logout requires an authenticated user.

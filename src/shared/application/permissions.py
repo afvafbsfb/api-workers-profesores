@@ -319,6 +319,22 @@ def can_login(current_user, payload: Dict = None) -> Tuple[bool, Dict, Optional[
     return True, {}, None
 
 
+def can_query_roles(current_user, params: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si `current_user` puede listar roles disponibles.
+    
+    Todos los usuarios autenticados pueden consultar roles para conocer
+    los roles disponibles al crear/modificar usuarios.
+    
+    Returns: (allowed, effective_filters, reason)
+    """
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    
+    # Todos los usuarios autenticados pueden ver roles
+    # No se aplican filtros adicionales - se retornan todos los roles
+    return True, {}, None
+
+
 def can_logout(current_user) -> Tuple[bool, Optional[str]]:
     """Compatibility wrapper: logout requires an authenticated user."""
     if not current_user:

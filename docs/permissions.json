@@ -118,6 +118,17 @@
       "detected_roles": []
     },
     {
+      "name": "can_query_roles",
+      "description": "Decide si `current_user` puede listar roles disponibles.\n\nTodos los usuarios autenticados pueden consultar roles para conocer\nlos roles disponibles al crear/modificar usuarios.\n\nReturns: (allowed, effective_filters, reason)",
+      "params": [
+        "current_user",
+        "params"
+      ],
+      "detected_roles": [
+        "not_authenticated"
+      ]
+    },
+    {
       "name": "can_logout",
       "description": "Compatibility wrapper: logout requires an authenticated user.",
       "params": [

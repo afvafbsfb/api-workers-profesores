@@ -387,10 +387,12 @@ try:
         app.config['SQLALCHEMY_BINDS'] = {}
     # Registrar blueprints al inicio
     from src.usuarios.interfaces.usuarios_routes import usuarios_bp
+    from src.usuarios.interfaces.roles_routes import roles_bp
     from src.usuarios.login_routes import login_bp
     from src.academias.interfaces.flask.academias_routes import academias_bp
     from src.academias.interfaces.flask.tarifas_routes import tarifas_bp
     app.register_blueprint(usuarios_bp, url_prefix='/usuarios')
+    app.register_blueprint(roles_bp, url_prefix='/roles')
     app.register_blueprint(login_bp, url_prefix='/auth')
     app.register_blueprint(academias_bp, url_prefix='/academias')
     app.register_blueprint(tarifas_bp, url_prefix='/tarifas')

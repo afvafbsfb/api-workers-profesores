@@ -21,25 +21,9 @@ from src.schemas.academia import AcademiaSchema
 from src.schemas.refresh import RefreshRequestSchema
 # New: register tarifa schemas
 from src.schemas.tarifa import TarifaSchema, TarifaCreateSchema, TarifaUpdateSchema
+# New: register usuario schemas
+from src.schemas.usuario import UsuarioSchema, UsuarioCreateSchema, UsuarioUpdateSchema, RolSchema
 import re
-
-# Basic programmatic schemas for Usuario and Rol derived from models.py
-from marshmallow import Schema, fields
-
-
-class RolSchema(Schema):
-    id = fields.Int(dump_only=True)
-    nombre = fields.Str()
-
-
-class UsuarioSchema(Schema):
-    id = fields.Int(dump_only=True)
-    academia_id = fields.Int(allow_none=True)
-    nombre = fields.Str()
-    email = fields.Email()
-    rol = fields.Nested(RolSchema)
-    estado = fields.Str()
-    fecha_alta = fields.DateTime()
 
 
 def dump():
@@ -68,6 +52,8 @@ def dump():
                 apispec.components.schema('RefreshRequest', schema=RefreshRequestSchema)
                 apispec.components.schema('Rol', schema=RolSchema)
                 apispec.components.schema('Usuario', schema=UsuarioSchema)
+                apispec.components.schema('UsuarioCreate', schema=UsuarioCreateSchema)
+                apispec.components.schema('UsuarioUpdate', schema=UsuarioUpdateSchema)
                 # Tarifa schemas
                 apispec.components.schema('Tarifa', schema=TarifaSchema)
                 apispec.components.schema('TarifaCreate', schema=TarifaCreateSchema)
@@ -409,15 +395,25 @@ def dump():
                                     }
                                 else:
                                     if path.startswith('/usuarios'):
-                                        # Use Usuario schema as request/response body for create/update (simple heuristic)
-                                        op['requestBody'] = {
-                                            'content': {
-                                                'application/json': {
-                                                    'schema': {'$ref': '#/components/schemas/Usuario'}
-                                                }
-                                            },
-                                            'required': True
-                                        }
+                                        # Use UsuarioCreate for POST and UsuarioUpdate for PUT/PATCH
+                                        if m.lower() == 'post':
+                                            op['requestBody'] = {
+                                                'content': {
+                                                    'application/json': {
+                                                        'schema': {'$ref': '#/components/schemas/UsuarioCreate'}
+                                                    }
+                                                },
+                                                'required': True
+                                            }
+                                        elif m.lower() in ('put', 'patch'):
+                                            op['requestBody'] = {
+                                                'content': {
+                                                    'application/json': {
+                                                        'schema': {'$ref': '#/components/schemas/UsuarioUpdate'}
+                                                    }
+                                                },
+                                                'required': True
+                                            }
                                     elif path.startswith('/academias') and m.lower() in ('post', 'patch', 'put'):
                                         op['requestBody'] = {
                                             'content': {
