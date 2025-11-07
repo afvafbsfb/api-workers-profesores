@@ -287,7 +287,7 @@ def crear_usuario():
     # Minimal creation logic: expect nombre, email, rol_id (password opcional)
     nombre = effective.get('nombre')
     email = effective.get('email')
-    password = effective.get('password', email)  # Si no se proporciona password, usar email
+    password_plain = effective.get('password', email)  # Si no se proporciona password, usar email
     rol_id = effective.get('rol_id')
     academia_id = effective.get('academia_id')
 
@@ -299,7 +299,9 @@ def crear_usuario():
         return jsonify({"ok": False, "error": "conflict", "message": "email_exists"}), 409
 
     try:
-        u = Usuario(nombre=nombre, email=email, password=password, rol_id=int(rol_id), academia_id=academia_id)
+        from src.autenticacion.infrastructure.hasher import Hasher
+        password_hashed = Hasher.hash(password_plain)
+        u = Usuario(nombre=nombre, email=email, password=password_hashed, rol_id=int(rol_id), academia_id=academia_id)
         db.session.add(u)
         db.session.commit()
         return jsonify({"ok": True, "result": {"id": u.id, "email": u.email}}), 201
