@@ -6,6 +6,13 @@ class InscripcionSchema(Schema):
     """Schema para serialización/deserialización de Inscripcion (GET)."""
     
     id = fields.Int(dump_only=True, metadata={'example': 1})
+    academia_id = fields.Int(
+        dump_only=True,
+        metadata={
+            'description': 'ID de la academia (calculado automáticamente)',
+            'example': 1
+        }
+    )
     alumno_id = fields.Int(
         required=True,
         metadata={

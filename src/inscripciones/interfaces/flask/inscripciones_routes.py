@@ -49,19 +49,121 @@ def _load_tables():
 
 inscripciones_bp = Blueprint('inscripciones', __name__)
 
+# Definición de parámetros de query para GET /inscripciones
+inscripciones_list_query_args = {
+    'academia_id': {
+        'type': 'integer',
+        'description': 'Filtrar por ID de academia (solo admin_plataforma)',
+        'required': False
+    },
+    'alumno_id': {
+        'type': 'integer',
+        'description': 'Filtrar por ID de alumno específico',
+        'required': False
+    },
+    'curso_id': {
+        'type': 'integer',
+        'description': 'Filtrar por ID de curso específico',
+        'required': False
+    },
+    'tarifa_id': {
+        'type': 'integer',
+        'description': 'Filtrar por ID de tarifa',
+        'required': False
+    },
+    'activas': {
+        'type': 'boolean',
+        'description': 'Filtrar por inscripciones activas (true) o finalizadas (false)',
+        'required': False
+    },
+    'fecha_inicio_desde': {
+        'type': 'string',
+        'description': 'Filtrar inscripciones desde fecha inicio (formato: YYYY-MM-DD)',
+        'required': False
+    },
+    'fecha_inicio_hasta': {
+        'type': 'string',
+        'description': 'Filtrar inscripciones hasta fecha inicio (formato: YYYY-MM-DD)',
+        'required': False
+    },
+    'page': {
+        'type': 'integer',
+        'description': 'Número de página (inicia en 1)',
+        'required': False,
+        'default': 1,
+        'minimum': 1
+    },
+    'size': {
+        'type': 'integer',
+        'description': 'Tamaño de página',
+        'required': False,
+        'default': 20,
+        'minimum': 1,
+        'maximum': 100
+    },
+    'with_total': {
+        'type': 'boolean',
+        'description': 'Incluir conteo total de resultados',
+        'required': False
+    },
+    'order_by': {
+        'type': 'string',
+        'description': 'Campo para ordenar (id, fecha_inicio, fecha_fin)',
+        'required': False
+    },
+    'order_dir': {
+        'type': 'string',
+        'description': 'Dirección del ordenamiento (asc, desc)',
+        'required': False
+    },
+    'expand': {
+        'type': 'string',
+        'description': 'Expandir relaciones (alumno, curso, tarifa)',
+        'required': False
+    }
+}
 
 @inscripciones_bp.route('/', methods=['GET'])
 @require_auth
 @operation_id('inscripciones.listar_inscripciones')
+@openapi_query_args(inscripciones_list_query_args)
 @use_args({
+    'academia_id': fields.Int(required=False),
     'alumno_id': fields.Int(required=False),
     'curso_id': fields.Int(required=False),
+    'tarifa_id': fields.Int(required=False),
     'activas': fields.Bool(required=False),
+    'fecha_inicio_desde': fields.Str(required=False),
+    'fecha_inicio_hasta': fields.Str(required=False),
     'page': fields.Int(required=False, load_default=1),
-    'size': fields.Int(required=False, load_default=20)
+    'size': fields.Int(required=False, load_default=20),
+    'with_total': fields.Bool(required=False),
+    'order_by': fields.Str(required=False),
+    'order_dir': fields.Str(required=False),
+    'expand': fields.Str(required=False)
 }, location='query')
 def listar_inscripciones(args, current_user):
-    """Lista inscripciones según permisos del usuario."""
+    """Lista inscripciones (matrículas) según permisos del usuario.
+    
+    Permite consultar inscripciones filtradas por:
+    - Academia (solo admin_plataforma)
+    - Alumno específico
+    - Curso específico  
+    - Tarifa aplicada
+    - Estado (activas/finalizadas)
+    - Rango de fechas de inicio
+    
+    Soporta paginación, ordenamiento y expansión de relaciones.
+    
+    Casos de uso:
+    - Ver todas las matrículas de una academia
+    - Consultar inscripciones de un alumno
+    - Listar alumnos matriculados en un curso
+    - Filtrar por estado activo/finalizado
+    """
+    _load_tables()
+    logger.info(f"listar_inscripciones llamado por user {current_user.get('usuario_id')} con args: {args}")
+    
     page, size = clamp_pagination(args.get('page', 1), args.get('size', 20))
     
     perm_result = can_query_inscripciones(current_user, args)
@@ -88,18 +190,22 @@ def listar_inscripciones(args, current_user):
     
     # Filtro de academia para admin_academia
     if 'academia_id' in enforced_filters:
-        if 'curso_profesores' not in [str(f) for f in query.froms]:
-            query = query.select_from(
-                inscripciones.join(cursos, inscripciones.c.curso_id == cursos.c.id)
-            )
-        query = query.where(cursos.c.academia_id == enforced_filters['academia_id'])
+        query = query.where(inscripciones.c.academia_id == enforced_filters['academia_id'])
     
     # Filtros opcionales
+    if args.get('academia_id'):
+        # Solo admin_plataforma puede filtrar por academia_id explícitamente
+        if 'admin_plataforma' in current_user.get('roles', []):
+            query = query.where(inscripciones.c.academia_id == args['academia_id'])
+    
     if args.get('alumno_id'):
         query = query.where(inscripciones.c.alumno_id == args['alumno_id'])
     
     if args.get('curso_id'):
         query = query.where(inscripciones.c.curso_id == args['curso_id'])
+    
+    if args.get('tarifa_id'):
+        query = query.where(inscripciones.c.tarifa_id == args['tarifa_id'])
     
     if args.get('activas') is not None:
         if args['activas']:
@@ -107,7 +213,41 @@ def listar_inscripciones(args, current_user):
         else:
             query = query.where(inscripciones.c.fecha_fin.isnot(None))
     
-    query = query.order_by(inscripciones.c.fecha_inicio.desc())
+    # Filtros de fecha de inicio
+    if args.get('fecha_inicio_desde'):
+        try:
+            fecha_desde = datetime.strptime(args['fecha_inicio_desde'], '%Y-%m-%d').date()
+            query = query.where(inscripciones.c.fecha_inicio >= fecha_desde)
+        except ValueError:
+            return jsonify({'ok': False, 'error': 'Formato de fecha_inicio_desde inválido (use YYYY-MM-DD)'}), 400
+    
+    if args.get('fecha_inicio_hasta'):
+        try:
+            fecha_hasta = datetime.strptime(args['fecha_inicio_hasta'], '%Y-%m-%d').date()
+            query = query.where(inscripciones.c.fecha_inicio <= fecha_hasta)
+        except ValueError:
+            return jsonify({'ok': False, 'error': 'Formato de fecha_inicio_hasta inválido (use YYYY-MM-DD)'}), 400
+    
+    # Ordenamiento
+    order_whitelist = ['id', 'fecha_inicio', 'fecha_fin']
+    order_by = args.get('order_by', 'fecha_inicio')
+    order_dir = args.get('order_dir', 'desc').lower()
+    
+    if order_by in order_whitelist:
+        order_column = getattr(inscripciones.c, order_by)
+        if order_dir == 'asc':
+            query = query.order_by(order_column.asc())
+        else:
+            query = query.order_by(order_column.desc())
+    else:
+        query = query.order_by(inscripciones.c.fecha_inicio.desc())
+    
+    # Conteo total si se solicita
+    total = None
+    if args.get('with_total'):
+        count_query = select(func.count()).select_from(query.alias())
+        with db.engine.connect() as conn:
+            total = conn.execute(count_query).scalar()
     
     offset = (page - 1) * size
     query = query.limit(size).offset(offset)
@@ -118,8 +258,17 @@ def listar_inscripciones(args, current_user):
             schema = InscripcionSchema(many=True)
             result = schema.dump(rows)
             
-            return jsonify({'ok': True, 'result': result, 'page': page, 'size': size}), 200
+            # Usar build_page_envelope para respuesta paginada
+            envelope = build_page_envelope(
+                items=result,
+                page=page,
+                size=size,
+                total=total
+            )
+            
+            return jsonify(envelope), 200
     except Exception as e:
+        logger.error(f"Error listando inscripciones: {e}")
         db.session.rollback()
         return jsonify({'ok': False, 'error': str(e)}), 500
 
@@ -129,6 +278,8 @@ def listar_inscripciones(args, current_user):
 @operation_id('inscripciones.crear_inscripcion')
 def crear_inscripcion(current_user):
     """Crea una nueva inscripción."""
+    _load_tables()
+    logger.info(f"crear_inscripcion llamado por user {current_user.get('usuario_id')}")
     try:
         schema = InscripcionCreateSchema()
         payload = schema.load(request.get_json() or {})
@@ -159,6 +310,9 @@ def crear_inscripcion(current_user):
         if alumno['academia_id'] != curso['academia_id']:
             return jsonify({'ok': False, 'error': 'El alumno y el curso deben pertenecer a la misma academia'}), 409
         
+        # Calcular academia_id automáticamente
+        academia_id = alumno['academia_id']
+        
         # Validar que la tarifa pertenece a la academia del curso
         tarifa = conn.execute(
             select(tarifas).where(tarifas.c.id == payload['tarifa_id'])
@@ -167,7 +321,7 @@ def crear_inscripcion(current_user):
         if not tarifa:
             return jsonify({'ok': False, 'error': 'tarifa_id no existe'}), 404
         
-        if tarifa['academia_id'] != curso['academia_id']:
+        if tarifa['academia_id'] != academia_id:
             return jsonify({'ok': False, 'error': 'La tarifa debe pertenecer a la misma academia del curso'}), 409
         
         # Verificar capacidad del curso
@@ -198,6 +352,9 @@ def crear_inscripcion(current_user):
         
         if inscripcion_existente:
             return jsonify({'ok': False, 'error': 'El alumno ya tiene una inscripción activa en este curso'}), 409
+        
+        # Agregar academia_id al payload para INSERT
+        payload['academia_id'] = academia_id
     
     try:
         insert_stmt = inscripciones.insert().values(**payload)
@@ -223,6 +380,7 @@ def crear_inscripcion(current_user):
 @operation_id('inscripciones.obtener_inscripcion')
 def obtener_inscripcion(inscripcion_id, current_user):
     """Obtiene una inscripción por ID."""
+    _load_tables()
     with db.engine.connect() as conn:
         inscripcion = conn.execute(
             select(inscripciones).where(inscripciones.c.id == inscripcion_id)
@@ -245,6 +403,7 @@ def obtener_inscripcion(inscripcion_id, current_user):
 @operation_id('inscripciones.actualizar_inscripcion')
 def actualizar_inscripcion(inscripcion_id, current_user):
     """Actualiza una inscripción (típicamente para dar de baja)."""
+    _load_tables()
     with db.engine.connect() as conn:
         inscripcion = conn.execute(
             select(inscripciones).where(inscripciones.c.id == inscripcion_id)
@@ -306,6 +465,7 @@ def actualizar_inscripcion(inscripcion_id, current_user):
 @operation_id('inscripciones.eliminar_inscripcion')
 def eliminar_inscripcion(inscripcion_id, current_user):
     """Elimina una inscripción (mejor usar PATCH para dar de baja)."""
+    _load_tables()
     with db.engine.connect() as conn:
         inscripcion = conn.execute(
             select(inscripciones).where(inscripciones.c.id == inscripcion_id)

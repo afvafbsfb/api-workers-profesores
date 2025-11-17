@@ -4,8 +4,17 @@
       "Academia": {
         "additionalProperties": false,
         "properties": {
+          "descripcion": {
+            "example": "Academia especializada en preparación de exámenes oficiales de inglés, francés y alemán",
+            "type": "string"
+          },
           "direccion": {
-            "example": "Calle Mayor 123, Madrid",
+            "example": "Calle Mayor 123, 28013 Madrid",
+            "type": "string"
+          },
+          "email_contacto": {
+            "example": "contacto@academiaidiomas.es",
+            "format": "email",
             "type": "string"
           },
           "id": {
@@ -14,6 +23,10 @@
           },
           "nombre": {
             "example": "Academia de Idiomas Central",
+            "type": "string"
+          },
+          "nombre_contacto": {
+            "example": "Juan Pérez García",
             "type": "string"
           },
           "telefono": {
@@ -957,6 +970,12 @@
       "Inscripcion": {
         "additionalProperties": false,
         "properties": {
+          "academia_id": {
+            "description": "ID de la academia (calculado automáticamente)",
+            "example": 1,
+            "readOnly": true,
+            "type": "integer"
+          },
           "alumno": {
             "allOf": [
               {
@@ -3966,6 +3985,117 @@
       "get": {
         "description": "Auto-generated operation for inscripciones.listar_inscripciones",
         "operationId": "inscripciones.listar_inscripciones",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "academia_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alumno_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "curso_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tarifa_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "activas",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fecha_inicio_desde",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fecha_inicio_hasta",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "with_total",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_dir",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expand",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful response"

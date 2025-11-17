@@ -5,7 +5,6 @@
 DROP DATABASE IF EXISTS api_workers;
 
 -- Script para crear la base de datos y las tablas actualizadas
-Tarifa
 CREATE DATABASE IF NOT EXISTS api_workers CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE api_workers;
 
@@ -13,6 +12,11 @@ USE api_workers;
 CREATE TABLE Academia (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL UNIQUE,
+    direccion VARCHAR(255) NULL,
+    telefono VARCHAR(20) NULL,
+    nombre_contacto VARCHAR(100) NULL,
+    email_contacto VARCHAR(100) NULL,
+    descripcion TEXT NULL,
     fecha_alta DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     fecha_baja DATETIME NULL,
     fecha_ultima_modificacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -335,5 +339,79 @@ INSERT INTO Rol_Usuario (id, nombre) VALUES
 (1, 'Admin_plataforma'), 
 (2, 'Admin_academia'),
 (3, 'Profesor_academia');
+
+-- ==================================================================================
+-- MEJORA DE PERFORMANCE: Añadir academia_id a Inscripcion
+-- ==================================================================================
+-- Añade academia_id redundante a Inscripcion para mejorar performance en queries
+-- multi-academia. Evita JOINs innecesarios al filtrar por academia.
+-- El trigger garantiza consistencia con alumno, curso y tarifa.
+
+ALTER TABLE Inscripcion 
+  ADD COLUMN academia_id INT NOT NULL AFTER id,
+  ADD FOREIGN KEY fk_inscripcion_academia (academia_id) REFERENCES Academia(id),
+  ADD INDEX idx_inscripcion_academia (academia_id);
+
+-- Poblar academia_id en inscripciones existentes (si las hay)
+UPDATE Inscripcion i
+INNER JOIN Alumno a ON i.alumno_id = a.id
+SET i.academia_id = a.academia_id;
+
+-- Trigger para validar consistencia de academia_id en INSERT
+DELIMITER $$
+CREATE TRIGGER trg_inscripcion_academia_check_insert
+BEFORE INSERT ON Inscripcion
+FOR EACH ROW
+BEGIN
+  DECLARE v_alumno_academia INT;
+  DECLARE v_curso_academia INT;
+  DECLARE v_tarifa_academia INT;
+  
+  -- Obtener academia_id de las entidades relacionadas
+  SELECT academia_id INTO v_alumno_academia FROM Alumno WHERE id = NEW.alumno_id;
+  SELECT academia_id INTO v_curso_academia FROM Curso WHERE id = NEW.curso_id;
+  SELECT academia_id INTO v_tarifa_academia FROM Tarifa WHERE id = NEW.tarifa_id;
+  
+  -- Validar que todas pertenecen a la misma academia
+  IF NEW.academia_id != v_alumno_academia OR 
+     NEW.academia_id != v_curso_academia OR 
+     NEW.academia_id != v_tarifa_academia THEN
+    SIGNAL SQLSTATE '45000' 
+    SET MESSAGE_TEXT = 'Inconsistencia: alumno, curso y tarifa deben pertenecer a la misma academia que la inscripcion';
+  END IF;
+END$$
+DELIMITER ;
+
+-- Trigger para validar consistencia de academia_id en UPDATE
+DELIMITER $$
+CREATE TRIGGER trg_inscripcion_academia_check_update
+BEFORE UPDATE ON Inscripcion
+FOR EACH ROW
+BEGIN
+  DECLARE v_alumno_academia INT;
+  DECLARE v_curso_academia INT;
+  DECLARE v_tarifa_academia INT;
+  
+  -- Solo validar si se modifica academia_id, alumno_id, curso_id o tarifa_id
+  IF NEW.academia_id != OLD.academia_id OR 
+     NEW.alumno_id != OLD.alumno_id OR
+     NEW.curso_id != OLD.curso_id OR
+     NEW.tarifa_id != OLD.tarifa_id THEN
+    
+    -- Obtener academia_id de las entidades relacionadas
+    SELECT academia_id INTO v_alumno_academia FROM Alumno WHERE id = NEW.alumno_id;
+    SELECT academia_id INTO v_curso_academia FROM Curso WHERE id = NEW.curso_id;
+    SELECT academia_id INTO v_tarifa_academia FROM Tarifa WHERE id = NEW.tarifa_id;
+    
+    -- Validar que todas pertenecen a la misma academia
+    IF NEW.academia_id != v_alumno_academia OR 
+       NEW.academia_id != v_curso_academia OR 
+       NEW.academia_id != v_tarifa_academia THEN
+      SIGNAL SQLSTATE '45000' 
+      SET MESSAGE_TEXT = 'Inconsistencia: alumno, curso y tarifa deben pertenecer a la misma academia que la inscripcion';
+    END IF;
+  END IF;
+END$$
+DELIMITER ;
 
 
