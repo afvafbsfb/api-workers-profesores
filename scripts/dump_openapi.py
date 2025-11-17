@@ -23,6 +23,18 @@ from src.schemas.refresh import RefreshRequestSchema
 from src.schemas.tarifa import TarifaSchema, TarifaCreateSchema, TarifaUpdateSchema
 # New: register usuario schemas
 from src.schemas.usuario import UsuarioSchema, UsuarioCreateSchema, UsuarioUpdateSchema, RolSchema
+# New: register alumno schemas
+from src.schemas.alumno import AlumnoSchema, AlumnoCreateSchema, AlumnoUpdateSchema
+# New: register sesion schemas
+from src.schemas.sesion import SesionSchema, SesionCreateSchema, SesionUpdateSchema
+# New: register inscripcion schemas
+from src.schemas.inscripcion import InscripcionSchema, InscripcionCreateSchema, InscripcionUpdateSchema
+# New: register anotacion schemas
+from src.schemas.anotacion import AnotacionSchema, AnotacionCreateSchema, AnotacionUpdateSchema
+# Note: Aula, Curso, HorarioCurso schemas imported for requestBody config but NOT manually registered (auto-discovered)
+from src.schemas.aula import AulaCreateSchema, AulaUpdateSchema
+from src.schemas.curso import CursoCreateSchema, CursoUpdateSchema
+from src.schemas.horario_curso import HorarioCursoCreateSchema, HorarioCursoUpdateSchema
 import re
 
 
@@ -58,6 +70,29 @@ def dump():
                 apispec.components.schema('Tarifa', schema=TarifaSchema)
                 apispec.components.schema('TarifaCreate', schema=TarifaCreateSchema)
                 apispec.components.schema('TarifaUpdate', schema=TarifaUpdateSchema)
+                # Alumno schemas
+                apispec.components.schema('Alumno', schema=AlumnoSchema)
+                apispec.components.schema('AlumnoCreate', schema=AlumnoCreateSchema)
+                apispec.components.schema('AlumnoUpdate', schema=AlumnoUpdateSchema)
+                # Sesion schemas
+                apispec.components.schema('Sesion', schema=SesionSchema)
+                apispec.components.schema('SesionCreate', schema=SesionCreateSchema)
+                apispec.components.schema('SesionUpdate', schema=SesionUpdateSchema)
+                # Inscripcion schemas
+                apispec.components.schema('Inscripcion', schema=InscripcionSchema)
+                apispec.components.schema('InscripcionCreate', schema=InscripcionCreateSchema)
+                apispec.components.schema('InscripcionUpdate', schema=InscripcionUpdateSchema)
+                # Anotacion schemas
+                apispec.components.schema('Anotacion', schema=AnotacionSchema)
+                apispec.components.schema('AnotacionCreate', schema=AnotacionCreateSchema)
+                apispec.components.schema('AnotacionUpdate', schema=AnotacionUpdateSchema)
+                # Note: Aula, Curso, HorarioCurso base schemas are auto-discovered, only register Create/Update
+                apispec.components.schema('AulaCreate', schema=AulaCreateSchema)
+                apispec.components.schema('AulaUpdate', schema=AulaUpdateSchema)
+                apispec.components.schema('CursoCreate', schema=CursoCreateSchema)
+                apispec.components.schema('CursoUpdate', schema=CursoUpdateSchema)
+                apispec.components.schema('HorarioCursoCreate', schema=HorarioCursoCreateSchema)
+                apispec.components.schema('HorarioCursoUpdate', schema=HorarioCursoUpdateSchema)
 
                 # Register a bearer (JWT) security scheme so Swagger UI can authorize
                 apispec.components.security_scheme('bearerAuth', {
@@ -438,6 +473,210 @@ def dump():
                                                 'content': {
                                                     'application/json': {
                                                         'schema': {'$ref': '#/components/schemas/TarifaUpdate'}
+                                                    }
+                                                },
+                                                'required': True
+                                            }
+                                    elif path.startswith('/alumnos'):
+                                        if m.lower() == 'post':
+                                            op['requestBody'] = {
+                                                'content': {
+                                                    'application/json': {
+                                                        'schema': {'$ref': '#/components/schemas/AlumnoCreate'}
+                                                    }
+                                                },
+                                                'required': True
+                                            }
+                                        elif m.lower() in ('put', 'patch'):
+                                            op['requestBody'] = {
+                                                'content': {
+                                                    'application/json': {
+                                                        'schema': {'$ref': '#/components/schemas/AlumnoUpdate'}
+                                                    }
+                                                },
+                                                'required': True
+                                            }
+                                    elif path.startswith('/sesiones'):
+                                        # Endpoint especial: pasar-lista
+                                        if 'pasar-lista' in path and m.lower() == 'post':
+                                            op['requestBody'] = {
+                                                'content': {
+                                                    'application/json': {
+                                                        'schema': {
+                                                            'type': 'object',
+                                                            'required': ['alumnos'],
+                                                            'properties': {
+                                                                'alumnos': {
+                                                                    'type': 'array',
+                                                                    'items': {
+                                                                        'type': 'object',
+                                                                        'required': ['alumno_id', 'ausente'],
+                                                                        'properties': {
+                                                                            'alumno_id': {'type': 'integer', 'example': 1},
+                                                                            'ausente': {'type': 'boolean', 'example': True}
+                                                                        }
+                                                                    },
+                                                                    'example': [
+                                                                        {'alumno_id': 1, 'ausente': True},
+                                                                        {'alumno_id': 2, 'ausente': False},
+                                                                        {'alumno_id': 3, 'ausente': True}
+                                                                    ]
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                'required': True
+                                            }
+                                        elif m.lower() == 'post':
+                                            op['requestBody'] = {
+                                                'content': {
+                                                    'application/json': {
+                                                        'schema': {'$ref': '#/components/schemas/SesionCreate'}
+                                                    }
+                                                },
+                                                'required': True
+                                            }
+                                        elif m.lower() in ('put', 'patch'):
+                                            op['requestBody'] = {
+                                                'content': {
+                                                    'application/json': {
+                                                        'schema': {'$ref': '#/components/schemas/SesionUpdate'}
+                                                    }
+                                                },
+                                                'required': True
+                                            }
+                                    elif path.startswith('/inscripciones'):
+                                        if m.lower() == 'post':
+                                            op['requestBody'] = {
+                                                'content': {
+                                                    'application/json': {
+                                                        'schema': {'$ref': '#/components/schemas/InscripcionCreate'}
+                                                    }
+                                                },
+                                                'required': True
+                                            }
+                                        elif m.lower() in ('put', 'patch'):
+                                            op['requestBody'] = {
+                                                'content': {
+                                                    'application/json': {
+                                                        'schema': {'$ref': '#/components/schemas/InscripcionUpdate'}
+                                                    }
+                                                },
+                                                'required': True
+                                            }
+                                    elif path.startswith('/anotaciones'):
+                                        if m.lower() == 'post':
+                                            op['requestBody'] = {
+                                                'content': {
+                                                    'application/json': {
+                                                        'schema': {'$ref': '#/components/schemas/AnotacionCreate'}
+                                                    }
+                                                },
+                                                'required': True
+                                            }
+                                        elif m.lower() in ('put', 'patch'):
+                                            op['requestBody'] = {
+                                                'content': {
+                                                    'application/json': {
+                                                        'schema': {'$ref': '#/components/schemas/AnotacionUpdate'}
+                                                    }
+                                                },
+                                                'required': True
+                                            }
+                                    elif path.startswith('/aulas'):
+                                        if m.lower() == 'post':
+                                            op['requestBody'] = {
+                                                'content': {
+                                                    'application/json': {
+                                                        'schema': {'$ref': '#/components/schemas/AulaCreate'}
+                                                    }
+                                                },
+                                                'required': True
+                                            }
+                                        elif m.lower() in ('put', 'patch'):
+                                            op['requestBody'] = {
+                                                'content': {
+                                                    'application/json': {
+                                                        'schema': {'$ref': '#/components/schemas/AulaUpdate'}
+                                                    }
+                                                },
+                                                'required': True
+                                            }
+                                    elif path.startswith('/cursos'):
+                                        if m.lower() == 'post':
+                                            op['requestBody'] = {
+                                                'content': {
+                                                    'application/json': {
+                                                        'schema': {'$ref': '#/components/schemas/CursoCreate'}
+                                                    }
+                                                },
+                                                'required': True
+                                            }
+                                        elif m.lower() in ('put', 'patch'):
+                                            op['requestBody'] = {
+                                                'content': {
+                                                    'application/json': {
+                                                        'schema': {'$ref': '#/components/schemas/CursoUpdate'}
+                                                    }
+                                                },
+                                                'required': True
+                                            }
+                                    elif path.startswith('/horarios'):
+                                        if m.lower() == 'post':
+                                            op['requestBody'] = {
+                                                'content': {
+                                                    'application/json': {
+                                                        'schema': {'$ref': '#/components/schemas/HorarioCursoCreate'}
+                                                    }
+                                                },
+                                                'required': True
+                                            }
+                                        elif m.lower() in ('put', 'patch'):
+                                            op['requestBody'] = {
+                                                'content': {
+                                                    'application/json': {
+                                                        'schema': {'$ref': '#/components/schemas/HorarioCursoUpdate'}
+                                                    }
+                                                },
+                                                'required': True
+                                            }
+                                    elif path.startswith('/curso-profesores'):
+                                        if m.lower() == 'post':
+                                            op['requestBody'] = {
+                                                'content': {
+                                                    'application/json': {
+                                                        'schema': {
+                                                            'type': 'object',
+                                                            'required': ['curso_id', 'usuario_id'],
+                                                            'properties': {
+                                                                'curso_id': {'type': 'integer', 'example': 1, 'description': 'ID del curso'},
+                                                                'usuario_id': {'type': 'integer', 'example': 5, 'description': 'ID del profesor (usuario)'}
+                                                            },
+                                                            'example': {
+                                                                'curso_id': 1,
+                                                                'usuario_id': 5
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                'required': True
+                                            }
+                                        elif m.lower() in ('put', 'patch'):
+                                            op['requestBody'] = {
+                                                'content': {
+                                                    'application/json': {
+                                                        'schema': {
+                                                            'type': 'object',
+                                                            'properties': {
+                                                                'fecha_baja': {'type': 'string', 'format': 'date-time', 'example': '2024-12-31T23:59:59', 'description': 'Fecha de baja'},
+                                                                'motivo_baja': {'type': 'string', 'example': 'Fin de contrato', 'description': 'Motivo de la baja'}
+                                                            },
+                                                            'example': {
+                                                                'fecha_baja': '2024-12-31T23:59:59',
+                                                                'motivo_baja': 'Fin de contrato'
+                                                            }
+                                                        }
                                                     }
                                                 },
                                                 'required': True

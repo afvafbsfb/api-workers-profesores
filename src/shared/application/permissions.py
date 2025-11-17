@@ -649,3 +649,1098 @@ def can_delete_tarifa(current_user, target_tarifa) -> Tuple[bool, Optional[str]]
         return True, None
 
     return False, 'forbidden'
+
+
+# ---------------------------------------------------------------------------
+# Reglas para Aulas
+# ---------------------------------------------------------------------------
+def can_query_aulas(current_user, params: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si `current_user` puede listar/consultar aulas con `params`.
+
+    Returns: (allowed, effective_filters, reason)
+    - effective_filters puede contener 'academia_id' forzada para limitar al ámbito del usuario.
+    """
+    user_role = None
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    effective_filters = {}
+
+    if user_role == 'admin_plataforma':
+        if 'academia_id' in params and params.get('academia_id'):
+            try:
+                effective_filters['academia_id'] = int(params.get('academia_id'))
+            except Exception:
+                return False, {}, 'invalid_academia_id'
+        return True, effective_filters, None
+
+    if user_role == 'admin_academia':
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        if 'academia_id' in params and params.get('academia_id'):
+            try:
+                if int(params.get('academia_id')) != int(acad_id):
+                    return False, {}, 'forbidden_other_academia'
+            except Exception:
+                return False, {}, 'invalid_academia_id'
+        effective_filters['academia_id'] = int(acad_id)
+        return True, effective_filters, None
+
+    if user_role == 'profesor_academia':
+        # Profesores pueden ver aulas de su academia
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        effective_filters['academia_id'] = int(acad_id)
+        return True, effective_filters, None
+
+    return False, {}, 'forbidden'
+
+
+def can_create_aula(current_user, payload: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si current_user puede crear un aula.
+
+    Reglas:
+    - admin_plataforma: puede crear aulas para cualquier academia (academia_id obligatorio)
+    - admin_academia: puede crear aulas solo para su academia
+    - profesor_academia: no puede crear aulas
+    """
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    effective = dict(payload or {})
+
+    if user_role == 'admin_plataforma':
+        if 'academia_id' not in effective or not effective.get('academia_id'):
+            return False, {}, 'academia_id_required'
+        return True, effective, None
+
+    if user_role == 'admin_academia':
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        if 'academia_id' in effective and effective.get('academia_id'):
+            try:
+                if int(effective.get('academia_id')) != int(acad_id):
+                    return False, {}, 'forbidden_other_academia'
+            except Exception:
+                return False, {}, 'invalid_academia_id'
+        effective['academia_id'] = int(acad_id)
+        return True, effective, None
+
+    return False, {}, 'forbidden'
+
+
+def can_view_aula(current_user, target_aula) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si current_user puede ver un aula específica."""
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    if user_role == 'admin_plataforma':
+        return True, {}, None
+
+    if user_role in ('admin_academia', 'profesor_academia'):
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        if getattr(target_aula, 'academia_id', None) != int(acad_id):
+            return False, {}, 'forbidden_other_academia'
+        return True, {}, None
+
+    return False, {}, 'forbidden'
+
+
+def can_modify_aula(current_user, target_aula, payload: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si current_user puede modificar un aula."""
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    sanitized = {}
+    payload = payload or {}
+
+    if user_role == 'admin_plataforma':
+        for k in ('nombre', 'capacidad_maxima'):
+            if k in payload:
+                sanitized[k] = payload[k]
+        return True, sanitized, None
+
+    if user_role == 'admin_academia':
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        if getattr(target_aula, 'academia_id', None) != int(acad_id):
+            return False, {}, 'forbidden_other_academia'
+        for k in ('nombre', 'capacidad_maxima'):
+            if k in payload:
+                sanitized[k] = payload[k]
+        return True, sanitized, None
+
+    return False, {}, 'forbidden'
+
+
+def can_delete_aula(current_user, target_aula) -> Tuple[bool, Optional[str]]:
+    """Decide si current_user puede borrar (soft-delete) un aula."""
+    if not current_user:
+        return False, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    if user_role == 'admin_plataforma':
+        return True, None
+
+    if user_role == 'admin_academia':
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, 'user_has_no_academy'
+        if getattr(target_aula, 'academia_id', None) != int(acad_id):
+            return False, 'forbidden_other_academia'
+        return True, None
+
+    return False, 'forbidden'
+
+
+# ---------------------------------------------------------------------------
+# Reglas para Cursos
+# ---------------------------------------------------------------------------
+def can_query_cursos(current_user, params: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si `current_user` puede listar/consultar cursos con `params`."""
+    user_role = None
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    effective_filters = {}
+
+    if user_role == 'admin_plataforma':
+        if 'academia_id' in params and params.get('academia_id'):
+            try:
+                effective_filters['academia_id'] = int(params.get('academia_id'))
+            except Exception:
+                return False, {}, 'invalid_academia_id'
+        return True, effective_filters, None
+
+    if user_role == 'admin_academia':
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        if 'academia_id' in params and params.get('academia_id'):
+            try:
+                if int(params.get('academia_id')) != int(acad_id):
+                    return False, {}, 'forbidden_other_academia'
+            except Exception:
+                return False, {}, 'invalid_academia_id'
+        effective_filters['academia_id'] = int(acad_id)
+        return True, effective_filters, None
+
+    if user_role == 'profesor_academia':
+        # Profesores ven solo cursos asignados a ellos
+        # La lógica de filtrado se implementará en la ruta usando Curso_Profesores
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        effective_filters['academia_id'] = int(acad_id)
+        effective_filters['profesor_id'] = current_user.id  # Filtrar por profesor asignado
+        return True, effective_filters, None
+
+    return False, {}, 'forbidden'
+
+
+def can_create_curso(current_user, payload: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si current_user puede crear un curso."""
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    effective = dict(payload or {})
+
+    if user_role == 'admin_plataforma':
+        if 'academia_id' not in effective or not effective.get('academia_id'):
+            return False, {}, 'academia_id_required'
+        return True, effective, None
+
+    if user_role == 'admin_academia':
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        if 'academia_id' in effective and effective.get('academia_id'):
+            try:
+                if int(effective.get('academia_id')) != int(acad_id):
+                    return False, {}, 'forbidden_other_academia'
+            except Exception:
+                return False, {}, 'invalid_academia_id'
+        effective['academia_id'] = int(acad_id)
+        return True, effective, None
+
+    return False, {}, 'forbidden'
+
+
+def can_view_curso(current_user, target_curso) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si current_user puede ver un curso específico."""
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    if user_role == 'admin_plataforma':
+        return True, {}, None
+
+    if user_role == 'admin_academia':
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        if getattr(target_curso, 'academia_id', None) != int(acad_id):
+            return False, {}, 'forbidden_other_academia'
+        return True, {}, None
+
+    if user_role == 'profesor_academia':
+        # Verificar si el profesor está asignado al curso
+        # La verificación específica se hará en la ruta consultando Curso_Profesores
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        if getattr(target_curso, 'academia_id', None) != int(acad_id):
+            return False, {}, 'forbidden_other_academia'
+        return True, {}, None
+
+    return False, {}, 'forbidden'
+
+
+def can_modify_curso(current_user, target_curso, payload: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si current_user puede modificar un curso."""
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    sanitized = {}
+    payload = payload or {}
+
+    if user_role == 'admin_plataforma':
+        for k in ('nombre', 'anio_academico', 'fecha_inicio', 'fecha_fin', 
+                  'acepta_nuevos_alumnos', 'capacidad_maxima', 'tarifa_id', 
+                  'tipo_alumno', 'estado'):
+            if k in payload:
+                sanitized[k] = payload[k]
+        return True, sanitized, None
+
+    if user_role == 'admin_academia':
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        if getattr(target_curso, 'academia_id', None) != int(acad_id):
+            return False, {}, 'forbidden_other_academia'
+        for k in ('nombre', 'anio_academico', 'fecha_inicio', 'fecha_fin', 
+                  'acepta_nuevos_alumnos', 'capacidad_maxima', 'tarifa_id', 
+                  'tipo_alumno', 'estado'):
+            if k in payload:
+                sanitized[k] = payload[k]
+        return True, sanitized, None
+
+    return False, {}, 'forbidden'
+
+
+def can_delete_curso(current_user, target_curso) -> Tuple[bool, Optional[str]]:
+    """Decide si current_user puede borrar (soft-delete) un curso."""
+    if not current_user:
+        return False, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    if user_role == 'admin_plataforma':
+        return True, None
+
+    if user_role == 'admin_academia':
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, 'user_has_no_academy'
+        if getattr(target_curso, 'academia_id', None) != int(acad_id):
+            return False, 'forbidden_other_academia'
+        return True, None
+
+    return False, 'forbidden'
+
+
+# ---------------------------------------------------------------------------
+# Reglas para Horarios
+# ---------------------------------------------------------------------------
+def can_query_horarios(current_user, params: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si `current_user` puede listar/consultar horarios con `params`."""
+    user_role = None
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    effective_filters = {}
+
+    if user_role == 'admin_plataforma':
+        # Puede ver todos los horarios, opcionalmente filtrados por curso_id
+        if 'curso_id' in params and params.get('curso_id'):
+            try:
+                effective_filters['curso_id'] = int(params.get('curso_id'))
+            except Exception:
+                return False, {}, 'invalid_curso_id'
+        return True, effective_filters, None
+
+    if user_role == 'admin_academia':
+        # Puede ver horarios de cursos de su academia
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        effective_filters['academia_id'] = int(acad_id)
+        if 'curso_id' in params and params.get('curso_id'):
+            try:
+                effective_filters['curso_id'] = int(params.get('curso_id'))
+            except Exception:
+                return False, {}, 'invalid_curso_id'
+        return True, effective_filters, None
+
+    if user_role == 'profesor_academia':
+        # Puede ver horarios de sus cursos asignados
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        effective_filters['academia_id'] = int(acad_id)
+        effective_filters['profesor_id'] = current_user.id
+        return True, effective_filters, None
+
+    return False, {}, 'forbidden'
+
+
+def can_create_horario(current_user, payload: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si current_user puede crear un horario."""
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    effective = dict(payload or {})
+
+    if user_role == 'admin_plataforma':
+        return True, effective, None
+
+    if user_role == 'admin_academia':
+        # Debe validar que el curso pertenece a su academia (se hace en la ruta)
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        return True, effective, None
+
+    return False, {}, 'forbidden'
+
+
+def can_view_horario(current_user, target_horario) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si current_user puede ver un horario específico."""
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    if user_role == 'admin_plataforma':
+        return True, {}, None
+
+    if user_role in ('admin_academia', 'profesor_academia'):
+        # La validación de academia se hará en la ruta consultando el curso
+        return True, {}, None
+
+    return False, {}, 'forbidden'
+
+
+def can_modify_horario(current_user, target_horario, payload: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si current_user puede modificar un horario."""
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    sanitized = {}
+    payload = payload or {}
+
+    if user_role == 'admin_plataforma':
+        for k in ('aula_id', 'dia_semana', 'hora_inicio', 'hora_fin'):
+            if k in payload:
+                sanitized[k] = payload[k]
+        return True, sanitized, None
+
+    if user_role == 'admin_academia':
+        # La validación de academia se hará en la ruta
+        for k in ('aula_id', 'dia_semana', 'hora_inicio', 'hora_fin'):
+            if k in payload:
+                sanitized[k] = payload[k]
+        return True, sanitized, None
+
+    return False, {}, 'forbidden'
+
+
+def can_delete_horario(current_user, target_horario) -> Tuple[bool, Optional[str]]:
+    """Decide si current_user puede borrar (soft-delete) un horario."""
+    if not current_user:
+        return False, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    if user_role == 'admin_plataforma':
+        return True, None
+
+    if user_role == 'admin_academia':
+        # La validación de academia se hará en la ruta
+        return True, None
+
+    return False, 'forbidden'
+
+
+# ---------------------------------------------------------------------------
+# Reglas para Sesiones
+# ---------------------------------------------------------------------------
+def can_query_sesiones(current_user, params: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si `current_user` puede listar/consultar sesiones con `params`."""
+    user_role = None
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    effective_filters = {}
+
+    if user_role == 'admin_plataforma':
+        return True, effective_filters, None
+
+    if user_role == 'admin_academia':
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        effective_filters['academia_id'] = int(acad_id)
+        return True, effective_filters, None
+
+    if user_role == 'profesor_academia':
+        # Solo sesiones del profesor
+        effective_filters['profesor_id'] = current_user.id
+        return True, effective_filters, None
+
+    return False, {}, 'forbidden'
+
+
+def can_create_sesion(current_user, payload: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si current_user puede crear una sesión."""
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    effective = dict(payload or {})
+
+    if user_role == 'admin_plataforma':
+        return True, effective, None
+
+    if user_role == 'admin_academia':
+        # La validación de academia se hará en la ruta
+        return True, effective, None
+
+    if user_role == 'profesor_academia':
+        # Profesores pueden crear sesiones solo para sus cursos asignados
+        # La validación se hará en la ruta verificando curso_profesor_id
+        return True, effective, None
+
+    return False, {}, 'forbidden'
+
+
+def can_view_sesion(current_user, target_sesion) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si current_user puede ver una sesión específica."""
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    if user_role == 'admin_plataforma':
+        return True, {}, None
+
+    if user_role in ('admin_academia', 'profesor_academia'):
+        # La validación se hará en la ruta
+        return True, {}, None
+
+    return False, {}, 'forbidden'
+
+
+def can_modify_sesion(current_user, target_sesion, payload: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si current_user puede modificar una sesión."""
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    sanitized = {}
+    payload = payload or {}
+
+    if user_role == 'admin_plataforma':
+        for k in ('aula_id', 'hora_inicio', 'hora_fin', 'notas_sesion', 'notas_materia', 'motivo_baja'):
+            if k in payload:
+                sanitized[k] = payload[k]
+        return True, sanitized, None
+
+    if user_role == 'admin_academia':
+        for k in ('aula_id', 'hora_inicio', 'hora_fin', 'notas_sesion', 'notas_materia', 'motivo_baja'):
+            if k in payload:
+                sanitized[k] = payload[k]
+        return True, sanitized, None
+
+    if user_role == 'profesor_academia':
+        # Profesores pueden modificar sus propias sesiones
+        for k in ('notas_sesion', 'notas_materia'):
+            if k in payload:
+                sanitized[k] = payload[k]
+        return True, sanitized, None
+
+    return False, {}, 'forbidden'
+
+
+def can_pasar_lista(current_user, payload: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si current_user puede pasar lista en una sesión."""
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    effective = dict(payload or {})
+
+    if user_role in ('admin_plataforma', 'admin_academia', 'profesor_academia'):
+        # Todos pueden pasar lista, pero la validación de permisos se hará en la ruta
+        return True, effective, None
+
+    return False, {}, 'forbidden'
+
+
+# ---------------------------------------------------------------------------
+# Reglas para Alumnos
+# ---------------------------------------------------------------------------
+def can_query_alumnos(current_user, params: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si `current_user` puede listar/consultar alumnos con `params`."""
+    user_role = None
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    effective_filters = {}
+
+    if user_role == 'admin_plataforma':
+        if 'academia_id' in params and params.get('academia_id'):
+            try:
+                effective_filters['academia_id'] = int(params.get('academia_id'))
+            except Exception:
+                return False, {}, 'invalid_academia_id'
+        return True, effective_filters, None
+
+    if user_role == 'admin_academia':
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        if 'academia_id' in params and params.get('academia_id'):
+            try:
+                if int(params.get('academia_id')) != int(acad_id):
+                    return False, {}, 'forbidden_other_academia'
+            except Exception:
+                return False, {}, 'invalid_academia_id'
+        effective_filters['academia_id'] = int(acad_id)
+        return True, effective_filters, None
+
+    if user_role == 'profesor_academia':
+        # Solo alumnos de sus cursos asignados
+        effective_filters['profesor_id'] = current_user.id
+        return True, effective_filters, None
+
+    return False, {}, 'forbidden'
+
+
+def can_create_alumno(current_user, payload: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si current_user puede crear un alumno."""
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    effective = dict(payload or {})
+
+    if user_role == 'admin_plataforma':
+        if 'academia_id' not in effective or not effective.get('academia_id'):
+            return False, {}, 'academia_id_required'
+        return True, effective, None
+
+    if user_role == 'admin_academia':
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        if 'academia_id' in effective and effective.get('academia_id'):
+            try:
+                if int(effective.get('academia_id')) != int(acad_id):
+                    return False, {}, 'forbidden_other_academia'
+            except Exception:
+                return False, {}, 'invalid_academia_id'
+        effective['academia_id'] = int(acad_id)
+        return True, effective, None
+
+    return False, {}, 'forbidden'
+
+
+def can_view_alumno(current_user, target_alumno) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si current_user puede ver un alumno específico."""
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    if user_role == 'admin_plataforma':
+        return True, {}, None
+
+    if user_role == 'admin_academia':
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        if getattr(target_alumno, 'academia_id', None) != int(acad_id):
+            return False, {}, 'forbidden_other_academia'
+        return True, {}, None
+
+    if user_role == 'profesor_academia':
+        # Verificación en la ruta: alumno debe estar inscrito en curso del profesor
+        return True, {}, None
+
+    return False, {}, 'forbidden'
+
+
+def can_modify_alumno(current_user, target_alumno, payload: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si current_user puede modificar un alumno."""
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    sanitized = {}
+    payload = payload or {}
+
+    if user_role == 'admin_plataforma':
+        for k in ('nombre', 'email', 'dni', 'telefono', 'fecha_nacimiento', 'direccion',
+                  'nombre_tutor', 'relaccion_tutor_alumno', 'telefono_tutor', 'email_tutor'):
+            if k in payload:
+                sanitized[k] = payload[k]
+        return True, sanitized, None
+
+    if user_role == 'admin_academia':
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        if getattr(target_alumno, 'academia_id', None) != int(acad_id):
+            return False, {}, 'forbidden_other_academia'
+        for k in ('nombre', 'email', 'dni', 'telefono', 'fecha_nacimiento', 'direccion',
+                  'nombre_tutor', 'relaccion_tutor_alumno', 'telefono_tutor', 'email_tutor'):
+            if k in payload:
+                sanitized[k] = payload[k]
+        return True, sanitized, None
+
+    return False, {}, 'forbidden'
+
+
+def can_delete_alumno(current_user, target_alumno) -> Tuple[bool, Optional[str]]:
+    """Decide si current_user puede borrar (soft-delete) un alumno."""
+    if not current_user:
+        return False, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    if user_role == 'admin_plataforma':
+        return True, None
+
+    if user_role == 'admin_academia':
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, 'user_has_no_academy'
+        if getattr(target_alumno, 'academia_id', None) != int(acad_id):
+            return False, 'forbidden_other_academia'
+        return True, None
+
+    return False, 'forbidden'
+
+
+# ---------------------------------------------------------------------------
+# Reglas para Inscripciones
+# ---------------------------------------------------------------------------
+def can_query_inscripciones(current_user, params: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si `current_user` puede listar/consultar inscripciones con `params`."""
+    user_role = None
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    effective_filters = {}
+
+    if user_role == 'admin_plataforma':
+        return True, effective_filters, None
+
+    if user_role == 'admin_academia':
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        effective_filters['academia_id'] = int(acad_id)
+        return True, effective_filters, None
+
+    if user_role == 'profesor_academia':
+        # Solo inscripciones de sus cursos
+        effective_filters['profesor_id'] = current_user.id
+        return True, effective_filters, None
+
+    return False, {}, 'forbidden'
+
+
+def can_create_inscripcion(current_user, payload: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si current_user puede crear una inscripción."""
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    effective = dict(payload or {})
+
+    if user_role in ('admin_plataforma', 'admin_academia'):
+        # La validación de academia se hará en la ruta
+        return True, effective, None
+
+    return False, {}, 'forbidden'
+
+
+def can_view_inscripcion(current_user, target_inscripcion) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si current_user puede ver una inscripción específica."""
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    if user_role == 'admin_plataforma':
+        return True, {}, None
+
+    if user_role in ('admin_academia', 'profesor_academia'):
+        # La validación se hará en la ruta
+        return True, {}, None
+
+    return False, {}, 'forbidden'
+
+
+def can_modify_inscripcion(current_user, target_inscripcion, payload: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si current_user puede modificar una inscripción."""
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    sanitized = {}
+    payload = payload or {}
+
+    if user_role in ('admin_plataforma', 'admin_academia'):
+        for k in ('tarifa_id', 'fecha_inicio', 'fecha_fin', 'motivo_baja'):
+            if k in payload:
+                sanitized[k] = payload[k]
+        return True, sanitized, None
+
+    return False, {}, 'forbidden'
+
+
+def can_delete_inscripcion(current_user, target_inscripcion) -> Tuple[bool, Optional[str]]:
+    """Decide si current_user puede borrar (soft-delete) una inscripción."""
+    if not current_user:
+        return False, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        return False, 'forbidden'
+
+    if user_role in ('admin_plataforma', 'admin_academia'):
+        # La validación de academia se hará en la ruta
+        return True, None
+
+    return False, 'forbidden'
+
+
+# ---------------------------------------------------------------------------
+# Reglas para Anotaciones
+# ---------------------------------------------------------------------------
+def can_query_anotaciones(current_user, params: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si `current_user` puede listar/consultar anotaciones con `params`."""
+    user_role = None
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    effective_filters = {}
+
+    if user_role == 'admin_plataforma':
+        return True, effective_filters, None
+
+    if user_role == 'admin_academia':
+        acad_id = getattr(current_user, 'academia_id', None)
+        if not acad_id:
+            return False, {}, 'user_has_no_academy'
+        effective_filters['academia_id'] = int(acad_id)
+        return True, effective_filters, None
+
+    if user_role == 'profesor_academia':
+        # Solo anotaciones de sus sesiones
+        effective_filters['profesor_id'] = current_user.id
+        return True, effective_filters, None
+
+    return False, {}, 'forbidden'
+
+
+def can_create_anotacion(current_user, payload: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si current_user puede crear una anotación."""
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    effective = dict(payload or {})
+
+    if user_role in ('admin_plataforma', 'admin_academia', 'profesor_academia'):
+        # La validación se hará en la ruta
+        return True, effective, None
+
+    return False, {}, 'forbidden'
+
+
+def can_view_anotacion(current_user, target_anotacion) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si current_user puede ver una anotación específica."""
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    if user_role == 'admin_plataforma':
+        return True, {}, None
+
+    if user_role in ('admin_academia', 'profesor_academia'):
+        # La validación se hará en la ruta
+        return True, {}, None
+
+    return False, {}, 'forbidden'
+
+
+def can_modify_anotacion(current_user, target_anotacion, payload: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """Decide si current_user puede modificar una anotación."""
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    sanitized = {}
+    payload = payload or {}
+
+    if user_role in ('admin_plataforma', 'admin_academia', 'profesor_academia'):
+        for k in ('tipo_anotacion', 'texto', 'motivo_baja'):
+            if k in payload:
+                sanitized[k] = payload[k]
+        return True, sanitized, None
+
+    return False, {}, 'forbidden'
+
+
+def can_delete_anotacion(current_user, target_anotacion) -> Tuple[bool, Optional[str]]:
+    """Decide si current_user puede borrar (soft-delete) una anotación."""
+    if not current_user:
+        return False, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        user_role = None
+
+    if user_role in ('admin_plataforma', 'admin_academia', 'profesor_academia'):
+        # La validación se hará en la ruta
+        return True, None
+
+    return False, 'forbidden'
+
+
+# ================================================================================
+# Permisos para Curso-Profesores (asignaciones)
+# ================================================================================
+
+def can_query_curso_profesores(current_user, params: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """
+    Decide si current_user puede listar asignaciones curso-profesor.
+    - admin_plataforma: todas
+    - admin_academia: solo de su academia (via curso.academia_id)
+    - profesor_academia: solo las suyas
+    """
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        return False, {}, 'forbidden'
+
+    if user_role == 'admin_plataforma':
+        return True, {}, None
+
+    if user_role == 'admin_academia':
+        return True, {'academia_id': current_user.academia_id}, None
+
+    if user_role == 'profesor_academia':
+        return True, {'usuario_id': current_user.id}, None
+
+    return False, {}, 'forbidden'
+
+
+def can_create_curso_profesor(current_user, payload: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """
+    Decide si current_user puede crear asignación curso-profesor.
+    - admin_plataforma: siempre
+    - admin_academia: validar que el curso pertenezca a su academia
+    """
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        return False, {}, 'forbidden'
+
+    if user_role == 'admin_plataforma':
+        return True, {}, None
+
+    if user_role == 'admin_academia':
+        # La ruta valida que curso.academia_id == current_user.academia_id
+        return True, {}, None
+
+    return False, {}, 'forbidden'
+
+
+def can_view_curso_profesor(current_user, target_asignacion) -> Tuple[bool, Dict, Optional[str]]:
+    """
+    Decide si current_user puede ver una asignación específica.
+    - admin_plataforma: siempre
+    - admin_academia: si el curso es de su academia
+    - profesor_academia: si es su propia asignación
+    """
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        return False, {}, 'forbidden'
+
+    if user_role == 'admin_plataforma':
+        return True, {}, None
+
+    if user_role == 'admin_academia':
+        # La ruta valida que curso.academia_id == current_user.academia_id
+        return True, {}, None
+
+    if user_role == 'profesor_academia':
+        # Solo su asignación
+        if target_asignacion.get('usuario_id') == current_user.id:
+            return True, {}, None
+        return False, {}, 'forbidden'
+
+    return False, {}, 'forbidden'
+
+
+def can_modify_curso_profesor(current_user, target_asignacion, payload: Dict) -> Tuple[bool, Dict, Optional[str]]:
+    """
+    Decide si current_user puede modificar asignación curso-profesor.
+    - admin_plataforma: siempre
+    - admin_academia: si es asignación de su academia
+    """
+    if not current_user:
+        return False, {}, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        return False, {}, 'forbidden'
+
+    if user_role == 'admin_plataforma':
+        return True, {}, None
+
+    if user_role == 'admin_academia':
+        # La ruta valida que curso.academia_id == current_user.academia_id
+        return True, {}, None
+
+    return False, {}, 'forbidden'
+
+
+def can_delete_curso_profesor(current_user, target_asignacion) -> Tuple[bool, Optional[str]]:
+    """
+    Decide si current_user puede borrar (soft-delete) asignación.
+    - admin_plataforma: siempre
+    - admin_academia: si es asignación de su academia
+    """
+    if not current_user:
+        return False, 'not_authenticated'
+    try:
+        user_role = normalize_role(getattr(current_user, 'rol').nombre if getattr(current_user, 'rol', None) else None)
+    except Exception:
+        return False, 'forbidden'
+
+    if user_role in ('admin_plataforma', 'admin_academia'):
+        # La validación se hará en la ruta
+        return True, None
+
+    return False, 'forbidden'

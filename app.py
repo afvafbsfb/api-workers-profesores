@@ -50,12 +50,28 @@ def create_app():
     from src.usuarios.login_routes import login_bp as usuarios_login_bp
     from src.academias.interfaces.flask.academias_routes import academias_bp
     from src.academias.interfaces.flask.tarifas_routes import tarifas_bp
+    from src.aulas.interfaces.flask.aulas_routes import aulas_bp
+    from src.cursos.interfaces.flask.cursos_routes import cursos_bp
+    from src.horarios.interfaces.flask.horarios_routes import horarios_bp
+    from src.sesiones.interfaces.flask.sesiones_routes import sesiones_bp
+    from src.alumnos.interfaces.flask.alumnos_routes import alumnos_bp
+    from src.inscripciones.interfaces.flask.inscripciones_routes import inscripciones_bp
+    from src.anotaciones.interfaces.flask.anotaciones_routes import anotaciones_bp
+    from src.curso_profesores.interfaces.flask.curso_profesores_routes import curso_profesores_bp
 
     app.register_blueprint(usuarios_bp, url_prefix='/usuarios')
     app.register_blueprint(roles_bp, url_prefix='/roles')
     app.register_blueprint(usuarios_login_bp, url_prefix='/auth')
     app.register_blueprint(academias_bp, url_prefix='/academias')
     app.register_blueprint(tarifas_bp, url_prefix='/tarifas')
+    app.register_blueprint(aulas_bp, url_prefix='/aulas')
+    app.register_blueprint(cursos_bp, url_prefix='/cursos')
+    app.register_blueprint(horarios_bp, url_prefix='/horarios')
+    app.register_blueprint(sesiones_bp, url_prefix='/sesiones')
+    app.register_blueprint(alumnos_bp, url_prefix='/alumnos')
+    app.register_blueprint(inscripciones_bp, url_prefix='/inscripciones')
+    app.register_blueprint(anotaciones_bp, url_prefix='/anotaciones')
+    app.register_blueprint(curso_profesores_bp, url_prefix='/curso-profesores')
     # Register docs blueprint (serves /openapi.json and /docs)
     try:
         from src.docs.swagger import swagger_bp

@@ -192,5 +192,261 @@
     "allowed_roles": ["admin_plataforma", "admin_academia"],
     "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia"},
     "note": "Eliminar tarifa (soft-delete): admin_plataforma puede eliminar cualquiera; admin_academia solo de su academia. Bloqueado si hay cursos activos asociados"
+  },
+
+  "can_query_aulas": {
+    "operationId": "aulas.listar_aulas",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia", "profesor_academia": "own_academia"},
+    "enforced_filters": { "academia_id": "current_user.academia_id" },
+    "note": "Listado de aulas: admin_plataforma puede ver todas; admin_academia y profesor_academia solo de su academia"
+  },
+
+  "can_create_aula": {
+    "operationId": "aulas.crear_aula",
+    "allowed_roles": ["admin_plataforma", "admin_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia"},
+    "note": "Crear aula: admin_plataforma requiere academia_id; admin_academia usa su academia vinculada"
+  },
+
+  "can_view_aula": {
+    "operationId": "aulas.obtener_aula",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia", "profesor_academia": "own_academia"},
+    "note": "Ver aula: profesores pueden ver aulas de su academia"
+  },
+
+  "can_modify_aula": {
+    "operationId": ["aulas.actualizar_aula_put", "aulas.actualizar_aula_patch"],
+    "allowed_roles": ["admin_plataforma", "admin_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia"},
+    "mutable_fields": ["nombre", "capacidad_maxima"],
+    "note": "Modificar aula: solo administradores"
+  },
+
+  "can_delete_aula": {
+    "operationId": "aulas.eliminar_aula",
+    "allowed_roles": ["admin_plataforma", "admin_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia"},
+    "note": "Eliminar aula (soft-delete): solo administradores"
+  },
+
+  "can_query_cursos": {
+    "operationId": "cursos.listar_cursos",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia", "profesor_academia": "assigned_courses"},
+    "enforced_filters": { "academia_id": "current_user.academia_id", "profesor_id": "current_user.id" },
+    "note": "Listado de cursos: profesores solo ven cursos asignados a ellos"
+  },
+
+  "can_create_curso": {
+    "operationId": "cursos.crear_curso",
+    "allowed_roles": ["admin_plataforma", "admin_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia"},
+    "note": "Crear curso: solo administradores"
+  },
+
+  "can_view_curso": {
+    "operationId": "cursos.obtener_curso",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia", "profesor_academia": "assigned_courses"},
+    "note": "Ver curso: profesores solo ven cursos asignados"
+  },
+
+  "can_modify_curso": {
+    "operationId": ["cursos.actualizar_curso_put", "cursos.actualizar_curso_patch"],
+    "allowed_roles": ["admin_plataforma", "admin_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia"},
+    "mutable_fields": ["nombre", "anio_academico", "fecha_inicio", "fecha_fin", "acepta_nuevos_alumnos", "capacidad_maxima", "tarifa_id", "tipo_alumno", "estado"],
+    "note": "Modificar curso: solo administradores"
+  },
+
+  "can_delete_curso": {
+    "operationId": "cursos.eliminar_curso",
+    "allowed_roles": ["admin_plataforma", "admin_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia"},
+    "note": "Eliminar curso (soft-delete): solo administradores"
+  },
+
+  "can_query_horarios": {
+    "operationId": "horarios.listar_horarios",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia", "profesor_academia": "assigned_courses"},
+    "enforced_filters": { "academia_id": "current_user.academia_id", "profesor_id": "current_user.id" },
+    "note": "Listado de horarios: profesores solo ven horarios de sus cursos"
+  },
+
+  "can_create_horario": {
+    "operationId": "horarios.crear_horario",
+    "allowed_roles": ["admin_plataforma", "admin_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia"},
+    "note": "Crear horario: solo administradores"
+  },
+
+  "can_view_horario": {
+    "operationId": "horarios.obtener_horario",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia", "profesor_academia": "assigned_courses"},
+    "note": "Ver horario: profesores solo ven horarios de sus cursos"
+  },
+
+  "can_modify_horario": {
+    "operationId": ["horarios.actualizar_horario_put", "horarios.actualizar_horario_patch"],
+    "allowed_roles": ["admin_plataforma", "admin_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia"},
+    "mutable_fields": ["aula_id", "dia_semana", "hora_inicio", "hora_fin"],
+    "note": "Modificar horario: solo administradores"
+  },
+
+  "can_delete_horario": {
+    "operationId": "horarios.eliminar_horario",
+    "allowed_roles": ["admin_plataforma", "admin_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia"},
+    "note": "Eliminar horario (soft-delete): solo administradores"
+  },
+
+  "can_query_sesiones": {
+    "operationId": "sesiones.listar_sesiones",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia", "profesor_academia": "own_sessions"},
+    "enforced_filters": { "academia_id": "current_user.academia_id", "profesor_id": "current_user.id" },
+    "note": "Listado de sesiones: profesores solo ven sus propias sesiones"
+  },
+
+  "can_create_sesion": {
+    "operationId": "sesiones.crear_sesion",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia", "profesor_academia": "assigned_courses"},
+    "note": "Crear sesión: profesores pueden crear sesiones para sus cursos asignados"
+  },
+
+  "can_view_sesion": {
+    "operationId": "sesiones.obtener_sesion",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia", "profesor_academia": "own_sessions"},
+    "note": "Ver sesión: profesores solo ven sus propias sesiones"
+  },
+
+  "can_modify_sesion": {
+    "operationId": ["sesiones.actualizar_sesion_put", "sesiones.actualizar_sesion_patch"],
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia", "profesor_academia": "own_sessions"},
+    "mutable_fields_by_role": {
+      "admin_plataforma": ["aula_id", "hora_inicio", "hora_fin", "notas_sesion", "notas_materia", "motivo_baja"],
+      "admin_academia": ["aula_id", "hora_inicio", "hora_fin", "notas_sesion", "notas_materia", "motivo_baja"],
+      "profesor_academia": ["notas_sesion", "notas_materia"]
+    },
+    "note": "Modificar sesión: profesores solo pueden modificar notas en sus propias sesiones"
+  },
+
+  "can_pasar_lista": {
+    "operationId": "sesiones.pasar_lista",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia", "profesor_academia": "own_sessions"},
+    "note": "Pasar lista: profesores solo en sus propias sesiones"
+  },
+
+  "can_query_alumnos": {
+    "operationId": "alumnos.listar_alumnos",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia", "profesor_academia": "assigned_courses"},
+    "enforced_filters": { "academia_id": "current_user.academia_id", "profesor_id": "current_user.id" },
+    "note": "Listado de alumnos: profesores solo ven alumnos de sus cursos asignados"
+  },
+
+  "can_create_alumno": {
+    "operationId": "alumnos.crear_alumno",
+    "allowed_roles": ["admin_plataforma", "admin_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia"},
+    "note": "Crear alumno: solo administradores"
+  },
+
+  "can_view_alumno": {
+    "operationId": "alumnos.obtener_alumno",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia", "profesor_academia": "assigned_courses"},
+    "note": "Ver alumno: profesores solo ven alumnos de sus cursos"
+  },
+
+  "can_modify_alumno": {
+    "operationId": ["alumnos.actualizar_alumno_put", "alumnos.actualizar_alumno_patch"],
+    "allowed_roles": ["admin_plataforma", "admin_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia"},
+    "mutable_fields": ["nombre", "email", "dni", "telefono", "fecha_nacimiento", "direccion", "nombre_tutor", "relaccion_tutor_alumno", "telefono_tutor", "email_tutor"],
+    "note": "Modificar alumno: solo administradores"
+  },
+
+  "can_delete_alumno": {
+    "operationId": "alumnos.eliminar_alumno",
+    "allowed_roles": ["admin_plataforma", "admin_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia"},
+    "note": "Eliminar alumno (soft-delete): solo administradores"
+  },
+
+  "can_query_inscripciones": {
+    "operationId": "inscripciones.listar_inscripciones",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia", "profesor_academia": "assigned_courses"},
+    "enforced_filters": { "academia_id": "current_user.academia_id", "profesor_id": "current_user.id" },
+    "note": "Listado de inscripciones: profesores solo ven inscripciones de sus cursos"
+  },
+
+  "can_create_inscripcion": {
+    "operationId": "inscripciones.crear_inscripcion",
+    "allowed_roles": ["admin_plataforma", "admin_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia"},
+    "note": "Crear inscripción: solo administradores"
+  },
+
+  "can_view_inscripcion": {
+    "operationId": "inscripciones.obtener_inscripcion",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia", "profesor_academia": "assigned_courses"},
+    "note": "Ver inscripción: profesores solo ven inscripciones de sus cursos"
+  },
+
+  "can_modify_inscripcion": {
+    "operationId": ["inscripciones.actualizar_inscripcion_put", "inscripciones.actualizar_inscripcion_patch"],
+    "allowed_roles": ["admin_plataforma", "admin_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia"},
+    "mutable_fields": ["tarifa_id", "fecha_inicio", "fecha_fin", "motivo_baja"],
+    "note": "Modificar inscripción: solo administradores (típicamente para dar de baja)"
+  },
+
+  "can_query_anotaciones": {
+    "operationId": "anotaciones.listar_anotaciones",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia", "profesor_academia": "own_sessions"},
+    "enforced_filters": { "academia_id": "current_user.academia_id", "profesor_id": "current_user.id" },
+    "note": "Listado de anotaciones: profesores solo ven anotaciones de sus sesiones"
+  },
+
+  "can_create_anotacion": {
+    "operationId": "anotaciones.crear_anotacion",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia", "profesor_academia": "own_sessions"},
+    "note": "Crear anotación: profesores solo en sus propias sesiones"
+  },
+
+  "can_view_anotacion": {
+    "operationId": "anotaciones.obtener_anotacion",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia", "profesor_academia": "own_sessions"},
+    "note": "Ver anotación: profesores solo ven anotaciones de sus sesiones"
+  },
+
+  "can_modify_anotacion": {
+    "operationId": ["anotaciones.actualizar_anotacion_put", "anotaciones.actualizar_anotacion_patch"],
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia", "profesor_academia": "own_sessions"},
+    "mutable_fields": ["tipo_anotacion", "texto", "motivo_baja"],
+    "note": "Modificar anotación: profesores solo en sus propias sesiones"
+  },
+
+  "can_delete_anotacion": {
+    "operationId": "anotaciones.eliminar_anotacion",
+    "allowed_roles": ["admin_plataforma", "admin_academia", "profesor_academia"],
+    "scope_by_role": {"admin_plataforma": "global", "admin_academia": "own_academia", "profesor_academia": "own_sessions"},
+    "note": "Eliminar anotación (soft-delete): profesores solo en sus propias sesiones"
   }
 }

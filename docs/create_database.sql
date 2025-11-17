@@ -247,7 +247,7 @@ CREATE TABLE AnotacionesAlumnoSesion (
     curso_id INT NOT NULL,
     curso_profesor_id INT NOT NULL,
     alumno_id INT NOT NULL,
-    tipo_anotacion ENUM('Ausencia', 'Evaluacion', 'Comportamiento') NOT NULL,
+    tipo_anotacion ENUM('Ausencia', 'Evaluacion', 'Comportamiento', 'Observacion', 'Otros') NOT NULL,
     texto VARCHAR(255),
     timestamp_alta DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     timestamp_baja DATETIME,
