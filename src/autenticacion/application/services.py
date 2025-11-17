@@ -130,9 +130,10 @@ class AuthService:
         except Exception as e:
             db.session.rollback()
 
-        # Obtener rol y nombre del usuario
+        # Obtener rol, nombre y academia_id del usuario
         role = user.rol.nombre if user.rol else None
         name = user.nombre
+        academia_id = user.academia_id
 
         return LoginResponseDTO(
             ok=True,
@@ -140,5 +141,6 @@ class AuthService:
             role=role,
             name=name,
             status=200,
-            must_change_password=must_change_password
+            must_change_password=must_change_password,
+            academia_id=academia_id
         )

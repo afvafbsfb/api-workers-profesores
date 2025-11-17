@@ -38,7 +38,8 @@ def login():
             "tokens": response_dto.tokens,
             "role": response_dto.role,
             "name": response_dto.name,
-            "must_change_password": response_dto.must_change_password
+            "must_change_password": response_dto.must_change_password,
+            "academiaId": response_dto.academia_id
         }), response_dto.status
 
     except ValidationError as e:

@@ -73,7 +73,7 @@ Requisitos
 Set-Location 'C:\Users\Angel FV\Desktop\FORMACION\api-workers-profesores'
 
 # Crear y activar virtualenv
-python -m venv .venv
+
 . .venv\Scripts\Activate.ps1
 
 # Instalar dependencias
@@ -95,6 +95,8 @@ $env:JWT_DELEGATION_EXPIRATIONMINUTES = '5'
 $env:DUMP_SECRETS = '1' 
 
 if (Test-Path '.venv\Scripts\Activate.ps1') { . '.venv\Scripts\Activate.ps1' }
+
+
 python -u main.py
 
 o bien usar:
