@@ -72,8 +72,10 @@ Requisitos
 # Sitúate en la raíz del repo
 Set-Location 'C:\Users\Angel FV\Desktop\FORMACION\api-workers-profesores'
 
-# Crear y activar virtualenv
+# Crear virtualenv si no existe
+if (-not (Test-Path .venv)) { python -m venv .venv }
 
+# Activar virtualenv
 . .venv\Scripts\Activate.ps1
 
 # Instalar dependencias

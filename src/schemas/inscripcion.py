@@ -27,13 +27,6 @@ class InscripcionSchema(Schema):
             'example': 1
         }
     )
-    tarifa_id = fields.Int(
-        required=True,
-        metadata={
-            'description': 'ID de la tarifa aplicada a esta inscripción',
-            'example': 1
-        }
-    )
     fecha_inicio = fields.Date(
         required=True,
         metadata={
@@ -66,11 +59,6 @@ class InscripcionSchema(Schema):
         dump_only=True,
         metadata={'description': 'Información del curso'}
     )
-    tarifa = fields.Nested(
-        'TarifaSchema',
-        dump_only=True,
-        metadata={'description': 'Información de la tarifa'}
-    )
 
 
 class InscripcionCreateSchema(Schema):
@@ -79,12 +67,13 @@ class InscripcionCreateSchema(Schema):
     Campos obligatorios:
     - alumno_id: ID del alumno
     - curso_id: ID del curso
-    - tarifa_id: ID de la tarifa
     - fecha_inicio: Fecha de inicio de la inscripción
     
     Campos opcionales:
     - fecha_fin: null por defecto (inscripción activa)
     - motivo_baja: null por defecto
+    
+    Nota: La tarifa se obtiene del curso automáticamente.
     """
     
     alumno_id = fields.Int(
@@ -98,13 +87,6 @@ class InscripcionCreateSchema(Schema):
         required=True,
         metadata={
             'description': 'ID del curso al que se inscribe',
-            'example': 1
-        }
-    )
-    tarifa_id = fields.Int(
-        required=True,
-        metadata={
-            'description': 'ID de la tarifa a aplicar',
             'example': 1
         }
     )
@@ -144,12 +126,6 @@ class InscripcionCreateSchema(Schema):
         if value is None or value <= 0:
             raise ValidationError('El curso_id debe ser un número positivo.')
 
-    @validates('tarifa_id')
-    def validate_tarifa_id(self, value, **kwargs):
-        """tarifa_id debe ser válido."""
-        if value is None or value <= 0:
-            raise ValidationError('El tarifa_id debe ser un número positivo.')
-
     @validates_schema
     def validate_fechas(self, data, **kwargs):
         """Si fecha_fin existe, debe ser posterior a fecha_inicio."""
@@ -162,16 +138,11 @@ class InscripcionUpdateSchema(Schema):
     """Schema para actualización de Inscripcion (PATCH).
     
     Todos los campos son opcionales.
-    Típicamente usado para dar de baja (fecha_fin + motivo_baja) o cambiar tarifa.
+    Típicamente usado para dar de baja (fecha_fin + motivo_baja).
+    
+    Nota: La tarifa se gestiona a nivel de Curso, no de Inscripcion.
     """
     
-    tarifa_id = fields.Int(
-        required=False,
-        metadata={
-            'description': 'Nuevo ID de tarifa',
-            'example': 2
-        }
-    )
     fecha_inicio = fields.Date(
         required=False,
         metadata={
@@ -200,15 +171,10 @@ class InscripcionUpdateSchema(Schema):
     alumno_id = fields.Int(required=False, allow_none=True, load_only=True)
     curso_id = fields.Int(required=False, allow_none=True, load_only=True)
 
-    @validates('tarifa_id')
-    def validate_tarifa_id(self, value, **kwargs):
-        if value is not None and value <= 0:
-            raise ValidationError('El tarifa_id debe ser un número positivo.')
-
     @validates_schema
     def validate_at_least_one_field(self, data, **kwargs):
         """Al menos un campo mutable debe estar presente para actualizar."""
-        mutable_fields = {'tarifa_id', 'fecha_inicio', 'fecha_fin', 'motivo_baja'}
+        mutable_fields = {'fecha_inicio', 'fecha_fin', 'motivo_baja'}
         if not any(field in data for field in mutable_fields):
             raise ValidationError('Debe proporcionar al menos un campo mutable para actualizar.')
 

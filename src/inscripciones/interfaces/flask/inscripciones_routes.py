@@ -66,11 +66,6 @@ inscripciones_list_query_args = {
         'description': 'Filtrar por ID de curso específico',
         'required': False
     },
-    'tarifa_id': {
-        'type': 'integer',
-        'description': 'Filtrar por ID de tarifa',
-        'required': False
-    },
     'activas': {
         'type': 'boolean',
         'description': 'Filtrar por inscripciones activas (true) o finalizadas (false)',
@@ -118,7 +113,7 @@ inscripciones_list_query_args = {
     },
     'expand': {
         'type': 'string',
-        'description': 'Expandir relaciones (alumno, curso, tarifa)',
+        'description': 'Expandir relaciones (alumno, curso)',
         'required': False
     }
 }
@@ -131,7 +126,6 @@ inscripciones_list_query_args = {
     'academia_id': fields.Int(required=False),
     'alumno_id': fields.Int(required=False),
     'curso_id': fields.Int(required=False),
-    'tarifa_id': fields.Int(required=False),
     'activas': fields.Bool(required=False),
     'fecha_inicio_desde': fields.Str(required=False),
     'fecha_inicio_hasta': fields.Str(required=False),
@@ -148,8 +142,7 @@ def listar_inscripciones(args, current_user):
     Permite consultar inscripciones filtradas por:
     - Academia (solo admin_plataforma)
     - Alumno específico
-    - Curso específico  
-    - Tarifa aplicada
+    - Curso específico
     - Estado (activas/finalizadas)
     - Rango de fechas de inicio
     
@@ -203,9 +196,6 @@ def listar_inscripciones(args, current_user):
     
     if args.get('curso_id'):
         query = query.where(inscripciones.c.curso_id == args['curso_id'])
-    
-    if args.get('tarifa_id'):
-        query = query.where(inscripciones.c.tarifa_id == args['tarifa_id'])
     
     if args.get('activas') is not None:
         if args['activas']:
@@ -313,17 +303,6 @@ def crear_inscripcion(current_user):
         # Calcular academia_id automáticamente
         academia_id = alumno['academia_id']
         
-        # Validar que la tarifa pertenece a la academia del curso
-        tarifa = conn.execute(
-            select(tarifas).where(tarifas.c.id == payload['tarifa_id'])
-        ).mappings().fetchone()
-        
-        if not tarifa:
-            return jsonify({'ok': False, 'error': 'tarifa_id no existe'}), 404
-        
-        if tarifa['academia_id'] != academia_id:
-            return jsonify({'ok': False, 'error': 'La tarifa debe pertenecer a la misma academia del curso'}), 409
-        
         # Verificar capacidad del curso
         if curso.get('capacidad_maxima'):
             inscripciones_activas = conn.execute(
@@ -424,23 +403,6 @@ def actualizar_inscripcion(inscripcion_id, current_user):
         return jsonify({'ok': False, 'error': perm_result.get('reason', 'No autorizado')}), 403
     
     sanitized = perm_result.get('sanitized_payload', payload)
-    
-    # Validar cambio de tarifa si se solicita
-    if 'tarifa_id' in sanitized:
-        with db.engine.connect() as conn:
-            curso = conn.execute(
-                select(cursos).where(cursos.c.id == inscripcion['curso_id'])
-            ).mappings().fetchone()
-            
-            tarifa = conn.execute(
-                select(tarifas).where(tarifas.c.id == sanitized['tarifa_id'])
-            ).mappings().fetchone()
-            
-            if not tarifa:
-                return jsonify({'ok': False, 'error': 'tarifa_id no existe'}), 404
-            
-            if tarifa['academia_id'] != curso['academia_id']:
-                return jsonify({'ok': False, 'error': 'La tarifa debe pertenecer a la misma academia'}), 409
     
     try:
         update_stmt = inscripciones.update().where(inscripciones.c.id == inscripcion_id).values(**sanitized)

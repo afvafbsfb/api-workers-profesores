@@ -24,7 +24,6 @@ class Inscripcion(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     alumno_id = Column(Integer, ForeignKey('Alumno.id'), nullable=False)
     curso_id = Column(Integer, ForeignKey('Curso.id'), nullable=False)
-    tarifa_id = Column(Integer, ForeignKey('Tarifa.id'), nullable=False)
     fecha_inicio = Column(Date, nullable=False)
     fecha_fin = Column(Date, nullable=True)
     motivo_baja = Column(String(255), nullable=True)

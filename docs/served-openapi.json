@@ -4,8 +4,17 @@
       "Academia": {
         "additionalProperties": false,
         "properties": {
+          "descripcion": {
+            "example": "Academia especializada en preparación de exámenes oficiales de inglés, francés y alemán",
+            "type": "string"
+          },
           "direccion": {
-            "example": "Calle Mayor 123, Madrid",
+            "example": "Calle Mayor 123, 28013 Madrid",
+            "type": "string"
+          },
+          "email_contacto": {
+            "example": "contacto@academiaidiomas.es",
+            "format": "email",
             "type": "string"
           },
           "id": {
@@ -16,6 +25,10 @@
             "example": "Academia de Idiomas Central",
             "type": "string"
           },
+          "nombre_contacto": {
+            "example": "Juan Pérez García",
+            "type": "string"
+          },
           "telefono": {
             "example": "+34 912 345 678",
             "type": "string"
@@ -24,6 +37,1078 @@
         "required": [
           "nombre"
         ],
+        "type": "object"
+      },
+      "Alumno": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "description": "ID de la academia a la que pertenece el alumno",
+            "example": 1,
+            "type": "integer"
+          },
+          "direccion": {
+            "description": "Dirección del alumno",
+            "example": "Calle Mayor 123, 28001 Madrid",
+            "type": "string"
+          },
+          "dni": {
+            "description": "DNI/NIE del alumno",
+            "example": "12345678A",
+            "type": "string"
+          },
+          "email": {
+            "description": "Email del alumno (único en el sistema)",
+            "example": "juan.perez@email.com",
+            "format": "email",
+            "type": "string"
+          },
+          "email_tutor": {
+            "description": "Email del tutor",
+            "example": "maria.garcia@email.com",
+            "format": "email",
+            "nullable": true,
+            "type": "string"
+          },
+          "fecha_nacimiento": {
+            "description": "Fecha de nacimiento del alumno",
+            "example": "2005-03-15",
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "example": 1,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "nombre": {
+            "description": "Nombre completo del alumno",
+            "example": "Juan Pérez García",
+            "type": "string"
+          },
+          "nombre_tutor": {
+            "description": "Nombre del tutor (obligatorio para menores)",
+            "example": "María García López",
+            "nullable": true,
+            "type": "string"
+          },
+          "relaccion_tutor_alumno": {
+            "description": "Relación del tutor con el alumno",
+            "example": "Madre",
+            "nullable": true,
+            "type": "string"
+          },
+          "telefono": {
+            "description": "Teléfono del alumno",
+            "example": "+34 600123456",
+            "type": "string"
+          },
+          "telefono_tutor": {
+            "description": "Teléfono del tutor",
+            "example": "+34 600654321",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "academia_id",
+          "direccion",
+          "dni",
+          "email",
+          "fecha_nacimiento",
+          "nombre",
+          "telefono"
+        ],
+        "type": "object"
+      },
+      "AlumnoCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "description": "ID de la academia (obligatorio para admin_plataforma, opcional para admin_academia)",
+            "example": 1,
+            "nullable": true,
+            "type": "integer"
+          },
+          "direccion": {
+            "description": "Dirección completa del alumno",
+            "example": "Calle Mayor 123, 28001 Madrid",
+            "type": "string"
+          },
+          "dni": {
+            "description": "DNI/NIE del alumno",
+            "example": "12345678A",
+            "type": "string"
+          },
+          "email": {
+            "description": "Email del alumno (debe ser único)",
+            "example": "juan.perez@email.com",
+            "format": "email",
+            "type": "string"
+          },
+          "email_tutor": {
+            "description": "Email del tutor",
+            "example": "maria.garcia@email.com",
+            "format": "email",
+            "nullable": true,
+            "type": "string"
+          },
+          "fecha_nacimiento": {
+            "description": "Fecha de nacimiento del alumno",
+            "example": "2005-03-15",
+            "format": "date",
+            "type": "string"
+          },
+          "nombre": {
+            "description": "Nombre completo del alumno",
+            "example": "Juan Pérez García",
+            "type": "string"
+          },
+          "nombre_tutor": {
+            "description": "Nombre del tutor (obligatorio si el alumno es menor de edad)",
+            "example": "María García López",
+            "nullable": true,
+            "type": "string"
+          },
+          "relaccion_tutor_alumno": {
+            "description": "Relación del tutor con el alumno (Padre, Madre, Tutor legal, etc.)",
+            "example": "Madre",
+            "nullable": true,
+            "type": "string"
+          },
+          "telefono": {
+            "description": "Teléfono del alumno",
+            "example": "+34 600123456",
+            "type": "string"
+          },
+          "telefono_tutor": {
+            "description": "Teléfono del tutor",
+            "example": "+34 600654321",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "direccion",
+          "dni",
+          "email",
+          "fecha_nacimiento",
+          "nombre",
+          "telefono"
+        ],
+        "type": "object"
+      },
+      "AlumnoUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "direccion": {
+            "description": "Nueva dirección del alumno",
+            "example": "Avenida Principal 456, 28002 Madrid",
+            "type": "string"
+          },
+          "dni": {
+            "description": "Nuevo DNI del alumno",
+            "example": "87654321B",
+            "type": "string"
+          },
+          "email": {
+            "description": "Nuevo email del alumno",
+            "example": "nuevo.email@email.com",
+            "format": "email",
+            "type": "string"
+          },
+          "email_tutor": {
+            "description": "Nuevo email del tutor",
+            "example": "carlos.garcia@email.com",
+            "format": "email",
+            "nullable": true,
+            "type": "string"
+          },
+          "fecha_nacimiento": {
+            "description": "Nueva fecha de nacimiento",
+            "example": "2005-05-20",
+            "format": "date",
+            "type": "string"
+          },
+          "nombre": {
+            "description": "Nuevo nombre del alumno",
+            "example": "Juan Pérez García (Modificado)",
+            "type": "string"
+          },
+          "nombre_tutor": {
+            "description": "Nuevo nombre del tutor",
+            "example": "Carlos García López",
+            "nullable": true,
+            "type": "string"
+          },
+          "relaccion_tutor_alumno": {
+            "description": "Nueva relación del tutor",
+            "example": "Padre",
+            "nullable": true,
+            "type": "string"
+          },
+          "telefono": {
+            "description": "Nuevo teléfono del alumno",
+            "example": "+34 600999888",
+            "type": "string"
+          },
+          "telefono_tutor": {
+            "description": "Nuevo teléfono del tutor",
+            "example": "+34 600777666",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Anotacion": {
+        "additionalProperties": false,
+        "properties": {
+          "alumno": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Alumno"
+              }
+            ],
+            "description": "Información del alumno",
+            "readOnly": true
+          },
+          "alumno_id": {
+            "description": "ID del alumno",
+            "example": 1,
+            "type": "integer"
+          },
+          "curso_id": {
+            "description": "ID del curso",
+            "example": 1,
+            "type": "integer"
+          },
+          "curso_profesor_id": {
+            "description": "ID de la relación Curso_Profesores",
+            "example": 1,
+            "type": "integer"
+          },
+          "id": {
+            "example": 1,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "inscripcion_id": {
+            "description": "ID de la inscripción del alumno",
+            "example": 1,
+            "type": "integer"
+          },
+          "motivo_baja": {
+            "description": "Motivo de la baja lógica",
+            "example": null,
+            "nullable": true,
+            "type": "string"
+          },
+          "sesion": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Sesion"
+              }
+            ],
+            "description": "Información de la sesión",
+            "readOnly": true
+          },
+          "sesion_id": {
+            "description": "ID de la sesión",
+            "example": 1,
+            "type": "integer"
+          },
+          "texto": {
+            "description": "Texto de la anotación",
+            "example": "Ausencia justificada por enfermedad",
+            "nullable": true,
+            "type": "string"
+          },
+          "timestamp_alta": {
+            "description": "Timestamp de creación de la anotación",
+            "example": "2024-10-27T09:15:00",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "timestamp_baja": {
+            "description": "Timestamp de baja lógica (null si activa)",
+            "example": null,
+            "format": "date-time",
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "tipo_anotacion": {
+            "description": "Tipo de anotación: Ausencia (pasar lista), Evaluacion (académica), Comportamiento (conducta), Observacion (notas generales), Otros (miscelánea)",
+            "enum": [
+              "Ausencia",
+              "Evaluacion",
+              "Comportamiento",
+              "Observacion",
+              "Otros"
+            ],
+            "example": "Evaluacion",
+            "type": "string"
+          }
+        },
+        "required": [
+          "alumno_id",
+          "curso_id",
+          "curso_profesor_id",
+          "inscripcion_id",
+          "sesion_id",
+          "tipo_anotacion"
+        ],
+        "type": "object"
+      },
+      "AnotacionCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "alumno_id": {
+            "description": "ID del alumno",
+            "example": 1,
+            "type": "integer"
+          },
+          "curso_id": {
+            "description": "ID del curso",
+            "example": 1,
+            "type": "integer"
+          },
+          "curso_profesor_id": {
+            "description": "ID de la relación Curso_Profesores",
+            "example": 1,
+            "type": "integer"
+          },
+          "inscripcion_id": {
+            "description": "ID de la inscripción del alumno",
+            "example": 1,
+            "type": "integer"
+          },
+          "sesion_id": {
+            "description": "ID de la sesión",
+            "example": 1,
+            "type": "integer"
+          },
+          "texto": {
+            "description": "Texto descriptivo de la anotación",
+            "example": "Excelente participación en la discusión sobre gramática inglesa. Demuestra comprensión avanzada.",
+            "nullable": true,
+            "type": "string"
+          },
+          "tipo_anotacion": {
+            "description": "Tipo de anotación permitido: Evaluacion, Comportamiento, Observacion, Otros (NO se permite Ausencia - usar pasar-lista)",
+            "enum": [
+              "Evaluacion",
+              "Comportamiento",
+              "Observacion",
+              "Otros"
+            ],
+            "example": "Evaluacion",
+            "type": "string"
+          }
+        },
+        "required": [
+          "alumno_id",
+          "curso_id",
+          "curso_profesor_id",
+          "inscripcion_id",
+          "sesion_id",
+          "tipo_anotacion"
+        ],
+        "type": "object"
+      },
+      "AnotacionUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "alumno_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "curso_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "curso_profesor_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "inscripcion_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "motivo_baja": {
+            "description": "Motivo de baja (para dar de baja la anotación)",
+            "example": "Anotación errónea",
+            "nullable": true,
+            "type": "string"
+          },
+          "sesion_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "texto": {
+            "description": "Nuevo texto de la anotación",
+            "example": "Comportamiento disruptivo en clase",
+            "nullable": true,
+            "type": "string"
+          },
+          "timestamp_alta": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string",
+            "writeOnly": true
+          },
+          "timestamp_baja": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string",
+            "writeOnly": true
+          },
+          "tipo_anotacion": {
+            "description": "Nuevo tipo de anotación",
+            "enum": [
+              "Ausencia",
+              "Evaluacion",
+              "Comportamiento",
+              "Observacion",
+              "Otros"
+            ],
+            "example": "Comportamiento",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Aula": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "description": "ID de la academia a la que pertenece el aula",
+            "example": 1,
+            "type": "integer"
+          },
+          "capacidad_maxima": {
+            "description": "Capacidad máxima del aula",
+            "example": 30,
+            "type": "integer"
+          },
+          "id": {
+            "example": 1,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "nombre": {
+            "description": "Nombre del aula",
+            "example": "Aula 101",
+            "type": "string"
+          }
+        },
+        "required": [
+          "academia_id",
+          "capacidad_maxima",
+          "nombre"
+        ],
+        "type": "object"
+      },
+      "AulaCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "description": "ID de la academia (obligatorio para admin_plataforma, opcional para admin_academia)",
+            "example": 1,
+            "nullable": true,
+            "type": "integer"
+          },
+          "capacidad_maxima": {
+            "description": "Capacidad máxima del aula (debe ser mayor que 0)",
+            "example": 30,
+            "type": "integer"
+          },
+          "nombre": {
+            "description": "Nombre del aula",
+            "example": "Aula 102 - Informática",
+            "type": "string"
+          }
+        },
+        "required": [
+          "capacidad_maxima",
+          "nombre"
+        ],
+        "type": "object"
+      },
+      "AulaUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "capacidad_maxima": {
+            "description": "Nueva capacidad máxima del aula",
+            "example": 35,
+            "type": "integer"
+          },
+          "nombre": {
+            "description": "Nuevo nombre del aula",
+            "example": "Aula 102 - Informática Renovada",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Curso": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "description": "ID de la academia a la que pertenece el curso",
+            "example": 1,
+            "type": "integer"
+          },
+          "acepta_nuevos_alumnos": {
+            "description": "Indica si el curso acepta nuevos alumnos",
+            "example": true,
+            "type": "boolean"
+          },
+          "anio_academico": {
+            "description": "Año académico del curso",
+            "example": "2024-2025",
+            "type": "string"
+          },
+          "capacidad_maxima": {
+            "description": "Capacidad máxima de alumnos del curso",
+            "example": 25,
+            "type": "integer"
+          },
+          "estado": {
+            "description": "Estado del curso",
+            "enum": [
+              "Activo",
+              "Inactivo",
+              "Finalizado"
+            ],
+            "example": "Activo",
+            "type": "string"
+          },
+          "fecha_fin": {
+            "description": "Fecha de finalización del curso",
+            "example": "2025-06-30",
+            "format": "date",
+            "type": "string"
+          },
+          "fecha_inicio": {
+            "description": "Fecha de inicio del curso",
+            "example": "2024-09-15",
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "example": 1,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "nombre": {
+            "description": "Nombre del curso",
+            "example": "Inglés B1 - Mañanas",
+            "type": "string"
+          },
+          "tarifa": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Tarifa"
+              }
+            ],
+            "description": "Información de la tarifa asociada",
+            "readOnly": true
+          },
+          "tarifa_id": {
+            "description": "ID de la tarifa asociada al curso",
+            "example": 1,
+            "type": "integer"
+          },
+          "tipo_alumno": {
+            "description": "Tipo de alumno del curso",
+            "enum": [
+              "Infantil",
+              "Juvenil",
+              "Adultos"
+            ],
+            "example": "Adultos",
+            "type": "string"
+          }
+        },
+        "required": [
+          "academia_id",
+          "acepta_nuevos_alumnos",
+          "anio_academico",
+          "capacidad_maxima",
+          "estado",
+          "fecha_fin",
+          "fecha_inicio",
+          "nombre",
+          "tarifa_id",
+          "tipo_alumno"
+        ],
+        "type": "object"
+      },
+      "CursoCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "description": "ID de la academia (obligatorio para admin_plataforma, opcional para admin_academia)",
+            "example": 1,
+            "nullable": true,
+            "type": "integer"
+          },
+          "acepta_nuevos_alumnos": {
+            "default": true,
+            "description": "Indica si el curso acepta nuevos alumnos (por defecto True)",
+            "example": true,
+            "type": "boolean"
+          },
+          "anio_academico": {
+            "description": "Año académico (formato: YYYY-YYYY)",
+            "example": "2024-2025",
+            "type": "string"
+          },
+          "capacidad_maxima": {
+            "description": "Capacidad máxima de alumnos (debe ser mayor que 0)",
+            "example": 25,
+            "type": "integer"
+          },
+          "estado": {
+            "description": "Estado del curso (Activo, Inactivo, Finalizado)",
+            "enum": [
+              "Activo",
+              "Inactivo",
+              "Finalizado"
+            ],
+            "example": "Activo",
+            "type": "string"
+          },
+          "fecha_fin": {
+            "description": "Fecha de finalización del curso",
+            "example": "2025-06-30",
+            "format": "date",
+            "type": "string"
+          },
+          "fecha_inicio": {
+            "description": "Fecha de inicio del curso",
+            "example": "2024-09-15",
+            "format": "date",
+            "type": "string"
+          },
+          "nombre": {
+            "description": "Nombre del curso",
+            "example": "Inglés B1 - Mañanas",
+            "type": "string"
+          },
+          "tarifa_id": {
+            "description": "ID de la tarifa asociada al curso",
+            "example": 1,
+            "type": "integer"
+          },
+          "tipo_alumno": {
+            "description": "Tipo de alumno (Infantil, Juvenil, Adultos)",
+            "enum": [
+              "Infantil",
+              "Juvenil",
+              "Adultos"
+            ],
+            "example": "Adultos",
+            "type": "string"
+          }
+        },
+        "required": [
+          "anio_academico",
+          "capacidad_maxima",
+          "estado",
+          "fecha_fin",
+          "fecha_inicio",
+          "nombre",
+          "tarifa_id",
+          "tipo_alumno"
+        ],
+        "type": "object"
+      },
+      "CursoUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "acepta_nuevos_alumnos": {
+            "description": "Nuevo valor de acepta_nuevos_alumnos",
+            "example": false,
+            "type": "boolean"
+          },
+          "anio_academico": {
+            "description": "Nuevo año académico",
+            "example": "2025-2026",
+            "type": "string"
+          },
+          "capacidad_maxima": {
+            "description": "Nueva capacidad máxima",
+            "example": 30,
+            "type": "integer"
+          },
+          "estado": {
+            "description": "Nuevo estado del curso",
+            "enum": [
+              "Activo",
+              "Inactivo",
+              "Finalizado"
+            ],
+            "example": "Finalizado",
+            "type": "string"
+          },
+          "fecha_fin": {
+            "description": "Nueva fecha de finalización",
+            "example": "2026-06-30",
+            "format": "date",
+            "type": "string"
+          },
+          "fecha_inicio": {
+            "description": "Nueva fecha de inicio",
+            "example": "2025-09-15",
+            "format": "date",
+            "type": "string"
+          },
+          "nombre": {
+            "description": "Nuevo nombre del curso",
+            "example": "Inglés B1 - Mañanas (Modificado)",
+            "type": "string"
+          },
+          "tarifa_id": {
+            "description": "Nuevo ID de tarifa",
+            "example": 2,
+            "type": "integer"
+          },
+          "tipo_alumno": {
+            "description": "Nuevo tipo de alumno",
+            "enum": [
+              "Infantil",
+              "Juvenil",
+              "Adultos"
+            ],
+            "example": "Juvenil",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "HorarioCurso": {
+        "additionalProperties": false,
+        "properties": {
+          "aula": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Aula"
+              }
+            ],
+            "description": "Información del aula",
+            "readOnly": true
+          },
+          "aula_id": {
+            "description": "ID del aula donde se imparte el curso",
+            "example": 1,
+            "type": "integer"
+          },
+          "curso": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Curso"
+              }
+            ],
+            "description": "Información del curso",
+            "readOnly": true
+          },
+          "curso_id": {
+            "description": "ID del curso al que pertenece el horario",
+            "example": 1,
+            "type": "integer"
+          },
+          "dia_semana": {
+            "description": "Día de la semana",
+            "enum": [
+              "Lunes",
+              "Martes",
+              "Miércoles",
+              "Jueves",
+              "Viernes",
+              "Sábado",
+              "Domingo"
+            ],
+            "example": "Lunes",
+            "type": "string"
+          },
+          "hora_fin": {
+            "description": "Hora de finalización de la clase",
+            "example": "10:30:00",
+            "type": "string"
+          },
+          "hora_inicio": {
+            "description": "Hora de inicio de la clase",
+            "example": "09:00:00",
+            "type": "string"
+          },
+          "id": {
+            "example": 1,
+            "readOnly": true,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "aula_id",
+          "curso_id",
+          "dia_semana",
+          "hora_fin",
+          "hora_inicio"
+        ],
+        "type": "object"
+      },
+      "HorarioCursoCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "aula_id": {
+            "description": "ID del aula donde se imparte",
+            "example": 1,
+            "type": "integer"
+          },
+          "curso_id": {
+            "description": "ID del curso al que se asigna el horario",
+            "example": 1,
+            "type": "integer"
+          },
+          "dia_semana": {
+            "description": "Día de la semana (capitalizado)",
+            "enum": [
+              "Lunes",
+              "Martes",
+              "Miércoles",
+              "Jueves",
+              "Viernes",
+              "Sábado",
+              "Domingo"
+            ],
+            "example": "Lunes",
+            "type": "string"
+          },
+          "hora_fin": {
+            "description": "Hora de finalización de la clase (formato HH:MM:SS)",
+            "example": "10:30:00",
+            "type": "string"
+          },
+          "hora_inicio": {
+            "description": "Hora de inicio de la clase (formato HH:MM:SS)",
+            "example": "09:00:00",
+            "type": "string"
+          }
+        },
+        "required": [
+          "aula_id",
+          "curso_id",
+          "dia_semana",
+          "hora_fin",
+          "hora_inicio"
+        ],
+        "type": "object"
+      },
+      "HorarioCursoUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "aula_id": {
+            "description": "Nuevo ID del aula",
+            "example": 2,
+            "type": "integer"
+          },
+          "curso_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "dia_semana": {
+            "description": "Nuevo día de la semana",
+            "enum": [
+              "Lunes",
+              "Martes",
+              "Miércoles",
+              "Jueves",
+              "Viernes",
+              "Sábado",
+              "Domingo"
+            ],
+            "example": "Martes",
+            "type": "string"
+          },
+          "hora_fin": {
+            "description": "Nueva hora de finalización",
+            "example": "11:30:00",
+            "type": "string"
+          },
+          "hora_inicio": {
+            "description": "Nueva hora de inicio",
+            "example": "10:00:00",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Inscripcion": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "description": "ID de la academia (calculado automáticamente)",
+            "example": 1,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "alumno": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Alumno"
+              }
+            ],
+            "description": "Información del alumno",
+            "readOnly": true
+          },
+          "alumno_id": {
+            "description": "ID del alumno inscrito",
+            "example": 1,
+            "type": "integer"
+          },
+          "curso": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Curso"
+              }
+            ],
+            "description": "Información del curso",
+            "readOnly": true
+          },
+          "curso_id": {
+            "description": "ID del curso al que se inscribe",
+            "example": 1,
+            "type": "integer"
+          },
+          "fecha_fin": {
+            "description": "Fecha de fin de la inscripción (null si activa)",
+            "example": null,
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "fecha_inicio": {
+            "description": "Fecha de inicio de la inscripción",
+            "example": "2024-09-15",
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "example": 1,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "motivo_baja": {
+            "description": "Motivo de baja de la inscripción",
+            "example": null,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "alumno_id",
+          "curso_id",
+          "fecha_inicio"
+        ],
+        "type": "object"
+      },
+      "InscripcionCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "alumno_id": {
+            "description": "ID del alumno a inscribir",
+            "example": 1,
+            "type": "integer"
+          },
+          "curso_id": {
+            "description": "ID del curso al que se inscribe",
+            "example": 1,
+            "type": "integer"
+          },
+          "fecha_fin": {
+            "description": "Fecha de fin (opcional, null si inscripción activa)",
+            "example": null,
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "fecha_inicio": {
+            "description": "Fecha de inicio de la inscripción",
+            "example": "2024-09-15",
+            "format": "date",
+            "type": "string"
+          },
+          "motivo_baja": {
+            "description": "Motivo de baja (opcional)",
+            "example": null,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "alumno_id",
+          "curso_id",
+          "fecha_inicio"
+        ],
+        "type": "object"
+      },
+      "InscripcionUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "alumno_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "curso_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "fecha_fin": {
+            "description": "Nueva fecha de fin (para dar de baja)",
+            "example": "2024-12-31",
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "fecha_inicio": {
+            "description": "Nueva fecha de inicio",
+            "example": "2024-10-01",
+            "format": "date",
+            "type": "string"
+          },
+          "motivo_baja": {
+            "description": "Motivo de baja",
+            "example": "Cambio de ciudad",
+            "nullable": true,
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "LoginRequest": {
@@ -129,6 +1214,211 @@
           "nombre": {
             "example": "Admin_academia",
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Sesion": {
+        "additionalProperties": false,
+        "properties": {
+          "aula": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Aula"
+              }
+            ],
+            "description": "Información del aula",
+            "readOnly": true
+          },
+          "aula_id": {
+            "description": "ID del aula donde se realiza la sesión",
+            "example": 1,
+            "type": "integer"
+          },
+          "curso_profesor_id": {
+            "description": "ID de la relación Curso_Profesores",
+            "example": 1,
+            "type": "integer"
+          },
+          "hora_fin": {
+            "description": "Hora de finalización real de la sesión",
+            "example": "10:30:00",
+            "type": "string"
+          },
+          "hora_inicio": {
+            "description": "Hora de inicio real de la sesión",
+            "example": "09:00:00",
+            "type": "string"
+          },
+          "horario_curso": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/HorarioCurso"
+              }
+            ],
+            "description": "Información del horario del curso",
+            "readOnly": true
+          },
+          "horario_curso_id": {
+            "description": "ID del horario del curso",
+            "example": 1,
+            "type": "integer"
+          },
+          "id": {
+            "example": 1,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "motivo_baja": {
+            "description": "Motivo de la baja lógica",
+            "example": null,
+            "nullable": true,
+            "type": "string"
+          },
+          "notas_materia": {
+            "description": "Notas sobre la materia impartida",
+            "example": "Tema 3: Verbos irregulares",
+            "nullable": true,
+            "type": "string"
+          },
+          "notas_sesion": {
+            "description": "Notas generales de la sesión",
+            "example": "Clase muy participativa",
+            "nullable": true,
+            "type": "string"
+          },
+          "timestamp_alta": {
+            "description": "Timestamp de creación de la sesión",
+            "example": "2024-10-27T08:00:00",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "timestamp_baja": {
+            "description": "Timestamp de baja lógica (null si activo)",
+            "example": null,
+            "format": "date-time",
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "aula_id",
+          "curso_profesor_id",
+          "hora_fin",
+          "hora_inicio",
+          "horario_curso_id"
+        ],
+        "type": "object"
+      },
+      "SesionCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "aula_id": {
+            "description": "ID del aula donde se realiza la sesión",
+            "example": 1,
+            "type": "integer"
+          },
+          "curso_profesor_id": {
+            "description": "ID de la relación Curso_Profesores (profesor asignado al curso)",
+            "example": 1,
+            "type": "integer"
+          },
+          "hora_fin": {
+            "description": "Hora de finalización real de la sesión (formato HH:MM:SS)",
+            "example": "10:30:00",
+            "type": "string"
+          },
+          "hora_inicio": {
+            "description": "Hora de inicio real de la sesión (formato HH:MM:SS)",
+            "example": "09:00:00",
+            "type": "string"
+          },
+          "horario_curso_id": {
+            "description": "ID del horario del curso",
+            "example": 1,
+            "type": "integer"
+          },
+          "notas_materia": {
+            "description": "Notas sobre la materia impartida",
+            "example": "Tema 3: Verbos irregulares",
+            "nullable": true,
+            "type": "string"
+          },
+          "notas_sesion": {
+            "description": "Notas generales de la sesión",
+            "example": "Clase muy participativa",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "aula_id",
+          "curso_profesor_id",
+          "hora_fin",
+          "hora_inicio",
+          "horario_curso_id"
+        ],
+        "type": "object"
+      },
+      "SesionUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "aula_id": {
+            "description": "Nuevo ID del aula",
+            "example": 2,
+            "type": "integer"
+          },
+          "curso_profesor_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "hora_fin": {
+            "description": "Nueva hora de finalización",
+            "example": "10:45:00",
+            "type": "string"
+          },
+          "hora_inicio": {
+            "description": "Nueva hora de inicio",
+            "example": "09:15:00",
+            "type": "string"
+          },
+          "horario_curso_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "motivo_baja": {
+            "description": "Motivo de baja (para dar de baja la sesión)",
+            "example": "Sesión cancelada por festivo",
+            "nullable": true,
+            "type": "string"
+          },
+          "notas_materia": {
+            "description": "Nuevas notas de materia",
+            "example": "Tema 3: Verbos irregulares - completado",
+            "nullable": true,
+            "type": "string"
+          },
+          "notas_sesion": {
+            "description": "Nuevas notas de sesión",
+            "example": "Clase muy participativa - actualizado",
+            "nullable": true,
+            "type": "string"
+          },
+          "timestamp_alta": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string",
+            "writeOnly": true
+          },
+          "timestamp_baja": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string",
+            "writeOnly": true
           }
         },
         "type": "object"
@@ -422,10 +1712,170 @@
           }
         }
       },
+      "PaginatedAlumno": {
+        "type": "object",
+        "properties": {
+          "totalElements": {
+            "type": "integer"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Alumno"
+            }
+          },
+          "page": {
+            "type": "integer"
+          },
+          "size": {
+            "type": "integer"
+          }
+        }
+      },
       "Item": {
         "type": "object"
       },
+      "PaginatedAnotacione": {
+        "type": "object",
+        "properties": {
+          "totalElements": {
+            "type": "integer"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            }
+          },
+          "page": {
+            "type": "integer"
+          },
+          "size": {
+            "type": "integer"
+          }
+        }
+      },
+      "PaginatedAula": {
+        "type": "object",
+        "properties": {
+          "totalElements": {
+            "type": "integer"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Aula"
+            }
+          },
+          "page": {
+            "type": "integer"
+          },
+          "size": {
+            "type": "integer"
+          }
+        }
+      },
+      "PaginatedCurso_profesore": {
+        "type": "object",
+        "properties": {
+          "totalElements": {
+            "type": "integer"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            }
+          },
+          "page": {
+            "type": "integer"
+          },
+          "size": {
+            "type": "integer"
+          }
+        }
+      },
+      "PaginatedCurso": {
+        "type": "object",
+        "properties": {
+          "totalElements": {
+            "type": "integer"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Curso"
+            }
+          },
+          "page": {
+            "type": "integer"
+          },
+          "size": {
+            "type": "integer"
+          }
+        }
+      },
+      "PaginatedHorario": {
+        "type": "object",
+        "properties": {
+          "totalElements": {
+            "type": "integer"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            }
+          },
+          "page": {
+            "type": "integer"
+          },
+          "size": {
+            "type": "integer"
+          }
+        }
+      },
+      "PaginatedInscripcione": {
+        "type": "object",
+        "properties": {
+          "totalElements": {
+            "type": "integer"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            }
+          },
+          "page": {
+            "type": "integer"
+          },
+          "size": {
+            "type": "integer"
+          }
+        }
+      },
       "PaginatedRole": {
+        "type": "object",
+        "properties": {
+          "totalElements": {
+            "type": "integer"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            }
+          },
+          "page": {
+            "type": "integer"
+          },
+          "size": {
+            "type": "integer"
+          }
+        }
+      },
+      "PaginatedSesione": {
         "type": "object",
         "properties": {
           "totalElements": {
@@ -595,7 +2045,7 @@
             "Profesor_academia": "own_academia"
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       },
       "post": {
@@ -644,7 +2094,7 @@
           ],
           "scope": "global",
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       }
     },
@@ -695,7 +2145,7 @@
           ],
           "scope": "global",
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       },
       "get": {
@@ -751,7 +2201,7 @@
             "Profesor_academia": "own_academia"
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       },
       "patch": {
@@ -814,7 +2264,1285 @@
             "Admin_plataforma": "global"
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
+        }
+      }
+    },
+    "/alumnos/": {
+      "get": {
+        "description": "Auto-generated operation for alumnos.listar_alumnos",
+        "operationId": "alumnos.listar_alumnos",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "academia_id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "nombre",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "nombre_contains",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "email",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "email_contains",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dni",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "curso_id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "with_total",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_dir",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expand",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedAlumno"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /alumnos/",
+        "tags": [
+          "Alumnos"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma",
+            "Profesor_academia"
+          ],
+          "enforced_filters": {
+            "academia_id": "current_user.academia_id",
+            "profesor_id": "current_user.id"
+          },
+          "note": "Listado de alumnos: profesores solo ven alumnos de sus cursos asignados",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia",
+            "Profesor_academia": "assigned_courses"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.056365+00:00"
+        }
+      },
+      "post": {
+        "description": "Auto-generated operation for alumnos.crear_alumno",
+        "operationId": "alumnos.crear_alumno",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlumnoCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedAlumno"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "POST /alumnos/",
+        "tags": [
+          "Alumnos"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma"
+          ],
+          "note": "Crear alumno: solo administradores",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.056365+00:00"
+        }
+      }
+    },
+    "/alumnos/{alumno_id}": {
+      "delete": {
+        "description": "Auto-generated operation for alumnos.eliminar_alumno",
+        "operationId": "alumnos.eliminar_alumno",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "alumno_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Alumno"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "DELETE /alumnos/{alumno_id}",
+        "tags": [
+          "Alumnos"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma"
+          ],
+          "note": "Eliminar alumno (soft-delete): solo administradores",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.057377+00:00"
+        }
+      },
+      "get": {
+        "description": "Auto-generated operation for alumnos.obtener_alumno",
+        "operationId": "alumnos.obtener_alumno",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "alumno_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Alumno"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /alumnos/{alumno_id}",
+        "tags": [
+          "Alumnos"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma",
+            "Profesor_academia"
+          ],
+          "note": "Ver alumno: profesores solo ven alumnos de sus cursos",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia",
+            "Profesor_academia": "assigned_courses"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.056365+00:00"
+        }
+      },
+      "patch": {
+        "description": "Auto-generated operation for alumnos.actualizar_alumno",
+        "operationId": "alumnos.actualizar_alumno",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "alumno_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlumnoUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Alumno"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PATCH /alumnos/{alumno_id}",
+        "tags": [
+          "Alumnos"
+        ]
+      },
+      "put": {
+        "description": "Auto-generated operation for alumnos.actualizar_alumno",
+        "operationId": "alumnos.actualizar_alumno",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "alumno_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlumnoUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Alumno"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PUT /alumnos/{alumno_id}",
+        "tags": [
+          "Alumnos"
+        ]
+      }
+    },
+    "/anotaciones/": {
+      "get": {
+        "description": "Auto-generated operation for anotaciones.listar_anotaciones",
+        "operationId": "anotaciones.listar_anotaciones",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "sesion_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alumno_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "curso_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tipo_anotacion",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "excluir_tipo",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fecha_desde",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fecha_hasta",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "activas",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "with_total",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_dir",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expand",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedAnotacione"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /anotaciones/",
+        "tags": [
+          "Anotaciones"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma",
+            "Profesor_academia"
+          ],
+          "enforced_filters": {
+            "academia_id": "current_user.academia_id",
+            "profesor_id": "current_user.id"
+          },
+          "note": "Listado de anotaciones: profesores solo ven anotaciones de sus sesiones",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia",
+            "Profesor_academia": "own_sessions"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.057956+00:00"
+        }
+      },
+      "post": {
+        "description": "Auto-generated operation for anotaciones.crear_anotacion",
+        "operationId": "anotaciones.crear_anotacion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnotacionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedAnotacione"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "POST /anotaciones/",
+        "tags": [
+          "Anotaciones"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma",
+            "Profesor_academia"
+          ],
+          "note": "Crear anotación: profesores solo en sus propias sesiones",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia",
+            "Profesor_academia": "own_sessions"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.057956+00:00"
+        }
+      }
+    },
+    "/anotaciones/{anotacion_id}": {
+      "delete": {
+        "description": "Auto-generated operation for anotaciones.eliminar_anotacion",
+        "operationId": "anotaciones.eliminar_anotacion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "anotacion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "DELETE /anotaciones/{anotacion_id}",
+        "tags": [
+          "Anotaciones"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma",
+            "Profesor_academia"
+          ],
+          "note": "Eliminar anotación (soft-delete): profesores solo en sus propias sesiones",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia",
+            "Profesor_academia": "own_sessions"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.057956+00:00"
+        }
+      },
+      "get": {
+        "description": "Auto-generated operation for anotaciones.obtener_anotacion",
+        "operationId": "anotaciones.obtener_anotacion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "anotacion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /anotaciones/{anotacion_id}",
+        "tags": [
+          "Anotaciones"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma",
+            "Profesor_academia"
+          ],
+          "note": "Ver anotación: profesores solo ven anotaciones de sus sesiones",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia",
+            "Profesor_academia": "own_sessions"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.057956+00:00"
+        }
+      },
+      "patch": {
+        "description": "Auto-generated operation for anotaciones.actualizar_anotacion",
+        "operationId": "anotaciones.actualizar_anotacion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "anotacion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnotacionUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PATCH /anotaciones/{anotacion_id}",
+        "tags": [
+          "Anotaciones"
+        ]
+      },
+      "put": {
+        "description": "Auto-generated operation for anotaciones.actualizar_anotacion",
+        "operationId": "anotaciones.actualizar_anotacion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "anotacion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnotacionUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PUT /anotaciones/{anotacion_id}",
+        "tags": [
+          "Anotaciones"
+        ]
+      }
+    },
+    "/aulas/": {
+      "get": {
+        "description": "Auto-generated operation for aulas.listar_aulas",
+        "operationId": "aulas.listar_aulas",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "academia_id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "nombre",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "nombre_contains",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "capacidad_min",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "capacidad_max",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_direction",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expand",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedAula"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /aulas/",
+        "tags": [
+          "Aulas"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma",
+            "Profesor_academia"
+          ],
+          "enforced_filters": {
+            "academia_id": "current_user.academia_id"
+          },
+          "note": "Listado de aulas: admin_plataforma puede ver todas; admin_academia y profesor_academia solo de su academia",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia",
+            "Profesor_academia": "own_academia"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
+        }
+      },
+      "post": {
+        "description": "Auto-generated operation for aulas.crear_aula",
+        "operationId": "aulas.crear_aula",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AulaCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedAula"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "POST /aulas/",
+        "tags": [
+          "Aulas"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma"
+          ],
+          "note": "Crear aula: admin_plataforma requiere academia_id; admin_academia usa su academia vinculada",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
+        }
+      }
+    },
+    "/aulas/{aula_id}": {
+      "delete": {
+        "description": "Auto-generated operation for aulas.eliminar_aula",
+        "operationId": "aulas.eliminar_aula",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "aula_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Aula"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "DELETE /aulas/{aula_id}",
+        "tags": [
+          "Aulas"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma"
+          ],
+          "note": "Eliminar aula (soft-delete): solo administradores",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
+        }
+      },
+      "get": {
+        "description": "Auto-generated operation for aulas.obtener_aula",
+        "operationId": "aulas.obtener_aula",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "aula_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Aula"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /aulas/{aula_id}",
+        "tags": [
+          "Aulas"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma",
+            "Profesor_academia"
+          ],
+          "note": "Ver aula: profesores pueden ver aulas de su academia",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia",
+            "Profesor_academia": "own_academia"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
+        }
+      },
+      "patch": {
+        "description": "Auto-generated operation for aulas.actualizar_aula",
+        "operationId": "aulas.actualizar_aula_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "aula_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AulaUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Aula"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PATCH /aulas/{aula_id}",
+        "tags": [
+          "Aulas"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma"
+          ],
+          "note": "Modificar aula: solo administradores",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
+        }
+      },
+      "put": {
+        "description": "Auto-generated operation for aulas.actualizar_aula",
+        "operationId": "aulas.actualizar_aula_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "aula_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AulaUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Aula"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PUT /aulas/{aula_id}",
+        "tags": [
+          "Aulas"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma"
+          ],
+          "note": "Modificar aula: solo administradores",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       }
     },
@@ -856,7 +3584,7 @@
           "note": "Login público (no requiere rol)",
           "scope": "public",
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         },
         "security": []
       }
@@ -904,7 +3632,7 @@
           "note": "Logout para usuarios autenticados",
           "scope": "own_user",
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       }
     },
@@ -941,7 +3669,7 @@
           "note": "Refresh de tokens para usuarios autenticados",
           "scope": "own_user",
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       }
     },
@@ -980,7 +3708,750 @@
             "Admin_academia": "own_academia"
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
+        }
+      }
+    },
+    "/curso-profesores/": {
+      "get": {
+        "description": "Auto-generated operation for curso_profesores.listar_asignaciones",
+        "operationId": "curso_profesores.listar_asignaciones",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedCurso_profesore"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /curso-profesores/",
+        "tags": [
+          "Curso_profesores"
+        ]
+      },
+      "post": {
+        "description": "Auto-generated operation for curso_profesores.crear_asignacion",
+        "operationId": "curso_profesores.crear_asignacion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "example": {
+                  "curso_id": 1,
+                  "usuario_id": 5
+                },
+                "properties": {
+                  "curso_id": {
+                    "description": "ID del curso",
+                    "example": 1,
+                    "type": "integer"
+                  },
+                  "usuario_id": {
+                    "description": "ID del profesor (usuario)",
+                    "example": 5,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "curso_id",
+                  "usuario_id"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedCurso_profesore"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "POST /curso-profesores/",
+        "tags": [
+          "Curso_profesores"
+        ]
+      }
+    },
+    "/curso-profesores/{cp_id}": {
+      "delete": {
+        "description": "Auto-generated operation for curso_profesores.eliminar_asignacion",
+        "operationId": "curso_profesores.eliminar_asignacion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cp_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "DELETE /curso-profesores/{cp_id}",
+        "tags": [
+          "Curso_profesores"
+        ]
+      },
+      "get": {
+        "description": "Auto-generated operation for curso_profesores.obtener_asignacion",
+        "operationId": "curso_profesores.obtener_asignacion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cp_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /curso-profesores/{cp_id}",
+        "tags": [
+          "Curso_profesores"
+        ]
+      },
+      "patch": {
+        "description": "Auto-generated operation for curso_profesores.actualizar_asignacion",
+        "operationId": "curso_profesores.actualizar_asignacion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cp_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "example": {
+                  "fecha_baja": "2024-12-31T23:59:59",
+                  "motivo_baja": "Fin de contrato"
+                },
+                "properties": {
+                  "fecha_baja": {
+                    "description": "Fecha de baja",
+                    "example": "2024-12-31T23:59:59",
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "motivo_baja": {
+                    "description": "Motivo de la baja",
+                    "example": "Fin de contrato",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PATCH /curso-profesores/{cp_id}",
+        "tags": [
+          "Curso_profesores"
+        ]
+      },
+      "put": {
+        "description": "Auto-generated operation for curso_profesores.actualizar_asignacion",
+        "operationId": "curso_profesores.actualizar_asignacion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cp_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "example": {
+                  "fecha_baja": "2024-12-31T23:59:59",
+                  "motivo_baja": "Fin de contrato"
+                },
+                "properties": {
+                  "fecha_baja": {
+                    "description": "Fecha de baja",
+                    "example": "2024-12-31T23:59:59",
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "motivo_baja": {
+                    "description": "Motivo de la baja",
+                    "example": "Fin de contrato",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PUT /curso-profesores/{cp_id}",
+        "tags": [
+          "Curso_profesores"
+        ]
+      }
+    },
+    "/cursos/": {
+      "get": {
+        "description": "Auto-generated operation for cursos.listar_cursos",
+        "operationId": "cursos.listar_cursos",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "academia_id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "nombre",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "nombre_contains",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "anio_academico",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tipo_alumno",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "estado",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "acepta_nuevos_alumnos",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tarifa_id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_direction",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expand",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedCurso"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /cursos/",
+        "tags": [
+          "Cursos"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma",
+            "Profesor_academia"
+          ],
+          "enforced_filters": {
+            "academia_id": "current_user.academia_id",
+            "profesor_id": "current_user.id"
+          },
+          "note": "Listado de cursos: profesores solo ven cursos asignados a ellos",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia",
+            "Profesor_academia": "assigned_courses"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
+        }
+      },
+      "post": {
+        "description": "Auto-generated operation for cursos.crear_curso",
+        "operationId": "cursos.crear_curso",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CursoCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedCurso"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "POST /cursos/",
+        "tags": [
+          "Cursos"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma"
+          ],
+          "note": "Crear curso: solo administradores",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
+        }
+      }
+    },
+    "/cursos/{curso_id}": {
+      "delete": {
+        "description": "Auto-generated operation for cursos.eliminar_curso",
+        "operationId": "cursos.eliminar_curso",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "curso_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Curso"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "DELETE /cursos/{curso_id}",
+        "tags": [
+          "Cursos"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma"
+          ],
+          "note": "Eliminar curso (soft-delete): solo administradores",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
+        }
+      },
+      "get": {
+        "description": "Auto-generated operation for cursos.obtener_curso",
+        "operationId": "cursos.obtener_curso",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "curso_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Curso"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /cursos/{curso_id}",
+        "tags": [
+          "Cursos"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma",
+            "Profesor_academia"
+          ],
+          "note": "Ver curso: profesores solo ven cursos asignados",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia",
+            "Profesor_academia": "assigned_courses"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
+        }
+      },
+      "patch": {
+        "description": "Auto-generated operation for cursos.actualizar_curso",
+        "operationId": "cursos.actualizar_curso_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "curso_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CursoUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Curso"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PATCH /cursos/{curso_id}",
+        "tags": [
+          "Cursos"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma"
+          ],
+          "note": "Modificar curso: solo administradores",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
+        }
+      },
+      "put": {
+        "description": "Auto-generated operation for cursos.actualizar_curso",
+        "operationId": "cursos.actualizar_curso_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "curso_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CursoUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Curso"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PUT /cursos/{curso_id}",
+        "tags": [
+          "Cursos"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma"
+          ],
+          "note": "Modificar curso: solo administradores",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       }
     },
@@ -1023,6 +4494,777 @@
         "summary": "GET /health",
         "tags": [
           "Docs/Health"
+        ]
+      }
+    },
+    "/horarios/": {
+      "get": {
+        "description": "Auto-generated operation for horarios.listar_horarios",
+        "operationId": "horarios.listar_horarios",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "curso_id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "aula_id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dia_semana",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_direction",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expand",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedHorario"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /horarios/",
+        "tags": [
+          "Horarios"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma",
+            "Profesor_academia"
+          ],
+          "enforced_filters": {
+            "academia_id": "current_user.academia_id",
+            "profesor_id": "current_user.id"
+          },
+          "note": "Listado de horarios: profesores solo ven horarios de sus cursos",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia",
+            "Profesor_academia": "assigned_courses"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
+        }
+      },
+      "post": {
+        "description": "Auto-generated operation for horarios.crear_horario",
+        "operationId": "horarios.crear_horario",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HorarioCursoCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedHorario"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "POST /horarios/",
+        "tags": [
+          "Horarios"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma"
+          ],
+          "note": "Crear horario: solo administradores",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
+        }
+      }
+    },
+    "/horarios/{horario_id}": {
+      "delete": {
+        "description": "Auto-generated operation for horarios.eliminar_horario",
+        "operationId": "horarios.eliminar_horario",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "horario_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "DELETE /horarios/{horario_id}",
+        "tags": [
+          "Horarios"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma"
+          ],
+          "note": "Eliminar horario (soft-delete): solo administradores",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
+        }
+      },
+      "get": {
+        "description": "Auto-generated operation for horarios.obtener_horario",
+        "operationId": "horarios.obtener_horario",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "horario_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /horarios/{horario_id}",
+        "tags": [
+          "Horarios"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma",
+            "Profesor_academia"
+          ],
+          "note": "Ver horario: profesores solo ven horarios de sus cursos",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia",
+            "Profesor_academia": "assigned_courses"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
+        }
+      },
+      "patch": {
+        "description": "Auto-generated operation for horarios.actualizar_horario",
+        "operationId": "horarios.actualizar_horario_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "horario_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HorarioCursoUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PATCH /horarios/{horario_id}",
+        "tags": [
+          "Horarios"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma"
+          ],
+          "note": "Modificar horario: solo administradores",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
+        }
+      },
+      "put": {
+        "description": "Auto-generated operation for horarios.actualizar_horario",
+        "operationId": "horarios.actualizar_horario_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "horario_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HorarioCursoUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PUT /horarios/{horario_id}",
+        "tags": [
+          "Horarios"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma"
+          ],
+          "note": "Modificar horario: solo administradores",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
+        }
+      }
+    },
+    "/inscripciones/": {
+      "get": {
+        "description": "Auto-generated operation for inscripciones.listar_inscripciones",
+        "operationId": "inscripciones.listar_inscripciones",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "academia_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alumno_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "curso_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "activas",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fecha_inicio_desde",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fecha_inicio_hasta",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "with_total",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_dir",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expand",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedInscripcione"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /inscripciones/",
+        "tags": [
+          "Inscripciones"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma",
+            "Profesor_academia"
+          ],
+          "enforced_filters": {
+            "academia_id": "current_user.academia_id",
+            "profesor_id": "current_user.id"
+          },
+          "note": "Listado de inscripciones: profesores solo ven inscripciones de sus cursos",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia",
+            "Profesor_academia": "assigned_courses"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.057377+00:00"
+        }
+      },
+      "post": {
+        "description": "Auto-generated operation for inscripciones.crear_inscripcion",
+        "operationId": "inscripciones.crear_inscripcion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InscripcionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedInscripcione"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "POST /inscripciones/",
+        "tags": [
+          "Inscripciones"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma"
+          ],
+          "note": "Crear inscripción: solo administradores",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.057377+00:00"
+        }
+      }
+    },
+    "/inscripciones/{inscripcion_id}": {
+      "delete": {
+        "description": "Auto-generated operation for inscripciones.eliminar_inscripcion",
+        "operationId": "inscripciones.eliminar_inscripcion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "inscripcion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "DELETE /inscripciones/{inscripcion_id}",
+        "tags": [
+          "Inscripciones"
+        ]
+      },
+      "get": {
+        "description": "Auto-generated operation for inscripciones.obtener_inscripcion",
+        "operationId": "inscripciones.obtener_inscripcion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "inscripcion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /inscripciones/{inscripcion_id}",
+        "tags": [
+          "Inscripciones"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma",
+            "Profesor_academia"
+          ],
+          "note": "Ver inscripción: profesores solo ven inscripciones de sus cursos",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia",
+            "Profesor_academia": "assigned_courses"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.057377+00:00"
+        }
+      },
+      "patch": {
+        "description": "Auto-generated operation for inscripciones.actualizar_inscripcion",
+        "operationId": "inscripciones.actualizar_inscripcion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "inscripcion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InscripcionUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PATCH /inscripciones/{inscripcion_id}",
+        "tags": [
+          "Inscripciones"
+        ]
+      },
+      "put": {
+        "description": "Auto-generated operation for inscripciones.actualizar_inscripcion",
+        "operationId": "inscripciones.actualizar_inscripcion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "inscripcion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InscripcionUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PUT /inscripciones/{inscripcion_id}",
+        "tags": [
+          "Inscripciones"
         ]
       }
     },
@@ -1114,7 +5356,498 @@
           "transform_to": null,
           "scope": "global",
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
+        }
+      }
+    },
+    "/sesiones/": {
+      "get": {
+        "description": "Auto-generated operation for sesiones.listar_sesiones",
+        "operationId": "sesiones.listar_sesiones",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "horario_curso_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "curso_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "aula_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "profesor_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fecha_desde",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fecha_hasta",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "con_asistencia",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "with_total",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_dir",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedSesione"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /sesiones/",
+        "tags": [
+          "Sesiones"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma",
+            "Profesor_academia"
+          ],
+          "enforced_filters": {
+            "academia_id": "current_user.academia_id",
+            "profesor_id": "current_user.id"
+          },
+          "note": "Listado de sesiones: profesores solo ven sus propias sesiones",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia",
+            "Profesor_academia": "own_sessions"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.056170+00:00"
+        }
+      },
+      "post": {
+        "description": "Auto-generated operation for sesiones.crear_sesion",
+        "operationId": "sesiones.crear_sesion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SesionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedSesione"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "POST /sesiones/",
+        "tags": [
+          "Sesiones"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma",
+            "Profesor_academia"
+          ],
+          "note": "Crear sesión: profesores pueden crear sesiones para sus cursos asignados",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia",
+            "Profesor_academia": "assigned_courses"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.056170+00:00"
+        }
+      }
+    },
+    "/sesiones/{sesion_id}": {
+      "delete": {
+        "description": "Auto-generated operation for sesiones.eliminar_sesion",
+        "operationId": "sesiones.eliminar_sesion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sesion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "DELETE /sesiones/{sesion_id}",
+        "tags": [
+          "Sesiones"
+        ]
+      },
+      "get": {
+        "description": "Auto-generated operation for sesiones.obtener_sesion",
+        "operationId": "sesiones.obtener_sesion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sesion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /sesiones/{sesion_id}",
+        "tags": [
+          "Sesiones"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma",
+            "Profesor_academia"
+          ],
+          "note": "Ver sesión: profesores solo ven sus propias sesiones",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia",
+            "Profesor_academia": "own_sessions"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.056170+00:00"
+        }
+      },
+      "patch": {
+        "description": "Auto-generated operation for sesiones.actualizar_sesion",
+        "operationId": "sesiones.actualizar_sesion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sesion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SesionUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PATCH /sesiones/{sesion_id}",
+        "tags": [
+          "Sesiones"
+        ]
+      },
+      "put": {
+        "description": "Auto-generated operation for sesiones.actualizar_sesion",
+        "operationId": "sesiones.actualizar_sesion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sesion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SesionUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PUT /sesiones/{sesion_id}",
+        "tags": [
+          "Sesiones"
+        ]
+      }
+    },
+    "/sesiones/{sesion_id}/pasar-lista": {
+      "post": {
+        "description": "Auto-generated operation for sesiones.pasar_lista",
+        "operationId": "sesiones.pasar_lista",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sesion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "alumnos": {
+                    "example": [
+                      {
+                        "alumno_id": 1,
+                        "ausente": true
+                      },
+                      {
+                        "alumno_id": 2,
+                        "ausente": false
+                      },
+                      {
+                        "alumno_id": 3,
+                        "ausente": true
+                      }
+                    ],
+                    "items": {
+                      "properties": {
+                        "alumno_id": {
+                          "example": 1,
+                          "type": "integer"
+                        },
+                        "ausente": {
+                          "example": true,
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "alumno_id",
+                        "ausente"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "alumnos"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedSesione"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "POST /sesiones/{sesion_id}/pasar-lista",
+        "tags": [
+          "Sesiones"
+        ],
+        "x-permissions": {
+          "allowed_roles": [
+            "Admin_academia",
+            "Admin_plataforma",
+            "Profesor_academia"
+          ],
+          "note": "Pasar lista: profesores solo en sus propias sesiones",
+          "scope_by_role": {
+            "Admin_plataforma": "global",
+            "Admin_academia": "own_academia",
+            "Profesor_academia": "own_sessions"
+          },
+          "source": "permissions_map",
+          "generated_at": "2025-11-21T16:35:02.056365+00:00"
         }
       }
     },
@@ -1258,7 +5991,7 @@
             "Admin_academia": "own_academia"
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       },
       "post": {
@@ -1312,7 +6045,7 @@
             "Admin_academia": "own_academia"
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       }
     },
@@ -1368,7 +6101,7 @@
             "Admin_academia": "own_academia"
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       },
       "get": {
@@ -1422,7 +6155,7 @@
             "Admin_academia": "own_academia"
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       },
       "patch": {
@@ -1486,7 +6219,7 @@
             "Admin_academia": "own_academia"
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       },
       "put": {
@@ -1550,7 +6283,7 @@
             "Admin_academia": "own_academia"
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       }
     },
@@ -1776,7 +6509,7 @@
             "Profesor_academia": "own_academia"
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       },
       "post": {
@@ -1838,7 +6571,7 @@
             ]
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       }
     },
@@ -1889,7 +6622,7 @@
             "Profesor_academia": "own_academia"
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       }
     },
@@ -1933,7 +6666,7 @@
           "note": "Cada usuario puede ver su propio perfil; admins pueden verlo según su scope",
           "scope": "own_user",
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       }
     },
@@ -2016,7 +6749,7 @@
           "note": "Recuperación de credenciales: la operación puede iniciarse sin sesión (por ejemplo 'forgot password'), pero solo debe permitir recuperar las credenciales del propio usuario. Los admins pueden tener flujos separados para administrar credenciales de otros usuarios.",
           "scope": "own_user",
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       }
     },
@@ -2072,7 +6805,7 @@
             "Admin_academia": "own_academia"
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       },
       "get": {
@@ -2128,7 +6861,7 @@
             "Profesor_academia": "own_academia"
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       },
       "patch": {
@@ -2212,7 +6945,7 @@
             ]
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       },
       "put": {
@@ -2296,7 +7029,7 @@
             ]
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       }
     },
@@ -2387,7 +7120,7 @@
             ]
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       }
     },
@@ -2453,7 +7186,7 @@
             "Admin_academia": "own_academia"
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       }
     },
@@ -2519,7 +7252,7 @@
             "Admin_academia": "own_academia"
           },
           "source": "permissions_map",
-          "generated_at": "2025-10-29T15:09:03.361252+00:00"
+          "generated_at": "2025-11-21T16:35:02.055170+00:00"
         }
       }
     }
@@ -2538,8 +7271,40 @@
       "name": "Academias"
     },
     {
+      "description": "Operaciones sobre alumnos y sus inscripciones.",
+      "name": "Alumnos"
+    },
+    {
+      "description": "",
+      "name": "Anotaciones"
+    },
+    {
+      "description": "",
+      "name": "Aulas"
+    },
+    {
+      "description": "",
+      "name": "Curso_profesores"
+    },
+    {
+      "description": "Gestión de cursos, horarios e inscripciones.",
+      "name": "Cursos"
+    },
+    {
+      "description": "",
+      "name": "Horarios"
+    },
+    {
+      "description": "",
+      "name": "Inscripciones"
+    },
+    {
       "description": "",
       "name": "Roles"
+    },
+    {
+      "description": "",
+      "name": "Sesiones"
     },
     {
       "description": "",

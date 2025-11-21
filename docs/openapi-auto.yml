@@ -819,20 +819,10 @@ components:
           example: null
           nullable: true
           type: string
-        tarifa:
-          allOf:
-          - $ref: '#/components/schemas/Tarifa'
-          description: Información de la tarifa
-          readOnly: true
-        tarifa_id:
-          description: ID de la tarifa aplicada a esta inscripción
-          example: 1
-          type: integer
       required:
       - alumno_id
       - curso_id
       - fecha_inicio
-      - tarifa_id
       type: object
     InscripcionCreate:
       additionalProperties: false
@@ -861,15 +851,10 @@ components:
           example: null
           nullable: true
           type: string
-        tarifa_id:
-          description: ID de la tarifa a aplicar
-          example: 1
-          type: integer
       required:
       - alumno_id
       - curso_id
       - fecha_inicio
-      - tarifa_id
       type: object
     InscripcionUpdate:
       additionalProperties: false
@@ -898,10 +883,6 @@ components:
           example: Cambio de ciudad
           nullable: true
           type: string
-        tarifa_id:
-          description: Nuevo ID de tarifa
-          example: 2
-          type: integer
       type: object
     LoginRequest:
       additionalProperties: false
@@ -2789,11 +2770,6 @@ paths:
           type: string
       - in: query
         name: curso_id
-        required: false
-        schema:
-          type: string
-      - in: query
-        name: tarifa_id
         required: false
         schema:
           type: string

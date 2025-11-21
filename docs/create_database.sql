@@ -96,13 +96,11 @@ CREATE TABLE Inscripcion (
     id INT AUTO_INCREMENT PRIMARY KEY,
     alumno_id INT NOT NULL,
     curso_id INT NOT NULL,
-    tarifa_id INT NOT NULL,
     fecha_inicio DATE NOT NULL,
     fecha_fin DATE,
     motivo_baja VARCHAR(255),
     FOREIGN KEY (alumno_id) REFERENCES Alumno(id),
-    FOREIGN KEY (curso_id) REFERENCES Curso(id),
-    FOREIGN KEY (tarifa_id) REFERENCES Tarifa(id)
+    FOREIGN KEY (curso_id) REFERENCES Curso(id)
 );
 
 -- Tabla Rol_Usuario
@@ -345,7 +343,7 @@ INSERT INTO Rol_Usuario (id, nombre) VALUES
 -- ==================================================================================
 -- Añade academia_id redundante a Inscripcion para mejorar performance en queries
 -- multi-academia. Evita JOINs innecesarios al filtrar por academia.
--- El trigger garantiza consistencia con alumno, curso y tarifa.
+-- El trigger garantiza consistencia con alumno y curso.
 
 ALTER TABLE Inscripcion 
   ADD COLUMN academia_id INT NOT NULL AFTER id,
@@ -365,19 +363,16 @@ FOR EACH ROW
 BEGIN
   DECLARE v_alumno_academia INT;
   DECLARE v_curso_academia INT;
-  DECLARE v_tarifa_academia INT;
   
   -- Obtener academia_id de las entidades relacionadas
   SELECT academia_id INTO v_alumno_academia FROM Alumno WHERE id = NEW.alumno_id;
   SELECT academia_id INTO v_curso_academia FROM Curso WHERE id = NEW.curso_id;
-  SELECT academia_id INTO v_tarifa_academia FROM Tarifa WHERE id = NEW.tarifa_id;
   
   -- Validar que todas pertenecen a la misma academia
   IF NEW.academia_id != v_alumno_academia OR 
-     NEW.academia_id != v_curso_academia OR 
-     NEW.academia_id != v_tarifa_academia THEN
+     NEW.academia_id != v_curso_academia THEN
     SIGNAL SQLSTATE '45000' 
-    SET MESSAGE_TEXT = 'Inconsistencia: alumno, curso y tarifa deben pertenecer a la misma academia que la inscripcion';
+    SET MESSAGE_TEXT = 'Inconsistencia: alumno y curso deben pertenecer a la misma academia que la inscripcion';
   END IF;
 END$$
 DELIMITER ;
@@ -390,25 +385,21 @@ FOR EACH ROW
 BEGIN
   DECLARE v_alumno_academia INT;
   DECLARE v_curso_academia INT;
-  DECLARE v_tarifa_academia INT;
   
-  -- Solo validar si se modifica academia_id, alumno_id, curso_id o tarifa_id
+  -- Solo validar si se modifica academia_id, alumno_id o curso_id
   IF NEW.academia_id != OLD.academia_id OR 
      NEW.alumno_id != OLD.alumno_id OR
-     NEW.curso_id != OLD.curso_id OR
-     NEW.tarifa_id != OLD.tarifa_id THEN
+     NEW.curso_id != OLD.curso_id THEN
     
     -- Obtener academia_id de las entidades relacionadas
     SELECT academia_id INTO v_alumno_academia FROM Alumno WHERE id = NEW.alumno_id;
     SELECT academia_id INTO v_curso_academia FROM Curso WHERE id = NEW.curso_id;
-    SELECT academia_id INTO v_tarifa_academia FROM Tarifa WHERE id = NEW.tarifa_id;
     
     -- Validar que todas pertenecen a la misma academia
     IF NEW.academia_id != v_alumno_academia OR 
-       NEW.academia_id != v_curso_academia OR 
-       NEW.academia_id != v_tarifa_academia THEN
+       NEW.academia_id != v_curso_academia THEN
       SIGNAL SQLSTATE '45000' 
-      SET MESSAGE_TEXT = 'Inconsistencia: alumno, curso y tarifa deben pertenecer a la misma academia que la inscripcion';
+      SET MESSAGE_TEXT = 'Inconsistencia: alumno y curso deben pertenecer a la misma academia que la inscripcion';
     END IF;
   END IF;
 END$$
