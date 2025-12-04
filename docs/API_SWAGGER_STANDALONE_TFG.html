@@ -1,0 +1,5902 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Workers Profesores - Documentación Interactiva (TFG)</title>
+    <meta name="author" content="Ángel Fernández Vidal">
+    <meta name="description" content="Documentación OpenAPI interactiva del sistema de gestión de academias - TFG FP DAM">
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Ubuntu", sans-serif;
+        }
+        .tfg-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .tfg-header h1 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+        }
+        .tfg-header p {
+            margin: 0;
+            font-size: 14px;
+            opacity: 0.95;
+        }
+        .info-banner {
+            background: #E3F2FD;
+            border-left: 4px solid #2196F3;
+            padding: 12px 20px;
+            margin: 0;
+            font-size: 13px;
+        }
+        #swagger-ui {
+            max-width: 1460px;
+            margin: 0 auto;
+        }
+        .swagger-ui .topbar { display: none; }
+    </style>
+</head>
+<body>
+    <div class="tfg-header">
+        <h1>📡 API REST - Sistema de Gestión de Academias</h1>
+        <p><strong>Proyecto:</strong> TFG FP DAM - Sistema Academia Chat-Driven | <strong>Autor:</strong> Ángel Fernández Vidal | <strong>Curso:</strong> 2024-2025</p>
+    </div>
+    
+    <div class="info-banner">
+        <strong>ℹ️ Documentación interactiva:</strong> Esta página utiliza Swagger UI para mostrar todos los endpoints de la API REST.
+        Puedes explorar los schemas, ver ejemplos de request/response, y entender la estructura completa de la API.
+        <strong>Archivo 100% offline</strong> - No requiere servidor en ejecución.
+    </div>
+    
+    <div id="swagger-ui"></div>
+    
+    <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
+    <script>
+        // Especificación OpenAPI embebida (cargada desde openapi-auto.json)
+        // Este archivo es completamente standalone y funciona sin servidor
+        Promise.resolve({
+  "components": {
+    "schemas": {
+      "Academia": {
+        "additionalProperties": false,
+        "properties": {
+          "descripcion": {
+            "example": "Academia especializada en preparación de exámenes oficiales de inglés, francés y alemán",
+            "type": "string"
+          },
+          "direccion": {
+            "example": "Calle Mayor 123, 28013 Madrid",
+            "type": "string"
+          },
+          "email_contacto": {
+            "example": "contacto@academiaidiomas.es",
+            "format": "email",
+            "type": "string"
+          },
+          "id": {
+            "readOnly": true,
+            "type": "integer"
+          },
+          "nombre": {
+            "example": "Academia de Idiomas Central",
+            "type": "string"
+          },
+          "nombre_contacto": {
+            "example": "Juan Pérez García",
+            "type": "string"
+          },
+          "telefono": {
+            "example": "+34 912 345 678",
+            "type": "string"
+          }
+        },
+        "required": [
+          "nombre"
+        ],
+        "type": "object"
+      },
+      "Alumno": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "description": "ID de la academia a la que pertenece el alumno",
+            "example": 1,
+            "type": "integer"
+          },
+          "direccion": {
+            "description": "Dirección del alumno",
+            "example": "Calle Mayor 123, 28001 Madrid",
+            "type": "string"
+          },
+          "dni": {
+            "description": "DNI/NIE del alumno",
+            "example": "12345678A",
+            "type": "string"
+          },
+          "email": {
+            "description": "Email del alumno (único en el sistema)",
+            "example": "juan.perez@email.com",
+            "format": "email",
+            "type": "string"
+          },
+          "email_tutor": {
+            "description": "Email del tutor",
+            "example": "maria.garcia@email.com",
+            "format": "email",
+            "nullable": true,
+            "type": "string"
+          },
+          "fecha_nacimiento": {
+            "description": "Fecha de nacimiento del alumno",
+            "example": "2005-03-15",
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "example": 1,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "nombre": {
+            "description": "Nombre completo del alumno",
+            "example": "Juan Pérez García",
+            "type": "string"
+          },
+          "nombre_tutor": {
+            "description": "Nombre del tutor (obligatorio para menores)",
+            "example": "María García López",
+            "nullable": true,
+            "type": "string"
+          },
+          "relaccion_tutor_alumno": {
+            "description": "Relación del tutor con el alumno",
+            "example": "Madre",
+            "nullable": true,
+            "type": "string"
+          },
+          "telefono": {
+            "description": "Teléfono del alumno",
+            "example": "+34 600123456",
+            "type": "string"
+          },
+          "telefono_tutor": {
+            "description": "Teléfono del tutor",
+            "example": "+34 600654321",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "academia_id",
+          "direccion",
+          "dni",
+          "email",
+          "fecha_nacimiento",
+          "nombre",
+          "telefono"
+        ],
+        "type": "object"
+      },
+      "AlumnoCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "description": "ID de la academia (obligatorio para admin_plataforma, opcional para admin_academia)",
+            "example": 1,
+            "nullable": true,
+            "type": "integer"
+          },
+          "direccion": {
+            "description": "Dirección completa del alumno",
+            "example": "Calle Mayor 123, 28001 Madrid",
+            "type": "string"
+          },
+          "dni": {
+            "description": "DNI/NIE del alumno",
+            "example": "12345678A",
+            "type": "string"
+          },
+          "email": {
+            "description": "Email del alumno (debe ser único)",
+            "example": "juan.perez@email.com",
+            "format": "email",
+            "type": "string"
+          },
+          "email_tutor": {
+            "description": "Email del tutor",
+            "example": "maria.garcia@email.com",
+            "format": "email",
+            "nullable": true,
+            "type": "string"
+          },
+          "fecha_nacimiento": {
+            "description": "Fecha de nacimiento del alumno",
+            "example": "2005-03-15",
+            "format": "date",
+            "type": "string"
+          },
+          "nombre": {
+            "description": "Nombre completo del alumno",
+            "example": "Juan Pérez García",
+            "type": "string"
+          },
+          "nombre_tutor": {
+            "description": "Nombre del tutor (obligatorio si el alumno es menor de edad)",
+            "example": "María García López",
+            "nullable": true,
+            "type": "string"
+          },
+          "relaccion_tutor_alumno": {
+            "description": "Relación del tutor con el alumno (Padre, Madre, Tutor legal, etc.)",
+            "example": "Madre",
+            "nullable": true,
+            "type": "string"
+          },
+          "telefono": {
+            "description": "Teléfono del alumno",
+            "example": "+34 600123456",
+            "type": "string"
+          },
+          "telefono_tutor": {
+            "description": "Teléfono del tutor",
+            "example": "+34 600654321",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "direccion",
+          "dni",
+          "email",
+          "fecha_nacimiento",
+          "nombre",
+          "telefono"
+        ],
+        "type": "object"
+      },
+      "AlumnoUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "direccion": {
+            "description": "Nueva dirección del alumno",
+            "example": "Avenida Principal 456, 28002 Madrid",
+            "type": "string"
+          },
+          "dni": {
+            "description": "Nuevo DNI del alumno",
+            "example": "87654321B",
+            "type": "string"
+          },
+          "email": {
+            "description": "Nuevo email del alumno",
+            "example": "nuevo.email@email.com",
+            "format": "email",
+            "type": "string"
+          },
+          "email_tutor": {
+            "description": "Nuevo email del tutor",
+            "example": "carlos.garcia@email.com",
+            "format": "email",
+            "nullable": true,
+            "type": "string"
+          },
+          "fecha_nacimiento": {
+            "description": "Nueva fecha de nacimiento",
+            "example": "2005-05-20",
+            "format": "date",
+            "type": "string"
+          },
+          "nombre": {
+            "description": "Nuevo nombre del alumno",
+            "example": "Juan Pérez García (Modificado)",
+            "type": "string"
+          },
+          "nombre_tutor": {
+            "description": "Nuevo nombre del tutor",
+            "example": "Carlos García López",
+            "nullable": true,
+            "type": "string"
+          },
+          "relaccion_tutor_alumno": {
+            "description": "Nueva relación del tutor",
+            "example": "Padre",
+            "nullable": true,
+            "type": "string"
+          },
+          "telefono": {
+            "description": "Nuevo teléfono del alumno",
+            "example": "+34 600999888",
+            "type": "string"
+          },
+          "telefono_tutor": {
+            "description": "Nuevo teléfono del tutor",
+            "example": "+34 600777666",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Anotacion": {
+        "additionalProperties": false,
+        "properties": {
+          "alumno": {
+            "allOf": [
+              {
+                "\`$ref": "#/components/schemas/Alumno"
+              }
+            ],
+            "description": "Información del alumno",
+            "readOnly": true
+          },
+          "alumno_id": {
+            "description": "ID del alumno",
+            "example": 1,
+            "type": "integer"
+          },
+          "curso_id": {
+            "description": "ID del curso",
+            "example": 1,
+            "type": "integer"
+          },
+          "curso_profesor_id": {
+            "description": "ID de la relación Curso_Profesores",
+            "example": 1,
+            "type": "integer"
+          },
+          "id": {
+            "example": 1,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "inscripcion_id": {
+            "description": "ID de la inscripción del alumno",
+            "example": 1,
+            "type": "integer"
+          },
+          "motivo_baja": {
+            "description": "Motivo de la baja lógica",
+            "example": null,
+            "nullable": true,
+            "type": "string"
+          },
+          "sesion": {
+            "allOf": [
+              {
+                "\`$ref": "#/components/schemas/Sesion"
+              }
+            ],
+            "description": "Información de la sesión",
+            "readOnly": true
+          },
+          "sesion_id": {
+            "description": "ID de la sesión",
+            "example": 1,
+            "type": "integer"
+          },
+          "texto": {
+            "description": "Texto de la anotación",
+            "example": "Ausencia justificada por enfermedad",
+            "nullable": true,
+            "type": "string"
+          },
+          "timestamp_alta": {
+            "description": "Timestamp de creación de la anotación",
+            "example": "2024-10-27T09:15:00",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "timestamp_baja": {
+            "description": "Timestamp de baja lógica (null si activa)",
+            "example": null,
+            "format": "date-time",
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "tipo_anotacion": {
+            "description": "Tipo de anotación: Ausencia (pasar lista), Evaluacion (académica), Comportamiento (conducta), Observacion (notas generales), Otros (miscelánea)",
+            "enum": [
+              "Ausencia",
+              "Evaluacion",
+              "Comportamiento",
+              "Observacion",
+              "Otros"
+            ],
+            "example": "Evaluacion",
+            "type": "string"
+          }
+        },
+        "required": [
+          "alumno_id",
+          "curso_id",
+          "curso_profesor_id",
+          "inscripcion_id",
+          "sesion_id",
+          "tipo_anotacion"
+        ],
+        "type": "object"
+      },
+      "AnotacionCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "alumno_id": {
+            "description": "ID del alumno",
+            "example": 1,
+            "type": "integer"
+          },
+          "curso_id": {
+            "description": "ID del curso",
+            "example": 1,
+            "type": "integer"
+          },
+          "curso_profesor_id": {
+            "description": "ID de la relación Curso_Profesores",
+            "example": 1,
+            "type": "integer"
+          },
+          "inscripcion_id": {
+            "description": "ID de la inscripción del alumno",
+            "example": 1,
+            "type": "integer"
+          },
+          "sesion_id": {
+            "description": "ID de la sesión",
+            "example": 1,
+            "type": "integer"
+          },
+          "texto": {
+            "description": "Texto descriptivo de la anotación",
+            "example": "Excelente participación en la discusión sobre gramática inglesa. Demuestra comprensión avanzada.",
+            "nullable": true,
+            "type": "string"
+          },
+          "tipo_anotacion": {
+            "description": "Tipo de anotación permitido: Evaluacion, Comportamiento, Observacion, Otros (NO se permite Ausencia - usar pasar-lista)",
+            "enum": [
+              "Evaluacion",
+              "Comportamiento",
+              "Observacion",
+              "Otros"
+            ],
+            "example": "Evaluacion",
+            "type": "string"
+          }
+        },
+        "required": [
+          "alumno_id",
+          "curso_id",
+          "curso_profesor_id",
+          "inscripcion_id",
+          "sesion_id",
+          "tipo_anotacion"
+        ],
+        "type": "object"
+      },
+      "AnotacionUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "alumno_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "curso_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "curso_profesor_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "inscripcion_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "motivo_baja": {
+            "description": "Motivo de baja (para dar de baja la anotación)",
+            "example": "Anotación errónea",
+            "nullable": true,
+            "type": "string"
+          },
+          "sesion_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "texto": {
+            "description": "Nuevo texto de la anotación",
+            "example": "Comportamiento disruptivo en clase",
+            "nullable": true,
+            "type": "string"
+          },
+          "timestamp_alta": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string",
+            "writeOnly": true
+          },
+          "timestamp_baja": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string",
+            "writeOnly": true
+          },
+          "tipo_anotacion": {
+            "description": "Nuevo tipo de anotación",
+            "enum": [
+              "Ausencia",
+              "Evaluacion",
+              "Comportamiento",
+              "Observacion",
+              "Otros"
+            ],
+            "example": "Comportamiento",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Aula": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "description": "ID de la academia a la que pertenece el aula",
+            "example": 1,
+            "type": "integer"
+          },
+          "capacidad_maxima": {
+            "description": "Capacidad máxima del aula",
+            "example": 30,
+            "type": "integer"
+          },
+          "id": {
+            "example": 1,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "nombre": {
+            "description": "Nombre del aula",
+            "example": "Aula 101",
+            "type": "string"
+          }
+        },
+        "required": [
+          "academia_id",
+          "capacidad_maxima",
+          "nombre"
+        ],
+        "type": "object"
+      },
+      "AulaCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "description": "ID de la academia (obligatorio para admin_plataforma, opcional para admin_academia)",
+            "example": 1,
+            "nullable": true,
+            "type": "integer"
+          },
+          "capacidad_maxima": {
+            "description": "Capacidad máxima del aula (debe ser mayor que 0)",
+            "example": 30,
+            "type": "integer"
+          },
+          "nombre": {
+            "description": "Nombre del aula",
+            "example": "Aula 102 - Informática",
+            "type": "string"
+          }
+        },
+        "required": [
+          "capacidad_maxima",
+          "nombre"
+        ],
+        "type": "object"
+      },
+      "AulaUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "capacidad_maxima": {
+            "description": "Nueva capacidad máxima del aula",
+            "example": 35,
+            "type": "integer"
+          },
+          "nombre": {
+            "description": "Nuevo nombre del aula",
+            "example": "Aula 102 - Informática Renovada",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Curso": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "description": "ID de la academia a la que pertenece el curso",
+            "example": 1,
+            "type": "integer"
+          },
+          "acepta_nuevos_alumnos": {
+            "description": "Indica si el curso acepta nuevos alumnos",
+            "example": true,
+            "type": "boolean"
+          },
+          "anio_academico": {
+            "description": "Año académico del curso",
+            "example": "2024-2025",
+            "type": "string"
+          },
+          "capacidad_maxima": {
+            "description": "Capacidad máxima de alumnos del curso",
+            "example": 25,
+            "type": "integer"
+          },
+          "estado": {
+            "description": "Estado del curso",
+            "enum": [
+              "Activo",
+              "Inactivo",
+              "Finalizado"
+            ],
+            "example": "Activo",
+            "type": "string"
+          },
+          "fecha_fin": {
+            "description": "Fecha de finalización del curso",
+            "example": "2025-06-30",
+            "format": "date",
+            "type": "string"
+          },
+          "fecha_inicio": {
+            "description": "Fecha de inicio del curso",
+            "example": "2024-09-15",
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "example": 1,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "nombre": {
+            "description": "Nombre del curso",
+            "example": "Inglés B1 - Mañanas",
+            "type": "string"
+          },
+          "tarifa": {
+            "allOf": [
+              {
+                "\`$ref": "#/components/schemas/Tarifa"
+              }
+            ],
+            "description": "Información de la tarifa asociada",
+            "readOnly": true
+          },
+          "tarifa_id": {
+            "description": "ID de la tarifa asociada al curso",
+            "example": 1,
+            "type": "integer"
+          },
+          "tipo_alumno": {
+            "description": "Tipo de alumno del curso",
+            "enum": [
+              "Infantil",
+              "Juvenil",
+              "Adultos"
+            ],
+            "example": "Adultos",
+            "type": "string"
+          }
+        },
+        "required": [
+          "academia_id",
+          "acepta_nuevos_alumnos",
+          "anio_academico",
+          "capacidad_maxima",
+          "estado",
+          "fecha_fin",
+          "fecha_inicio",
+          "nombre",
+          "tarifa_id",
+          "tipo_alumno"
+        ],
+        "type": "object"
+      },
+      "CursoCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "description": "ID de la academia (obligatorio para admin_plataforma, opcional para admin_academia)",
+            "example": 1,
+            "nullable": true,
+            "type": "integer"
+          },
+          "acepta_nuevos_alumnos": {
+            "default": true,
+            "description": "Indica si el curso acepta nuevos alumnos (por defecto True)",
+            "example": true,
+            "type": "boolean"
+          },
+          "anio_academico": {
+            "description": "Año académico (formato: YYYY-YYYY)",
+            "example": "2024-2025",
+            "type": "string"
+          },
+          "capacidad_maxima": {
+            "description": "Capacidad máxima de alumnos (debe ser mayor que 0)",
+            "example": 25,
+            "type": "integer"
+          },
+          "estado": {
+            "description": "Estado del curso (Activo, Inactivo, Finalizado)",
+            "enum": [
+              "Activo",
+              "Inactivo",
+              "Finalizado"
+            ],
+            "example": "Activo",
+            "type": "string"
+          },
+          "fecha_fin": {
+            "description": "Fecha de finalización del curso",
+            "example": "2025-06-30",
+            "format": "date",
+            "type": "string"
+          },
+          "fecha_inicio": {
+            "description": "Fecha de inicio del curso",
+            "example": "2024-09-15",
+            "format": "date",
+            "type": "string"
+          },
+          "nombre": {
+            "description": "Nombre del curso",
+            "example": "Inglés B1 - Mañanas",
+            "type": "string"
+          },
+          "tarifa_id": {
+            "description": "ID de la tarifa asociada al curso",
+            "example": 1,
+            "type": "integer"
+          },
+          "tipo_alumno": {
+            "description": "Tipo de alumno (Infantil, Juvenil, Adultos)",
+            "enum": [
+              "Infantil",
+              "Juvenil",
+              "Adultos"
+            ],
+            "example": "Adultos",
+            "type": "string"
+          }
+        },
+        "required": [
+          "anio_academico",
+          "capacidad_maxima",
+          "estado",
+          "fecha_fin",
+          "fecha_inicio",
+          "nombre",
+          "tarifa_id",
+          "tipo_alumno"
+        ],
+        "type": "object"
+      },
+      "CursoUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "acepta_nuevos_alumnos": {
+            "description": "Nuevo valor de acepta_nuevos_alumnos",
+            "example": false,
+            "type": "boolean"
+          },
+          "anio_academico": {
+            "description": "Nuevo año académico",
+            "example": "2025-2026",
+            "type": "string"
+          },
+          "capacidad_maxima": {
+            "description": "Nueva capacidad máxima",
+            "example": 30,
+            "type": "integer"
+          },
+          "estado": {
+            "description": "Nuevo estado del curso",
+            "enum": [
+              "Activo",
+              "Inactivo",
+              "Finalizado"
+            ],
+            "example": "Finalizado",
+            "type": "string"
+          },
+          "fecha_fin": {
+            "description": "Nueva fecha de finalización",
+            "example": "2026-06-30",
+            "format": "date",
+            "type": "string"
+          },
+          "fecha_inicio": {
+            "description": "Nueva fecha de inicio",
+            "example": "2025-09-15",
+            "format": "date",
+            "type": "string"
+          },
+          "nombre": {
+            "description": "Nuevo nombre del curso",
+            "example": "Inglés B1 - Mañanas (Modificado)",
+            "type": "string"
+          },
+          "tarifa_id": {
+            "description": "Nuevo ID de tarifa",
+            "example": 2,
+            "type": "integer"
+          },
+          "tipo_alumno": {
+            "description": "Nuevo tipo de alumno",
+            "enum": [
+              "Infantil",
+              "Juvenil",
+              "Adultos"
+            ],
+            "example": "Juvenil",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "HorarioCurso": {
+        "additionalProperties": false,
+        "properties": {
+          "aula": {
+            "allOf": [
+              {
+                "\`$ref": "#/components/schemas/Aula"
+              }
+            ],
+            "description": "Información del aula",
+            "readOnly": true
+          },
+          "aula_id": {
+            "description": "ID del aula donde se imparte el curso",
+            "example": 1,
+            "type": "integer"
+          },
+          "curso": {
+            "allOf": [
+              {
+                "\`$ref": "#/components/schemas/Curso"
+              }
+            ],
+            "description": "Información del curso",
+            "readOnly": true
+          },
+          "curso_id": {
+            "description": "ID del curso al que pertenece el horario",
+            "example": 1,
+            "type": "integer"
+          },
+          "dia_semana": {
+            "description": "Día de la semana",
+            "enum": [
+              "Lunes",
+              "Martes",
+              "Miércoles",
+              "Jueves",
+              "Viernes",
+              "Sábado",
+              "Domingo"
+            ],
+            "example": "Lunes",
+            "type": "string"
+          },
+          "hora_fin": {
+            "description": "Hora de finalización de la clase",
+            "example": "10:30:00",
+            "type": "string"
+          },
+          "hora_inicio": {
+            "description": "Hora de inicio de la clase",
+            "example": "09:00:00",
+            "type": "string"
+          },
+          "id": {
+            "example": 1,
+            "readOnly": true,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "aula_id",
+          "curso_id",
+          "dia_semana",
+          "hora_fin",
+          "hora_inicio"
+        ],
+        "type": "object"
+      },
+      "HorarioCursoCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "aula_id": {
+            "description": "ID del aula donde se imparte",
+            "example": 1,
+            "type": "integer"
+          },
+          "curso_id": {
+            "description": "ID del curso al que se asigna el horario",
+            "example": 1,
+            "type": "integer"
+          },
+          "dia_semana": {
+            "description": "Día de la semana (capitalizado)",
+            "enum": [
+              "Lunes",
+              "Martes",
+              "Miércoles",
+              "Jueves",
+              "Viernes",
+              "Sábado",
+              "Domingo"
+            ],
+            "example": "Lunes",
+            "type": "string"
+          },
+          "hora_fin": {
+            "description": "Hora de finalización de la clase (formato HH:MM:SS)",
+            "example": "10:30:00",
+            "type": "string"
+          },
+          "hora_inicio": {
+            "description": "Hora de inicio de la clase (formato HH:MM:SS)",
+            "example": "09:00:00",
+            "type": "string"
+          }
+        },
+        "required": [
+          "aula_id",
+          "curso_id",
+          "dia_semana",
+          "hora_fin",
+          "hora_inicio"
+        ],
+        "type": "object"
+      },
+      "HorarioCursoUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "aula_id": {
+            "description": "Nuevo ID del aula",
+            "example": 2,
+            "type": "integer"
+          },
+          "curso_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "dia_semana": {
+            "description": "Nuevo día de la semana",
+            "enum": [
+              "Lunes",
+              "Martes",
+              "Miércoles",
+              "Jueves",
+              "Viernes",
+              "Sábado",
+              "Domingo"
+            ],
+            "example": "Martes",
+            "type": "string"
+          },
+          "hora_fin": {
+            "description": "Nueva hora de finalización",
+            "example": "11:30:00",
+            "type": "string"
+          },
+          "hora_inicio": {
+            "description": "Nueva hora de inicio",
+            "example": "10:00:00",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Inscripcion": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "description": "ID de la academia (calculado automáticamente)",
+            "example": 1,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "alumno": {
+            "allOf": [
+              {
+                "\`$ref": "#/components/schemas/Alumno"
+              }
+            ],
+            "description": "Información del alumno",
+            "readOnly": true
+          },
+          "alumno_id": {
+            "description": "ID del alumno inscrito",
+            "example": 1,
+            "type": "integer"
+          },
+          "curso": {
+            "allOf": [
+              {
+                "\`$ref": "#/components/schemas/Curso"
+              }
+            ],
+            "description": "Información del curso",
+            "readOnly": true
+          },
+          "curso_id": {
+            "description": "ID del curso al que se inscribe",
+            "example": 1,
+            "type": "integer"
+          },
+          "fecha_fin": {
+            "description": "Fecha de fin de la inscripción (null si activa)",
+            "example": null,
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "fecha_inicio": {
+            "description": "Fecha de inicio de la inscripción",
+            "example": "2024-09-15",
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "example": 1,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "motivo_baja": {
+            "description": "Motivo de baja de la inscripción",
+            "example": null,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "alumno_id",
+          "curso_id",
+          "fecha_inicio"
+        ],
+        "type": "object"
+      },
+      "InscripcionCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "alumno_id": {
+            "description": "ID del alumno a inscribir",
+            "example": 1,
+            "type": "integer"
+          },
+          "curso_id": {
+            "description": "ID del curso al que se inscribe",
+            "example": 1,
+            "type": "integer"
+          },
+          "fecha_fin": {
+            "description": "Fecha de fin (opcional, null si inscripción activa)",
+            "example": null,
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "fecha_inicio": {
+            "description": "Fecha de inicio de la inscripción",
+            "example": "2024-09-15",
+            "format": "date",
+            "type": "string"
+          },
+          "motivo_baja": {
+            "description": "Motivo de baja (opcional)",
+            "example": null,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "alumno_id",
+          "curso_id",
+          "fecha_inicio"
+        ],
+        "type": "object"
+      },
+      "InscripcionUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "alumno_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "curso_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "fecha_fin": {
+            "description": "Nueva fecha de fin (para dar de baja)",
+            "example": "2024-12-31",
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "fecha_inicio": {
+            "description": "Nueva fecha de inicio",
+            "example": "2024-10-01",
+            "format": "date",
+            "type": "string"
+          },
+          "motivo_baja": {
+            "description": "Motivo de baja",
+            "example": "Cambio de ciudad",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LoginRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "email": {
+            "format": "email",
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ],
+        "type": "object"
+      },
+      "LoginResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "tokens": {
+            "additionalProperties": {},
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "PaginatedEnvelope": {
+        "properties": {
+          "has_more": {
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "meta": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "next_page": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "page": {
+            "type": "integer"
+          },
+          "prev_page": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "returned": {
+            "type": "integer"
+          },
+          "size": {
+            "type": "integer"
+          },
+          "total": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "RefreshRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "refresh_token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "refresh_token"
+        ],
+        "type": "object"
+      },
+      "Rol": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "example": 2,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "nombre": {
+            "example": "Admin_academia",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Sesion": {
+        "additionalProperties": false,
+        "properties": {
+          "aula": {
+            "allOf": [
+              {
+                "\`$ref": "#/components/schemas/Aula"
+              }
+            ],
+            "description": "Información del aula",
+            "readOnly": true
+          },
+          "aula_id": {
+            "description": "ID del aula donde se realiza la sesión",
+            "example": 1,
+            "type": "integer"
+          },
+          "curso_profesor_id": {
+            "description": "ID de la relación Curso_Profesores",
+            "example": 1,
+            "type": "integer"
+          },
+          "hora_fin": {
+            "description": "Hora de finalización real de la sesión",
+            "example": "10:30:00",
+            "type": "string"
+          },
+          "hora_inicio": {
+            "description": "Hora de inicio real de la sesión",
+            "example": "09:00:00",
+            "type": "string"
+          },
+          "horario_curso": {
+            "allOf": [
+              {
+                "\`$ref": "#/components/schemas/HorarioCurso"
+              }
+            ],
+            "description": "Información del horario del curso",
+            "readOnly": true
+          },
+          "horario_curso_id": {
+            "description": "ID del horario del curso",
+            "example": 1,
+            "type": "integer"
+          },
+          "id": {
+            "example": 1,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "motivo_baja": {
+            "description": "Motivo de la baja lógica",
+            "example": null,
+            "nullable": true,
+            "type": "string"
+          },
+          "notas_materia": {
+            "description": "Notas sobre la materia impartida",
+            "example": "Tema 3: Verbos irregulares",
+            "nullable": true,
+            "type": "string"
+          },
+          "notas_sesion": {
+            "description": "Notas generales de la sesión",
+            "example": "Clase muy participativa",
+            "nullable": true,
+            "type": "string"
+          },
+          "timestamp_alta": {
+            "description": "Timestamp de creación de la sesión",
+            "example": "2024-10-27T08:00:00",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "timestamp_baja": {
+            "description": "Timestamp de baja lógica (null si activo)",
+            "example": null,
+            "format": "date-time",
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "aula_id",
+          "curso_profesor_id",
+          "hora_fin",
+          "hora_inicio",
+          "horario_curso_id"
+        ],
+        "type": "object"
+      },
+      "SesionCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "aula_id": {
+            "description": "ID del aula donde se realiza la sesión",
+            "example": 1,
+            "type": "integer"
+          },
+          "curso_profesor_id": {
+            "description": "ID de la relación Curso_Profesores (profesor asignado al curso)",
+            "example": 1,
+            "type": "integer"
+          },
+          "hora_fin": {
+            "description": "Hora de finalización real de la sesión (formato HH:MM:SS)",
+            "example": "10:30:00",
+            "type": "string"
+          },
+          "hora_inicio": {
+            "description": "Hora de inicio real de la sesión (formato HH:MM:SS)",
+            "example": "09:00:00",
+            "type": "string"
+          },
+          "horario_curso_id": {
+            "description": "ID del horario del curso",
+            "example": 1,
+            "type": "integer"
+          },
+          "notas_materia": {
+            "description": "Notas sobre la materia impartida",
+            "example": "Tema 3: Verbos irregulares",
+            "nullable": true,
+            "type": "string"
+          },
+          "notas_sesion": {
+            "description": "Notas generales de la sesión",
+            "example": "Clase muy participativa",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "aula_id",
+          "curso_profesor_id",
+          "hora_fin",
+          "hora_inicio",
+          "horario_curso_id"
+        ],
+        "type": "object"
+      },
+      "SesionUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "aula_id": {
+            "description": "Nuevo ID del aula",
+            "example": 2,
+            "type": "integer"
+          },
+          "curso_profesor_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "hora_fin": {
+            "description": "Nueva hora de finalización",
+            "example": "10:45:00",
+            "type": "string"
+          },
+          "hora_inicio": {
+            "description": "Nueva hora de inicio",
+            "example": "09:15:00",
+            "type": "string"
+          },
+          "horario_curso_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "motivo_baja": {
+            "description": "Motivo de baja (para dar de baja la sesión)",
+            "example": "Sesión cancelada por festivo",
+            "nullable": true,
+            "type": "string"
+          },
+          "notas_materia": {
+            "description": "Nuevas notas de materia",
+            "example": "Tema 3: Verbos irregulares - completado",
+            "nullable": true,
+            "type": "string"
+          },
+          "notas_sesion": {
+            "description": "Nuevas notas de sesión",
+            "example": "Clase muy participativa - actualizado",
+            "nullable": true,
+            "type": "string"
+          },
+          "timestamp_alta": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string",
+            "writeOnly": true
+          },
+          "timestamp_baja": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        "type": "object"
+      },
+      "Tarifa": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "example": 1,
+            "type": "integer"
+          },
+          "descripcion": {
+            "example": "Tarifa mensual básica",
+            "type": "string"
+          },
+          "fecha_alta": {
+            "example": "2025-10-27T10:30:00",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "fecha_baja": {
+            "example": null,
+            "format": "date-time",
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "fecha_ultima_modificacion": {
+            "example": "2025-10-27T10:30:00",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "example": 1,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "precio_base": {
+            "example": 50.0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "academia_id",
+          "descripcion",
+          "precio_base"
+        ],
+        "type": "object"
+      },
+      "TarifaCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "description": "ID de la academia (obligatorio para admin_plataforma, opcional para admin_academia)",
+            "example": 1,
+            "nullable": true,
+            "type": "integer"
+          },
+          "descripcion": {
+            "description": "Descripción de la tarifa",
+            "example": "Tarifa mensual básica",
+            "type": "string"
+          },
+          "precio_base": {
+            "description": "Precio base de la tarifa (debe ser mayor que 0)",
+            "example": 50.0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "descripcion",
+          "precio_base"
+        ],
+        "type": "object"
+      },
+      "TarifaUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "nullable": true,
+            "type": "integer",
+            "writeOnly": true
+          },
+          "descripcion": {
+            "description": "Nueva descripción de la tarifa",
+            "example": "Tarifa mensual básica MODIFICADA",
+            "type": "string"
+          },
+          "fecha_alta": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string",
+            "writeOnly": true
+          },
+          "fecha_baja": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string",
+            "writeOnly": true
+          },
+          "precio_base": {
+            "description": "Nuevo precio base (debe ser mayor que 0)",
+            "example": 55.0,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "Usuario": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "description": "ID de la academia a la que pertenece el usuario (null para admin_plataforma)",
+            "example": 1,
+            "nullable": true,
+            "type": "integer"
+          },
+          "email": {
+            "description": "Email del usuario (único en el sistema)",
+            "example": "afvidal@abanca.com",
+            "format": "email",
+            "type": "string"
+          },
+          "estado": {
+            "description": "Estado del usuario",
+            "enum": [
+              "Activo",
+              "Bloqueado",
+              "Baja"
+            ],
+            "example": "Activo",
+            "readOnly": true,
+            "type": "string"
+          },
+          "fecha_alta": {
+            "example": "2025-10-27T10:30:00",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "example": 1,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "nombre": {
+            "description": "Nombre completo del usuario",
+            "example": "Angel Vidal Fernández",
+            "type": "string"
+          },
+          "password": {
+            "description": "Contraseña del usuario (opcional en alta, se usará el email como password temporal)",
+            "example": "MiPassword123!",
+            "nullable": true,
+            "type": "string",
+            "writeOnly": true
+          },
+          "rol": {
+            "allOf": [
+              {
+                "\`$ref": "#/components/schemas/Rol"
+              }
+            ],
+            "description": "Información del rol del usuario"
+          },
+          "rol_id": {
+            "description": "ID del rol asignado al usuario",
+            "example": 2,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "email",
+          "nombre",
+          "rol_id"
+        ],
+        "type": "object"
+      },
+      "UsuarioCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "description": "ID de la academia (solo admin_plataforma puede especificarlo, admin_academia lo tiene forzado)",
+            "example": 1,
+            "nullable": true,
+            "type": "integer"
+          },
+          "email": {
+            "description": "Email del usuario (debe ser único)",
+            "example": "afvidal@abanca.com",
+            "format": "email",
+            "type": "string"
+          },
+          "nombre": {
+            "description": "Nombre completo del usuario",
+            "example": "Angel Vidal Fernández",
+            "type": "string"
+          },
+          "password": {
+            "description": "Contraseña inicial (opcional). Si no se proporciona, se usará el email como password temporal que deberá cambiarse en el primer login",
+            "example": null,
+            "nullable": true,
+            "type": "string"
+          },
+          "rol_id": {
+            "description": "ID del rol a asignar (1=admin_plataforma, 2=admin_academia, 3=profesor_academia)",
+            "example": 2,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "email",
+          "nombre",
+          "rol_id"
+        ],
+        "type": "object"
+      },
+      "UsuarioUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "academia_id": {
+            "description": "Nueva academia del usuario",
+            "example": 2,
+            "nullable": true,
+            "type": "integer"
+          },
+          "email": {
+            "description": "Nuevo email del usuario",
+            "example": "nuevo_email@abanca.com",
+            "format": "email",
+            "type": "string"
+          },
+          "estado": {
+            "description": "Nuevo estado del usuario",
+            "enum": [
+              "Activo",
+              "Bloqueado",
+              "Baja"
+            ],
+            "example": "Bloqueado",
+            "type": "string"
+          },
+          "fecha_alta": {
+            "format": "date-time",
+            "type": "string",
+            "writeOnly": true
+          },
+          "fecha_baja": {
+            "format": "date-time",
+            "type": "string",
+            "writeOnly": true
+          },
+          "nombre": {
+            "description": "Nuevo nombre del usuario",
+            "example": "Angel Vidal Fernández (Modificado)",
+            "type": "string"
+          },
+          "password": {
+            "description": "Nueva contraseña del usuario",
+            "example": "NuevaPassword123!",
+            "type": "string",
+            "writeOnly": true
+          },
+          "rol_id": {
+            "description": "Nuevo rol del usuario",
+            "example": 3,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "description": "Spec generated from code (partial)",
+    "title": "API Workers Profesores",
+    "version": "1.0.0"
+  },
+  "openapi": "3.0.2",
+  "paths": {
+    "/academias": {
+      "get": {
+        "description": "Auto-generated operation for academias.listar_academias",
+        "operationId": "academias.listar_academias",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "nombre",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "nombre_contains",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /academias",
+        "tags": [
+          "Academias"
+        ]
+      },
+      "post": {
+        "description": "Auto-generated operation for academias.crear_academia",
+        "operationId": "academias.crear_academia",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/Academia"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "POST /academias",
+        "tags": [
+          "Academias"
+        ]
+      }
+    },
+    "/academias/{academia_id}": {
+      "delete": {
+        "description": "Auto-generated operation for academias.eliminar_academia",
+        "operationId": "academias.eliminar_academia",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "academia_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "DELETE /academias/{academia_id}",
+        "tags": [
+          "Academias"
+        ]
+      },
+      "get": {
+        "description": "Auto-generated operation for academias.obtener_academia",
+        "operationId": "academias.obtener_academia",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "academia_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /academias/{academia_id}",
+        "tags": [
+          "Academias"
+        ]
+      },
+      "patch": {
+        "description": "Auto-generated operation for academias.modificar_academia",
+        "operationId": "academias.modificar_academia",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "academia_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/Academia"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PATCH /academias/{academia_id}",
+        "tags": [
+          "Academias"
+        ]
+      }
+    },
+    "/alumnos/": {
+      "get": {
+        "description": "Auto-generated operation for alumnos.listar_alumnos",
+        "operationId": "alumnos.listar_alumnos",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "academia_id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "nombre",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "nombre_contains",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "email",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "email_contains",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dni",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "curso_id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "with_total",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_dir",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expand",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /alumnos/",
+        "tags": [
+          "Alumnos"
+        ]
+      },
+      "post": {
+        "description": "Auto-generated operation for alumnos.crear_alumno",
+        "operationId": "alumnos.crear_alumno",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/AlumnoCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "POST /alumnos/",
+        "tags": [
+          "Alumnos"
+        ]
+      }
+    },
+    "/alumnos/{alumno_id}": {
+      "delete": {
+        "description": "Auto-generated operation for alumnos.eliminar_alumno",
+        "operationId": "alumnos.eliminar_alumno",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "alumno_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "DELETE /alumnos/{alumno_id}",
+        "tags": [
+          "Alumnos"
+        ]
+      },
+      "get": {
+        "description": "Auto-generated operation for alumnos.obtener_alumno",
+        "operationId": "alumnos.obtener_alumno",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "alumno_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /alumnos/{alumno_id}",
+        "tags": [
+          "Alumnos"
+        ]
+      },
+      "patch": {
+        "description": "Auto-generated operation for alumnos.actualizar_alumno",
+        "operationId": "alumnos.actualizar_alumno",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "alumno_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/AlumnoUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PATCH /alumnos/{alumno_id}",
+        "tags": [
+          "Alumnos"
+        ]
+      },
+      "put": {
+        "description": "Auto-generated operation for alumnos.actualizar_alumno",
+        "operationId": "alumnos.actualizar_alumno",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "alumno_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/AlumnoUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PUT /alumnos/{alumno_id}",
+        "tags": [
+          "Alumnos"
+        ]
+      }
+    },
+    "/anotaciones/": {
+      "get": {
+        "description": "Auto-generated operation for anotaciones.listar_anotaciones",
+        "operationId": "anotaciones.listar_anotaciones",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "sesion_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alumno_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "curso_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tipo_anotacion",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "excluir_tipo",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fecha_desde",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fecha_hasta",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "activas",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "with_total",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_dir",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expand",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /anotaciones/",
+        "tags": [
+          "Anotaciones"
+        ]
+      },
+      "post": {
+        "description": "Auto-generated operation for anotaciones.crear_anotacion",
+        "operationId": "anotaciones.crear_anotacion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/AnotacionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "POST /anotaciones/",
+        "tags": [
+          "Anotaciones"
+        ]
+      }
+    },
+    "/anotaciones/{anotacion_id}": {
+      "delete": {
+        "description": "Auto-generated operation for anotaciones.eliminar_anotacion",
+        "operationId": "anotaciones.eliminar_anotacion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "anotacion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "DELETE /anotaciones/{anotacion_id}",
+        "tags": [
+          "Anotaciones"
+        ]
+      },
+      "get": {
+        "description": "Auto-generated operation for anotaciones.obtener_anotacion",
+        "operationId": "anotaciones.obtener_anotacion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "anotacion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /anotaciones/{anotacion_id}",
+        "tags": [
+          "Anotaciones"
+        ]
+      },
+      "patch": {
+        "description": "Auto-generated operation for anotaciones.actualizar_anotacion",
+        "operationId": "anotaciones.actualizar_anotacion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "anotacion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/AnotacionUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PATCH /anotaciones/{anotacion_id}",
+        "tags": [
+          "Anotaciones"
+        ]
+      },
+      "put": {
+        "description": "Auto-generated operation for anotaciones.actualizar_anotacion",
+        "operationId": "anotaciones.actualizar_anotacion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "anotacion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/AnotacionUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PUT /anotaciones/{anotacion_id}",
+        "tags": [
+          "Anotaciones"
+        ]
+      }
+    },
+    "/aulas/": {
+      "get": {
+        "description": "Auto-generated operation for aulas.listar_aulas",
+        "operationId": "aulas.listar_aulas",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "academia_id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "nombre",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "nombre_contains",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "capacidad_min",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "capacidad_max",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_direction",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expand",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /aulas/",
+        "tags": [
+          "Aulas"
+        ]
+      },
+      "post": {
+        "description": "Auto-generated operation for aulas.crear_aula",
+        "operationId": "aulas.crear_aula",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/AulaCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "POST /aulas/",
+        "tags": [
+          "Aulas"
+        ]
+      }
+    },
+    "/aulas/{aula_id}": {
+      "delete": {
+        "description": "Auto-generated operation for aulas.eliminar_aula",
+        "operationId": "aulas.eliminar_aula",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "aula_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "DELETE /aulas/{aula_id}",
+        "tags": [
+          "Aulas"
+        ]
+      },
+      "get": {
+        "description": "Auto-generated operation for aulas.obtener_aula",
+        "operationId": "aulas.obtener_aula",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "aula_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /aulas/{aula_id}",
+        "tags": [
+          "Aulas"
+        ]
+      },
+      "patch": {
+        "description": "Auto-generated operation for aulas.actualizar_aula",
+        "operationId": "aulas.actualizar_aula_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "aula_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/AulaUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PATCH /aulas/{aula_id}",
+        "tags": [
+          "Aulas"
+        ]
+      },
+      "put": {
+        "description": "Auto-generated operation for aulas.actualizar_aula",
+        "operationId": "aulas.actualizar_aula_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "aula_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/AulaUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PUT /aulas/{aula_id}",
+        "tags": [
+          "Aulas"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "description": "Inicio de sesión con email y password",
+        "operationId": "login.login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "\`$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            },
+            "description": "Login exitoso"
+          },
+          "401": {
+            "description": "Credenciales inválidas"
+          }
+        },
+        "summary": "Login usuario",
+        "tags": [
+          "login"
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "description": "Auto-generated operation for login_bp.logout",
+        "operationId": "login.logout",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/RefreshRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "POST /auth/logout",
+        "tags": [
+          "jwt"
+        ]
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "description": "Auto-generated operation for login_bp.refresh_tokens",
+        "operationId": "login.refresh_tokens",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "POST /auth/refresh",
+        "tags": [
+          "jwt"
+        ]
+      }
+    },
+    "/auth/unblock": {
+      "post": {
+        "description": "Auto-generated operation for login_bp.unblock_user",
+        "operationId": "login.unblock_user",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "POST /auth/unblock",
+        "tags": [
+          "jwt"
+        ]
+      }
+    },
+    "/curso-profesores/": {
+      "get": {
+        "description": "Auto-generated operation for curso_profesores.listar_asignaciones",
+        "operationId": "curso_profesores.listar_asignaciones",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /curso-profesores/",
+        "tags": [
+          "Curso_profesores"
+        ]
+      },
+      "post": {
+        "description": "Auto-generated operation for curso_profesores.crear_asignacion",
+        "operationId": "curso_profesores.crear_asignacion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "example": {
+                  "curso_id": 1,
+                  "usuario_id": 5
+                },
+                "properties": {
+                  "curso_id": {
+                    "description": "ID del curso",
+                    "example": 1,
+                    "type": "integer"
+                  },
+                  "usuario_id": {
+                    "description": "ID del profesor (usuario)",
+                    "example": 5,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "curso_id",
+                  "usuario_id"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "POST /curso-profesores/",
+        "tags": [
+          "Curso_profesores"
+        ]
+      }
+    },
+    "/curso-profesores/{cp_id}": {
+      "delete": {
+        "description": "Auto-generated operation for curso_profesores.eliminar_asignacion",
+        "operationId": "curso_profesores.eliminar_asignacion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cp_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "DELETE /curso-profesores/{cp_id}",
+        "tags": [
+          "Curso_profesores"
+        ]
+      },
+      "get": {
+        "description": "Auto-generated operation for curso_profesores.obtener_asignacion",
+        "operationId": "curso_profesores.obtener_asignacion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cp_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /curso-profesores/{cp_id}",
+        "tags": [
+          "Curso_profesores"
+        ]
+      },
+      "patch": {
+        "description": "Auto-generated operation for curso_profesores.actualizar_asignacion",
+        "operationId": "curso_profesores.actualizar_asignacion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cp_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "example": {
+                  "fecha_baja": "2024-12-31T23:59:59",
+                  "motivo_baja": "Fin de contrato"
+                },
+                "properties": {
+                  "fecha_baja": {
+                    "description": "Fecha de baja",
+                    "example": "2024-12-31T23:59:59",
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "motivo_baja": {
+                    "description": "Motivo de la baja",
+                    "example": "Fin de contrato",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PATCH /curso-profesores/{cp_id}",
+        "tags": [
+          "Curso_profesores"
+        ]
+      },
+      "put": {
+        "description": "Auto-generated operation for curso_profesores.actualizar_asignacion",
+        "operationId": "curso_profesores.actualizar_asignacion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cp_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "example": {
+                  "fecha_baja": "2024-12-31T23:59:59",
+                  "motivo_baja": "Fin de contrato"
+                },
+                "properties": {
+                  "fecha_baja": {
+                    "description": "Fecha de baja",
+                    "example": "2024-12-31T23:59:59",
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "motivo_baja": {
+                    "description": "Motivo de la baja",
+                    "example": "Fin de contrato",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PUT /curso-profesores/{cp_id}",
+        "tags": [
+          "Curso_profesores"
+        ]
+      }
+    },
+    "/cursos/": {
+      "get": {
+        "description": "Auto-generated operation for cursos.listar_cursos",
+        "operationId": "cursos.listar_cursos",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "academia_id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "nombre",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "nombre_contains",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "anio_academico",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tipo_alumno",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "estado",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "acepta_nuevos_alumnos",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tarifa_id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_direction",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expand",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /cursos/",
+        "tags": [
+          "Cursos"
+        ]
+      },
+      "post": {
+        "description": "Auto-generated operation for cursos.crear_curso",
+        "operationId": "cursos.crear_curso",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/CursoCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "POST /cursos/",
+        "tags": [
+          "Cursos"
+        ]
+      }
+    },
+    "/cursos/{curso_id}": {
+      "delete": {
+        "description": "Auto-generated operation for cursos.eliminar_curso",
+        "operationId": "cursos.eliminar_curso",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "curso_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "DELETE /cursos/{curso_id}",
+        "tags": [
+          "Cursos"
+        ]
+      },
+      "get": {
+        "description": "Auto-generated operation for cursos.obtener_curso",
+        "operationId": "cursos.obtener_curso",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "curso_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /cursos/{curso_id}",
+        "tags": [
+          "Cursos"
+        ]
+      },
+      "patch": {
+        "description": "Auto-generated operation for cursos.actualizar_curso",
+        "operationId": "cursos.actualizar_curso_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "curso_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/CursoUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PATCH /cursos/{curso_id}",
+        "tags": [
+          "Cursos"
+        ]
+      },
+      "put": {
+        "description": "Auto-generated operation for cursos.actualizar_curso",
+        "operationId": "cursos.actualizar_curso_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "curso_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/CursoUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PUT /cursos/{curso_id}",
+        "tags": [
+          "Cursos"
+        ]
+      }
+    },
+    "/docs": {
+      "get": {
+        "description": "Auto-generated operation for docs.docs_ui",
+        "operationId": "docs.docs_ui",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "summary": "GET /docs",
+        "tags": [
+          "Docs/Health"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "description": "Auto-generated operation for health",
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "summary": "GET /health",
+        "tags": [
+          "Docs/Health"
+        ]
+      }
+    },
+    "/horarios/": {
+      "get": {
+        "description": "Auto-generated operation for horarios.listar_horarios",
+        "operationId": "horarios.listar_horarios",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "curso_id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "aula_id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dia_semana",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_direction",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expand",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /horarios/",
+        "tags": [
+          "Horarios"
+        ]
+      },
+      "post": {
+        "description": "Auto-generated operation for horarios.crear_horario",
+        "operationId": "horarios.crear_horario",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/HorarioCursoCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "POST /horarios/",
+        "tags": [
+          "Horarios"
+        ]
+      }
+    },
+    "/horarios/{horario_id}": {
+      "delete": {
+        "description": "Auto-generated operation for horarios.eliminar_horario",
+        "operationId": "horarios.eliminar_horario",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "horario_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "DELETE /horarios/{horario_id}",
+        "tags": [
+          "Horarios"
+        ]
+      },
+      "get": {
+        "description": "Auto-generated operation for horarios.obtener_horario",
+        "operationId": "horarios.obtener_horario",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "horario_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /horarios/{horario_id}",
+        "tags": [
+          "Horarios"
+        ]
+      },
+      "patch": {
+        "description": "Auto-generated operation for horarios.actualizar_horario",
+        "operationId": "horarios.actualizar_horario_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "horario_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/HorarioCursoUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PATCH /horarios/{horario_id}",
+        "tags": [
+          "Horarios"
+        ]
+      },
+      "put": {
+        "description": "Auto-generated operation for horarios.actualizar_horario",
+        "operationId": "horarios.actualizar_horario_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "horario_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/HorarioCursoUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PUT /horarios/{horario_id}",
+        "tags": [
+          "Horarios"
+        ]
+      }
+    },
+    "/inscripciones/": {
+      "get": {
+        "description": "Auto-generated operation for inscripciones.listar_inscripciones",
+        "operationId": "inscripciones.listar_inscripciones",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "academia_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alumno_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "curso_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "activas",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fecha_inicio_desde",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fecha_inicio_hasta",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "with_total",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_dir",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expand",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /inscripciones/",
+        "tags": [
+          "Inscripciones"
+        ]
+      },
+      "post": {
+        "description": "Auto-generated operation for inscripciones.crear_inscripcion",
+        "operationId": "inscripciones.crear_inscripcion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/InscripcionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "POST /inscripciones/",
+        "tags": [
+          "Inscripciones"
+        ]
+      }
+    },
+    "/inscripciones/{inscripcion_id}": {
+      "delete": {
+        "description": "Auto-generated operation for inscripciones.eliminar_inscripcion",
+        "operationId": "inscripciones.eliminar_inscripcion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "inscripcion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "DELETE /inscripciones/{inscripcion_id}",
+        "tags": [
+          "Inscripciones"
+        ]
+      },
+      "get": {
+        "description": "Auto-generated operation for inscripciones.obtener_inscripcion",
+        "operationId": "inscripciones.obtener_inscripcion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "inscripcion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /inscripciones/{inscripcion_id}",
+        "tags": [
+          "Inscripciones"
+        ]
+      },
+      "patch": {
+        "description": "Auto-generated operation for inscripciones.actualizar_inscripcion",
+        "operationId": "inscripciones.actualizar_inscripcion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "inscripcion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/InscripcionUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PATCH /inscripciones/{inscripcion_id}",
+        "tags": [
+          "Inscripciones"
+        ]
+      },
+      "put": {
+        "description": "Auto-generated operation for inscripciones.actualizar_inscripcion",
+        "operationId": "inscripciones.actualizar_inscripcion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "inscripcion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/InscripcionUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PUT /inscripciones/{inscripcion_id}",
+        "tags": [
+          "Inscripciones"
+        ]
+      }
+    },
+    "/openapi.json": {
+      "get": {
+        "description": "Auto-generated operation for docs.openapi_json",
+        "operationId": "docs.openapi_json",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "summary": "GET /openapi.json",
+        "tags": [
+          "Docs/Health"
+        ]
+      }
+    },
+    "/roles/": {
+      "get": {
+        "description": "Auto-generated operation for roles.listar_roles",
+        "operationId": "roles.listar_roles",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "nombre",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "nombre_contains",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /roles/",
+        "tags": [
+          "Roles"
+        ]
+      }
+    },
+    "/sesiones/": {
+      "get": {
+        "description": "Auto-generated operation for sesiones.listar_sesiones",
+        "operationId": "sesiones.listar_sesiones",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "horario_curso_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "curso_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "aula_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "profesor_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fecha_desde",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fecha_hasta",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "con_asistencia",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "with_total",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_dir",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /sesiones/",
+        "tags": [
+          "Sesiones"
+        ]
+      },
+      "post": {
+        "description": "Auto-generated operation for sesiones.crear_sesion",
+        "operationId": "sesiones.crear_sesion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/SesionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "POST /sesiones/",
+        "tags": [
+          "Sesiones"
+        ]
+      }
+    },
+    "/sesiones/{sesion_id}": {
+      "delete": {
+        "description": "Auto-generated operation for sesiones.eliminar_sesion",
+        "operationId": "sesiones.eliminar_sesion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sesion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "DELETE /sesiones/{sesion_id}",
+        "tags": [
+          "Sesiones"
+        ]
+      },
+      "get": {
+        "description": "Auto-generated operation for sesiones.obtener_sesion",
+        "operationId": "sesiones.obtener_sesion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sesion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /sesiones/{sesion_id}",
+        "tags": [
+          "Sesiones"
+        ]
+      },
+      "patch": {
+        "description": "Auto-generated operation for sesiones.actualizar_sesion",
+        "operationId": "sesiones.actualizar_sesion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sesion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/SesionUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PATCH /sesiones/{sesion_id}",
+        "tags": [
+          "Sesiones"
+        ]
+      },
+      "put": {
+        "description": "Auto-generated operation for sesiones.actualizar_sesion",
+        "operationId": "sesiones.actualizar_sesion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sesion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/SesionUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PUT /sesiones/{sesion_id}",
+        "tags": [
+          "Sesiones"
+        ]
+      }
+    },
+    "/sesiones/{sesion_id}/pasar-lista": {
+      "post": {
+        "description": "Auto-generated operation for sesiones.pasar_lista",
+        "operationId": "sesiones.pasar_lista",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sesion_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "alumnos": {
+                    "example": [
+                      {
+                        "alumno_id": 1,
+                        "ausente": true
+                      },
+                      {
+                        "alumno_id": 2,
+                        "ausente": false
+                      },
+                      {
+                        "alumno_id": 3,
+                        "ausente": true
+                      }
+                    ],
+                    "items": {
+                      "properties": {
+                        "alumno_id": {
+                          "example": 1,
+                          "type": "integer"
+                        },
+                        "ausente": {
+                          "example": true,
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "alumno_id",
+                        "ausente"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "alumnos"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "POST /sesiones/{sesion_id}/pasar-lista",
+        "tags": [
+          "Sesiones"
+        ]
+      }
+    },
+    "/tarifas/": {
+      "get": {
+        "description": "Auto-generated operation for tarifas.listar_tarifas",
+        "operationId": "tarifas.listar_tarifas",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "academia_id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "precio_base_min",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "precio_base_max",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fecha_alta_desde",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fecha_alta_hasta",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fecha_baja_null",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_direction",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expand",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /tarifas/",
+        "tags": [
+          "Tarifas"
+        ]
+      },
+      "post": {
+        "description": "Auto-generated operation for tarifas.crear_tarifa",
+        "operationId": "tarifas.crear_tarifa",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/TarifaCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "POST /tarifas/",
+        "tags": [
+          "Tarifas"
+        ]
+      }
+    },
+    "/tarifas/{tarifa_id}": {
+      "delete": {
+        "description": "Auto-generated operation for tarifas.eliminar_tarifa",
+        "operationId": "tarifas.eliminar_tarifa",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tarifa_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "DELETE /tarifas/{tarifa_id}",
+        "tags": [
+          "Tarifas"
+        ]
+      },
+      "get": {
+        "description": "Auto-generated operation for tarifas.obtener_tarifa",
+        "operationId": "tarifas.obtener_tarifa",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tarifa_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /tarifas/{tarifa_id}",
+        "tags": [
+          "Tarifas"
+        ]
+      },
+      "patch": {
+        "description": "Auto-generated operation for tarifas.actualizar_tarifa",
+        "operationId": "tarifas.actualizar_tarifa_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tarifa_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/TarifaUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PATCH /tarifas/{tarifa_id}",
+        "tags": [
+          "Tarifas"
+        ]
+      },
+      "put": {
+        "description": "Auto-generated operation for tarifas.actualizar_tarifa",
+        "operationId": "tarifas.actualizar_tarifa_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tarifa_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/TarifaUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PUT /tarifas/{tarifa_id}",
+        "tags": [
+          "Tarifas"
+        ]
+      }
+    },
+    "/usuarios/": {
+      "get": {
+        "description": "Auto-generated operation for usuarios.listar_usuarios",
+        "operationId": "usuarios.listar_usuarios",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "academia_id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "rol",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "nombre",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "nombre_contains",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "email",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "email_contains",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "estado",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "rol_id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "with_total",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order_dir",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fecha_alta_gte",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fecha_alta_lte",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fecha_baja_gte",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fecha_baja_lte",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fecha_ultima_modificacion_gte",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fecha_ultima_modificacion_lte",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expand",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /usuarios/",
+        "tags": [
+          "Usuarios"
+        ]
+      },
+      "post": {
+        "description": "Auto-generated operation for usuarios.crear_usuario",
+        "operationId": "usuarios.crear_usuario",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/UsuarioCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "POST /usuarios/",
+        "tags": [
+          "Usuarios"
+        ]
+      }
+    },
+    "/usuarios/export": {
+      "get": {
+        "description": "Auto-generated operation for usuarios.exportar_usuarios",
+        "operationId": "usuarios.exportar_usuarios",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /usuarios/export",
+        "tags": [
+          "Usuarios"
+        ]
+      }
+    },
+    "/usuarios/me": {
+      "get": {
+        "description": "Auto-generated operation for usuarios.obtener_mi_perfil",
+        "operationId": "usuarios.obtener_mi_perfil",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "\`$ref": "#/components/schemas/Usuario"
+                }
+              }
+            },
+            "description": "Perfil del usuario autenticado"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /usuarios/me",
+        "tags": [
+          "Usuarios"
+        ]
+      }
+    },
+    "/usuarios/me/credentials": {
+      "put": {
+        "description": "Auto-generated operation for usuarios.actualizar_mis_credenciales",
+        "operationId": "usuarios.actualizar_mis_credenciales",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/UsuarioUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PUT /usuarios/me/credentials",
+        "tags": [
+          "Usuarios"
+        ]
+      }
+    },
+    "/usuarios/recover": {
+      "get": {
+        "description": "Auto-generated operation for usuarios.recuperar_credenciales",
+        "operationId": "usuarios.recuperar_credenciales",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /usuarios/recover",
+        "tags": [
+          "Usuarios"
+        ]
+      }
+    },
+    "/usuarios/{usuario_id}": {
+      "delete": {
+        "description": "Auto-generated operation for usuarios.eliminar_usuario",
+        "operationId": "usuarios.eliminar_usuario",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "usuario_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "DELETE /usuarios/{usuario_id}",
+        "tags": [
+          "Usuarios"
+        ]
+      },
+      "get": {
+        "description": "Auto-generated operation for usuarios.obtener_usuario",
+        "operationId": "usuarios.obtener_usuario",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "usuario_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /usuarios/{usuario_id}",
+        "tags": [
+          "Usuarios"
+        ]
+      },
+      "patch": {
+        "description": "Auto-generated operation for usuarios.actualizar_usuario",
+        "operationId": "usuarios.actualizar_usuario_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "usuario_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/UsuarioUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PATCH /usuarios/{usuario_id}",
+        "tags": [
+          "Usuarios"
+        ]
+      },
+      "put": {
+        "description": "Auto-generated operation for usuarios.actualizar_usuario",
+        "operationId": "usuarios.actualizar_usuario_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "usuario_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/UsuarioUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PUT /usuarios/{usuario_id}",
+        "tags": [
+          "Usuarios"
+        ]
+      }
+    },
+    "/usuarios/{usuario_id}/credentials": {
+      "put": {
+        "description": "Auto-generated operation for usuarios.actualizar_credenciales",
+        "operationId": "usuarios.actualizar_credenciales",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "usuario_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/UsuarioUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PUT /usuarios/{usuario_id}/credentials",
+        "tags": [
+          "Usuarios"
+        ]
+      }
+    },
+    "/usuarios/{usuario_id}/role": {
+      "put": {
+        "description": "Auto-generated operation for usuarios.actualizar_rol",
+        "operationId": "usuarios.actualizar_rol",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "usuario_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/UsuarioUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PUT /usuarios/{usuario_id}/role",
+        "tags": [
+          "Usuarios"
+        ]
+      }
+    },
+    "/usuarios/{usuario_id}/status": {
+      "put": {
+        "description": "Auto-generated operation for usuarios.actualizar_estado",
+        "operationId": "usuarios.actualizar_estado",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "usuario_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "\`$ref": "#/components/schemas/UsuarioUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "PUT /usuarios/{usuario_id}/status",
+        "tags": [
+          "Usuarios"
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "description": "Inicio de sesión (email/password).",
+      "name": "login"
+    },
+    {
+      "description": "Refresh, logout y gestión de tokens JWT.",
+      "name": "jwt"
+    },
+    {
+      "description": "Operaciones relacionadas con academias y su configuración.",
+      "name": "Academias"
+    },
+    {
+      "description": "Operaciones sobre alumnos y sus inscripciones.",
+      "name": "Alumnos"
+    },
+    {
+      "description": "",
+      "name": "Anotaciones"
+    },
+    {
+      "description": "",
+      "name": "Aulas"
+    },
+    {
+      "description": "",
+      "name": "Curso_profesores"
+    },
+    {
+      "description": "Gestión de cursos, horarios e inscripciones.",
+      "name": "Cursos"
+    },
+    {
+      "description": "",
+      "name": "Horarios"
+    },
+    {
+      "description": "",
+      "name": "Inscripciones"
+    },
+    {
+      "description": "",
+      "name": "Roles"
+    },
+    {
+      "description": "",
+      "name": "Sesiones"
+    },
+    {
+      "description": "",
+      "name": "Tarifas"
+    },
+    {
+      "description": "Gestión de usuarios, perfiles y credenciales.",
+      "name": "Usuarios"
+    },
+    {
+      "description": "Documentación y endpoints de salud.",
+      "name": "Docs/Health"
+    }
+  ]
+}).then(spec => {
+                // Añadir información del TFG al spec
+                spec.info = spec.info || {};
+                spec.info.description = (spec.info.description || '') + 
+                    '\n\n---\n\n**Documentación generada para TFG FP DAM**\n\n' +
+                    'Esta API REST forma parte del sistema de gestión de academias desarrollado como Trabajo Fin de Grado. ' +
+                    'Implementa autenticación JWT, control de permisos por roles (ADMIN, JEFE_ESTUDIOS, PROFESOR), ' +
+                    'y operaciones CRUD completas para gestión de alumnos, sesiones, cursos y matrículas.\n\n' +
+                    '**Tecnologías:** Python 3.12 + Flask + SQLAlchemy + PostgreSQL\n\n' +
+                    '**Autor:** Ángel Fernández Vidal - IES Fernando Wirtz Suárez - Curso 2024-2025';
+                
+                window.ui = SwaggerUIBundle({
+                    spec: spec,
+                    dom_id: '#swagger-ui',
+                    deepLinking: true,
+                    presets: [
+                        SwaggerUIBundle.presets.apis,
+                        SwaggerUIStandalonePreset
+                    ],
+                    plugins: [
+                        SwaggerUIBundle.plugins.DownloadUrl
+                    ],
+                    layout: "StandaloneLayout",
+                    defaultModelsExpandDepth: 1,
+                    defaultModelExpandDepth: 3,
+                    docExpansion: 'list',
+                    filter: true,
+                    tryItOutEnabled: false  // Deshabilitar "Try it out" ya que no hay servidor
+                });
+            })
+            .catch(err => {
+                console.error('Error loading OpenAPI spec:', err);
+                document.getElementById('swagger-ui').innerHTML = 
+                    '<div style="padding: 40px; text-align: center;">' +
+                    '<h2 style="color: #d32f2f;">⚠️ Error al cargar la especificación OpenAPI</h2>' +
+                    '<p>Asegúrate de que el archivo <code>openapi-auto.json</code> está en el mismo directorio que este HTML.</p>' +
+                    '<p style="color: #666; font-size: 14px;">Para usar este documento en el TFG, copia ambos archivos juntos:</p>' +
+                    '<ul style="text-align: left; max-width: 500px; margin: 20px auto; background: #f5f5f5; padding: 20px; border-radius: 8px;">' +
+                    '<li><code>API_SWAGGER_STANDALONE_TFG.html</code> (este archivo)</li>' +
+                    '<li><code>openapi-auto.json</code> (especificación)</li>' +
+                    '</ul>' +
+                    '</div>';
+            });
+    </script>
+    
+    <div style="text-align: center; padding: 20px; color: #666; font-size: 12px; border-top: 1px solid #e0e0e0; margin-top: 40px;">
+        <p><strong>API Workers Profesores</strong> - Sistema de Gestión de Academias</p>
+        <p>Documentación generada automáticamente desde código fuente con Flask-RESTX</p>
+        <p>Ángel Fernández Vidal - TFG FP DAM - IES Fernando Wirtz Suárez - 2024-2025</p>
+    </div>
+</body>
+</html>
+
