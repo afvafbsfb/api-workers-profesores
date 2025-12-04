@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Guía UX - AcademiaAPP Android</title>
+<meta charset="UTF-8">
+<meta name="version" content="2.0.0">
+<meta name="author" content="Ángel Fernández Vidal">
+<meta name="project" content="TFG FP DAM - AcademiaAPP">
+<style>
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Ubuntu", sans-serif;
+    font-size: 14px;
+    padding: 0 26px;
+    line-height: 22px;
+    word-wrap: break-word;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+h1 {
+    padding-bottom: 0.3em;
+    line-height: 1.2;
+    border-bottom: 2px solid #128C7E;
+    color: #128C7E;
+}
+
+h2 {
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid #f0f0f0;
+    margin-top: 32px;
+    color: #1EBEA5;
+}
+
+h3 {
+    margin-top: 20px;
+    color: #333;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 16px 0;
+}
+
+table th {
+    background-color: #ECE5DD;
+    text-align: left;
+    padding: 12px;
+    border: 1px solid #ddd;
+    font-weight: 600;
+}
+
+table td {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    vertical-align: top;
+}
+
+table tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+code {
+    background-color: #ECE5DD;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+}
+
+pre {
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 16px;
+    overflow-x: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+}
+
+.color-box {
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+    border: 1px solid #ccc;
+    vertical-align: middle;
+    margin-right: 8px;
+    border-radius: 4px;
+}
+
+.info-box {
+    background-color: #E3F2FD;
+    border-left: 4px solid #2196F3;
+    padding: 12px;
+    margin: 16px 0;
+    border-radius: 4px;
+}
+
+.component-box {
+    background-color: #F3E5F5;
+    border-left: 4px solid #9C27B0;
+    padding: 12px;
+    margin: 16px 0;
+    border-radius: 4px;
+}
+
+.interaction-box {
+    background-color: #E8F5E9;
+    border-left: 4px solid #4CAF50;
+    padding: 12px;
+    margin: 16px 0;
+    border-radius: 4px;
+}
+
+.screen-layout {
+    border: 2px solid #128C7E;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 16px 0;
+    background: linear-gradient(135deg, #f5f7fa 0%, #ECE5DD 30%);
+}
+
+.chat-bubble-user {
+    background-color: #DCF8C6;
+    color: #000000;
+    padding: 12px;
+    border-radius: 12px 12px 12px 4px;
+    margin: 8px 0 8px 60px;
+    max-width: 80%;
+    float: right;
+    clear: both;
+}
+
+.chat-bubble-assistant {
+    background-color: #FFFFFF;
+    color: #000000;
+    border: 1px solid #e0e0e0;
+    padding: 12px;
+    border-radius: 12px 12px 4px 12px;
+    margin: 8px 60px 8px 0;
+    max-width: 80%;
+    float: left;
+    clear: both;
+}
+
+@media print {
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}
+</style>
+</head>
+<body>
+
+<h1>Guía de Experiencia de Usuario</h1>
+<h2>AcademiaAPP - Aplicación Android</h2>
+
+<p><strong>Proyecto:</strong> TFG FP DAM - Sistema Academia Chat-Driven<br>
+<strong>Autor:</strong> Ángel Fernández Vidal<br>
+<strong>Fecha:</strong> Noviembre 2025<br>
+<strong>Tecnología:</strong> Kotlin + Jetpack Compose + Material Design 3</p>
+
+<hr>
+
+<h2>Índice</h2>
+<ol>
+<li><a href="#paleta-colores">Paleta de Colores Real</a></li>
+<li><a href="#login">Pantalla de Login</a></li>
+<li><a href="#chat">Pantalla de Chat</a></li>
+<li><a href="#mensajes">Burbujas de Mensajes</a></li>
+<li><a href="#tarjetas">Tarjetas de Datos (DataCards)</a></li>
+<li><a href="#sugerencias">SuggestionChips</a></li>
+<li><a href="#loading">Estados de Carga</a></li>
+<li><a href="#navegacion">Navegación con Drawer</a></li>
+<li><a href="#interacciones">Interacciones Clave</a></li>
+</ol>
+
+<hr>
+
+<h2 id="paleta-colores">1. Paleta de Colores Real</h2>
+
+<p>Extraído de <code>ui/theme/Color.kt</code>:</p>
+
+<table>
+<tr>
+<th>Color</th>
+<th>Código</th>
+<th>Uso en la App</th>
+</tr>
+<tr>
+<td><div class="color-box" style="background: #128C7E;"></div></td>
+<td><code>#128C7E</code></td>
+<td><strong>WhatsPrimaryLight</strong> - TopAppBar, StatusBar, botón enviar</td>
+</tr>
+<tr>
+<td><div class="color-box" style="background: #1EBEA5;"></div></td>
+<td><code>#1EBEA5</code></td>
+<td><strong>WhatsPrimaryDark</strong> - Modo oscuro (no implementado aún)</td>
+</tr>
+<tr>
+<td><div class="color-box" style="background: #ECE5DD;"></div></td>
+<td><code>#ECE5DD</code></td>
+<td><strong>ChatBgLight</strong> - Fondo del chat (modo claro)</td>
+</tr>
+<tr>
+<td><div class="color-box" style="background: #0B141A;"></div></td>
+<td><code>#0B141A</code></td>
+<td><strong>ChatBgDark</strong> - Fondo del chat (modo oscuro)</td>
+</tr>
+<tr>
+<td><div class="color-box" style="background: #DCF8C6;"></div></td>
+<td><code>#DCF8C6</code></td>
+<td><strong>ChatUserBubble</strong> - Burbuja de mensajes del usuario</td>
+</tr>
+<tr>
+<td><div class="color-box" style="background: #FFFFFF; border: 1px solid #ccc;"></div></td>
+<td><code>#FFFFFF</code></td>
+<td><strong>ChatAssistantBubble</strong> - Burbuja de mensajes del asistente</td>
+</tr>
+<tr>
+<td><div class="color-box" style="background: #000000;"></div></td>
+<td><code>#000000</code></td>
+<td><strong>TextBlack</strong> - Texto principal en burbujas</td>
+</tr>
+<tr>
+<td><div class="color-box" style="background: #FFE0B2;"></div></td>
+<td><code>#FFE0B2</code></td>
+<td><strong>ValidationWarning</strong> - Fondo de campos obligatorios con error de validación</td>
+</tr>
+</table>
+
+<div class="info-box">
+<strong>📌 Nota:</strong> La paleta sigue el esquema visual de WhatsApp para familiaridad del usuario. Verde turquesa para elementos activos, beige claro para el fondo del chat.
+</div>
+
+<hr>
+
+<h2 id="login">2. Pantalla de Login</h2>
+
+<p>Extraído de <code>ui/screens/LoginScreen.kt</code>:</p>
+
+<h3>Layout</h3>
+<div class="screen-layout">
+<pre>
+┌────────────────────────────────────────┐
+│ StatusBar (#128C7E)                    │
+├────────────────────────────────────────┤
+│                                        │
+│   [Círculos decorativos de fondo]     │
+│                                        │
+│        ┌──────────────────┐            │
+│        │  CARD LOGIN      │            │
+│        │                  │            │
+│        │  "Iniciar sesión"│            │
+│        │                  │            │
+│        │  [Usuario]       │            │
+│        │  [Contraseña]    │            │
+│        │                  │            │
+│        │  ☐ Recordar     │            │
+│        │                  │            │
+│        │  ¿Olvidaste...? │            │
+│        │                  │            │
+│        │  [ ACCEDER ]     │            │
+│        └──────────────────┘            │
+│                                        │
+└────────────────────────────────────────┘
+</pre>
+</div>
+
+<h3>Elementos UI Implementados</h3>
+<table>
+<tr>
+<th>Componente</th>
+<th>Tipo</th>
+<th>Características</th>
+</tr>
+<tr>
+<td><strong>Fondo degradado</strong></td>
+<td><code>Box + Brush.verticalGradient</code></td>
+<td>Primary.copy(alpha=0.3f) → PrimaryContainer.copy(alpha=0.5f) → #E8F5E9</td>
+</tr>
+<tr>
+<td><strong>Círculos decorativos</strong></td>
+<td><code>Box + CircleShape</code></td>
+<td>3 círculos con alpha 0.1-0.12, posicionados con offset negativo</td>
+</tr>
+<tr>
+<td><strong>Card central</strong></td>
+<td><code>Card</code></td>
+<td>RoundedCornerShape(24.dp), elevation 16.dp, fondo blanco 95% opacidad</td>
+</tr>
+<tr>
+<td><strong>Campo Usuario</strong></td>
+<td><code>OutlinedTextField</code></td>
+<td>Label: "Usuario", texto negro (#000000), sin validación compleja</td>
+</tr>
+<tr>
+<td><strong>Campo Contraseña</strong></td>
+<td><code>OutlinedTextField</code></td>
+<td>PasswordVisualTransformation + icono ojo mostrar/ocultar (ic_eye / ic_eye_off)</td>
+</tr>
+<tr>
+<td><strong>Checkbox "Recordar"</strong></td>
+<td><code>Checkbox</code></td>
+<td>Tamaño 24.dp, colors personalizados (checked=negro, unchecked=blanco)</td>
+</tr>
+<tr>
+<td><strong>Link "¿Olvidaste?"</strong></td>
+<td><code>TextButton</code></td>
+<td>Color azul oscuro (#1565C0), sin funcionalidad implementada</td>
+</tr>
+<tr>
+<td><strong>Botón Acceder</strong></td>
+<td><code>Button</code></td>
+<td>fillMaxWidth(), color primary (#128C7E), texto "Accediendo..." si loading</td>
+</tr>
+</table>
+
+<h3>Estados del Botón</h3>
+<div class="component-box">
+<strong>Estado Habilitado:</strong> Requiere <code>username.isNotBlank()</code> Y <code>password.isNotBlank()</code><br>
+<strong>Estado Loading:</strong> Botón deshabilitado, texto "Accediendo...", alpha 0.5f<br>
+<strong>Estado Error:</strong> Snackbar roja con mensaje, campos mantienen valores ingresados
+</div>
+
+<h3>Navegación Post-Login</h3>
+<pre>
+if (uiState.mustChangePassword) {
+    navController.navigate("change_password_required")
+} else {
+    navController.navigate("chat?fromLogin=true")
+}
+</pre>
+
+<hr>
+
+<h2 id="chat">3. Pantalla de Chat</h2>
+
+<p>Extraído de <code>ui/screens/ChatScreen.kt</code>:</p>
+
+<h3>Estructura Scaffold</h3>
+<div class="screen-layout">
+<pre>
+┌──────────────────────────────────────────┐
+│ AppTopBar                                │ ← height: 56.dp, color: #128C7E
+│ ☰ [Logo/Nombre Usuario]          [Menú] │
+├──────────────────────────────────────────┤
+│                                          │
+│  LazyColumn (mensajes)                   │ ← bg: #ECE5DD (claro) o #0B141A (oscuro)
+│  ┌────────────────────────────────┐      │
+│  │ Burbuja Asistente (#FFFFFF)    │      │
+│  └────────────────────────────────┘      │
+│                ┌────────────────────────┐│
+│                │ Burbuja Usuario        ││
+│                │ (#DCF8C6)              ││
+│                └────────────────────────┘│
+│  ┌────────────────────────────────┐      │
+│  │ Burbuja Asistente con tarjetas │      │
+│  │ [DataCard]  [DataCard]         │      │
+│  └────────────────────────────────┘      │
+│                                          │
+│ [Sugerencias]                            │ ← SuggestionChips horizontal scroll
+│ [📊 Clases] [👥 Alumnos] [📝 Lista]      │
+├──────────────────────────────────────────┤
+│ MessageInput                             │ ← OutlinedTextField + FloatingActionButton
+│ [Escribe un mensaje...]            [↑]  │
+└──────────────────────────────────────────┘
+</pre>
+</div>
+
+<h3>Componentes Principales</h3>
+
+<h4>AppTopBar (ui/components/AppTopBar.kt)</h4>
+<table>
+<tr>
+<th>Propiedad</th>
+<th>Valor</th>
+</tr>
+<tr>
+<td>height</td>
+<td>56.dp</td>
+</tr>
+<tr>
+<td>backgroundColor</td>
+<td>MaterialTheme.colorScheme.primary (#128C7E)</td>
+</tr>
+<tr>
+<td>contentColor</td>
+<td>MaterialTheme.colorScheme.onPrimary (blanco)</td>
+</tr>
+<tr>
+<td>showNavIcon</td>
+<td>true (icono ☰ menú hamburguesa)</td>
+</tr>
+<tr>
+<td>StatusBar sync</td>
+<td>window.statusBarColor = backgroundColor.toArgb()</td>
+</tr>
+</table>
+
+<h4>LazyColumn (Lista de Mensajes)</h4>
+<pre>
+LazyColumn(
+    state = listState,
+    modifier = Modifier
+        .fillMaxSize()
+        .padding(horizontal = 12.dp, vertical = 8.dp),
+    verticalArrangement = Arrangement.spacedBy(8.dp)
+) {
+    itemsIndexed(ui.messages) { index, m ->
+        // Render bubble
+    }
+}
+</pre>
+
+<div class="info-box">
+<strong>Auto-scroll:</strong> Usa <code>LaunchedEffect(ui.messages.size, ui.loading)</code> para scroll automático al último mensaje cuando cambia la lista o aparece loading.
+</div>
+
+<h4>MessageInput (Campo de Texto + Botón)</h4>
+<pre>
+Row(
+    modifier = Modifier
+        .fillMaxWidth()
+        .background(chatBackground)
+        .padding(8.dp)
+) {
+    OutlinedTextField(
+        value = inputText,
+        onValueChange = { ... },
+        placeholder = { Text("Escribe un mensaje...") },
+        modifier = Modifier.weight(1f)
+    )
+    Spacer(8.dp)
+    FloatingActionButton(
+        onClick = { vm.sendMessage(inputText) },
+        containerColor = MaterialTheme.colorScheme.primary,
+        shape = CircleShape
+    ) {
+        Icon(Icons.AutoMirrored.Filled.Send, "Enviar mensaje")
+    }
+}
+</pre>
+
+<hr>
+
+<h2 id="mensajes">4. Burbujas de Mensajes</h2>
+
+<h3>Burbuja de Usuario</h3>
+<table>
+<tr>
+<th>Propiedad</th>
+<th>Valor</th>
+</tr>
+<tr>
+<td>backgroundColor</td>
+<td><code>#DCF8C6</code> (verde claro WhatsApp)</td>
+</tr>
+<tr>
+<td>textColor</td>
+<td><code>#000000</code></td>
+</tr>
+<tr>
+<td>alignment</td>
+<td><code>Alignment.CenterEnd</code> (derecha)</td>
+</tr>
+<tr>
+<td>shape</td>
+<td>
+<code>RoundedCornerShape(
+    topStart = 12.dp,
+    topEnd = 12.dp,
+    bottomStart = 12.dp,
+    bottomEnd = 4.dp
+)</code>
+</td>
+</tr>
+<tr>
+<td>maxWidth</td>
+<td>80% del ancho de pantalla</td>
+</tr>
+</table>
+
+<div class="chat-bubble-user">
+Muéstrame las clases de hoy
+</div>
+<div style="clear: both;"></div>
+
+<h3>Burbuja del Asistente</h3>
+<table>
+<tr>
+<th>Propiedad</th>
+<th>Valor</th>
+</tr>
+<tr>
+<td>backgroundColor</td>
+<td><code>#FFFFFF</code></td>
+</tr>
+<tr>
+<td>textColor</td>
+<td><code>#000000</code></td>
+</tr>
+<tr>
+<td>alignment</td>
+<td><code>Alignment.CenterStart</code> (izquierda)</td>
+</tr>
+<tr>
+<td>shape</td>
+<td>
+<code>RoundedCornerShape(
+    topStart = 12.dp,
+    topEnd = 12.dp,
+    bottomEnd = 12.dp,
+    bottomStart = 4.dp
+)</code>
+</td>
+</tr>
+<tr>
+<td>maxWidth</td>
+<td>80% (sin tabla) / 95% (con tabla)</td>
+</tr>
+</table>
+
+<div class="chat-bubble-assistant">
+Tus clases de hoy - Miércoles 23 de octubre:<br>
+Tienes <strong>3 sesiones</strong> programadas.
+</div>
+<div style="clear: both;"></div>
+
+<hr>
+
+<h2 id="tarjetas">5. Tarjetas de Datos (DataCards)</h2>
+
+<p>Componente: <code>ui/screens/components/SesionesDelDiaCards.kt</code></p>
+
+<div style="background-color: #E3F2FD; padding: 12px; border-left: 4px solid #2196F3; margin: 16px 0; border-radius: 4px;">
+<p><strong>📊 Contenido dinámico:</strong> Los datos mostrados (horarios, cursos, estados) se actualizan automáticamente según la información del profesor y las clases programadas. El usuario siempre ve información actualizada sin necesidad de recargar manualmente. Los estados visuales cambian en tiempo real (⏰ → ▶️ → ✅).</p>
+</div>
+
+<h3>Anatomía Visual de una SesionesDelDiaCard</h3>
+<pre>
+Card(
+    modifier = Modifier.fillMaxWidth(),
+    shape = RoundedCornerShape(8.dp),
+    colors = CardDefaults.cardColors(
+        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+    ),
+    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+) {
+    Column(padding = 12.dp, spacing = 6.dp) {
+        // Línea 1: Horario + Aula
+        Row {
+            Text("$horaInicio - $horaFin", style = titleMedium, fontWeight = Bold)
+            Text("| $nombreAula", style = bodyMedium)
+        }
+        
+        // Línea 2: Curso
+        Text(nombreCurso, style = bodyLarge, fontWeight = Medium)
+        
+        // Línea 3: Descripción estado
+        Text(descripcionEstado, style = bodySmall, color = onSurfaceVariant)
+        
+        // Línea 4: Alumnos
+        Text("$alumnosAsistieron/$alumnosTotal alumnos", style = bodySmall)
+        
+        // Línea 5: Acciones contextuales
+        if (acciones.isNotEmpty()) {
+            HorizontalDivider(...)
+            Row {
+                acciones.forEach { accion ->
+                    OutlinedButton(
+                        onClick = { ... },
+                        height = 36.dp,
+                        contentPadding = PaddingValues(12.dp, 4.dp)
+                    ) {
+                        Text(accion, style = labelMedium)
+                    }
+                }
+            }
+        }
+    }
+}
+</pre>
+
+<h3>Jerarquía Visual y Diseño</h3>
+<table>
+<tr>
+<th>Elemento</th>
+<th>Estilo</th>
+<th>Propósito UX</th>
+</tr>
+<tr>
+<td>1️⃣ Horario</td>
+<td><code>titleMedium, Bold</code></td>
+<td>Máxima prominencia - Información primaria</td>
+</tr>
+<tr>
+<td>2️⃣ Curso</td>
+<td><code>bodyLarge, Medium</code></td>
+<td>Identificación principal del contenido</td>
+</tr>
+<tr>
+<td>3️⃣ Estado</td>
+<td><code>bodySmall, onSurfaceVariant</code></td>
+<td>Información secundaria contextual</td>
+</tr>
+<tr>
+<td>4️⃣ Alumnos</td>
+<td><code>bodySmall</code></td>
+<td>Datos cuantitativos de asistencia</td>
+</tr>
+<tr>
+<td>5️⃣ Acciones</td>
+<td><code>OutlinedButton, 36dp</code></td>
+<td>Interacción contextual según estado</td>
+</tr>
+</table>
+
+<h3>Estados Visuales y Acciones</h3>
+<table>
+<tr>
+<th>Estado</th>
+<th>Icono</th>
+<th>Descripción</th>
+<th>Acciones Disponibles</th>
+</tr>
+<tr>
+<td>Programada</td>
+<td>⏰</td>
+<td>"Sesión no iniciada"</td>
+<td>Iniciar (si está en ventana ±1h)</td>
+</tr>
+<tr>
+<td>En curso</td>
+<td>▶️</td>
+<td>"En curso"</td>
+<td>Ver alumnos, Pasar lista</td>
+</tr>
+<tr>
+<td>Completada</td>
+<td>✅</td>
+<td>"Completada"</td>
+<td>Ver alumnos, Ver anotaciones</td>
+</tr>
+</table>
+
+<h3>Especificaciones de Diseño</h3>
+<ul>
+<li><strong>Padding interno:</strong> 12dp</li>
+<li><strong>Spacing vertical:</strong> 6dp entre elementos</li>
+<li><strong>Bordes:</strong> 8dp de radio, 1dp de grosor con alpha 0.3</li>
+<li><strong>Fondo:</strong> surfaceVariant con alpha 0.5 (translúcido)</li>
+<li><strong>Botones:</strong> Altura 36dp, padding horizontal 12dp</li>
+<li><strong>Separador:</strong> HorizontalDivider antes de acciones</li>
+</ul>
+
+<h3>Tipos de Tarjetas Implementadas</h3>
+<table>
+<tr>
+<th>Componente</th>
+<th>Archivo</th>
+<th>Uso</th>
+</tr>
+<tr>
+<td><code>SesionesDelDiaCards</code></td>
+<td><code>components/SesionesDelDiaCards.kt</code></td>
+<td>Clases del día con estado, horario, curso, acciones (Ver alumnos, Pasar lista, Iniciar)</td>
+</tr>
+<tr>
+<td><code>SesionesSemanalesTable</code></td>
+<td><code>components/SesionesSemanalesTable.kt</code></td>
+<td>Vista semanal con días expandibles (icono UnfoldMore para expandir horarios)</td>
+</tr>
+<tr>
+<td><code>CompactList</code></td>
+<td><code>components/CompactList.kt</code></td>
+<td>Listas genéricas con icono 🔍 (Search) en última columna para ver detalles</td>
+</tr>
+<tr>
+<td><code>AlumnosSesionTable</code></td>
+<td><code>components/AlumnosSesionTable.kt</code></td>
+<td>Lista de alumnos con checkboxes asistencia (✅/❌) y icono 📝 para anotaciones</td>
+</tr>
+</table>
+
+<hr>
+
+<h2 id="sugerencias">6. SuggestionChips</h2>
+
+<p>Extraído de <code>ChatScreen.kt</code> líneas 962-1050:</p>
+
+<h3>Implementación</h3>
+<pre>
+Row(
+    modifier = Modifier
+        .fillMaxWidth()
+        .horizontalScroll(rememberScrollState())
+        .padding(horizontal = 12.dp, vertical = 8.dp),
+    horizontalArrangement = Arrangement.spacedBy(8.dp)
+) {
+    suggestions.forEach { suggestion ->
+        SuggestionChip(
+            onClick = {
+                vm.disableSuggestionsForMessage(index)
+                vm.sendMessage(suggestion.displayText)
+            },
+            label = { Text(suggestion.displayText) },
+            enabled = !ui.loading && m.suggestionsEnabled
+        )
+    }
+}
+</pre>
+
+<h3>Tipos de Sugerencias</h3>
+<table>
+<tr>
+<th>Tipo</th>
+<th>Comportamiento</th>
+<th>Ejemplo</th>
+</tr>
+<tr>
+<td><strong>Navegación (pagination)</strong></td>
+<td>Chips con iconos de flecha (prev/next), ordenados por dirección</td>
+<td>
+← Página anterior | Página siguiente →
+</td>
+</tr>
+<tr>
+<td><strong>Acciones contextuales</strong></td>
+<td>Chips sin icono, texto descriptivo</td>
+<td>"Ver clases de ayer", "Buscar alumno"</td>
+</tr>
+<tr>
+<td><strong>Filtros</strong></td>
+<td>Chips que envían mensaje con contexto adicional</td>
+<td>"Solo alumnos activos", "Solo completadas"</td>
+</tr>
+</table>
+
+<div class="interaction-box">
+<strong>Deshabilitar sugerencias:</strong> Cuando el usuario hace tap en un chip o escribe un nuevo mensaje, se llama a <code>vm.disableSuggestionsForMessage(index)</code> para que los chips del mensaje anterior desaparezcan (evita saturación visual).
+</div>
+
+<h3>Iconos de Paginación</h3>
+<pre>
+val icon = when (suggestion.pagination?.direction) {
+    "prev" -> Icons.AutoMirrored.Filled.KeyboardArrowLeft
+    "next" -> Icons.AutoMirrored.Filled.KeyboardArrowRight
+    else -> null
+}
+</pre>
+
+<hr>
+
+<h2 id="loading">7. Estados de Carga</h2>
+
+<p>Extraído de <code>ui/screens/components/TypingIndicator.kt</code>:</p>
+
+<h3>TypingIndicator (Animación de 3 Puntos)</h3>
+<pre>
+@Composable
+fun TypingIndicator(dotColor: Color = Color(0xFF555555)) {
+    // 3 dots animados con offset vertical
+    Row(spacing = 4.dp) {
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .offset(y = offsetY1.dp)  // animateFloat 0f → -8f
+                .background(dotColor, CircleShape)
+        )
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .offset(y = offsetY2.dp)  // delay 200ms
+                .background(dotColor, CircleShape)
+        )
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .offset(y = offsetY3.dp)  // delay 400ms
+                .background(dotColor, CircleShape)
+        )
+    }
+}
+</pre>
+
+<h3>Uso del TypingIndicator</h3>
+<table>
+<tr>
+<th>Contexto</th>
+<th>Ubicación</th>
+</tr>
+<tr>
+<td><strong>Mensaje de bienvenida inicial</strong></td>
+<td>Centrado en pantalla vacía dentro de Card blanco con elevation 4.dp</td>
+</tr>
+<tr>
+<td><strong>Respuesta en proceso</strong></td>
+<td>Última burbuja del asistente (blanca) mientras <code>ui.loading == true</code></td>
+</tr>
+</table>
+
+<div class="component-box">
+<strong>Animación:</strong> infiniteRepeatable con tween(600ms), RepeatMode.Reverse, efecto de "ola" vertical (-8dp offset).
+</div>
+
+<hr>
+
+<h2 id="navegacion">8. Navegación con Drawer</h2>
+
+<p>Extraído de <code>ChatScreen.kt</code> líneas 230-295:</p>
+
+<h3>ModalNavigationDrawer</h3>
+<pre>
+ModalNavigationDrawer(
+    drawerState = drawerState,
+    drawerContent = {
+        ModalDrawerSheet {
+            // Header con fondo primary
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.primary)
+                    .padding(16.dp)
+            ) {
+                Text(userName, color = onPrimary)
+                Text(academiaName ?: "Academia vinculada", color = onPrimary)
+            }
+            
+            // Opciones dinámicas según rol
+            menuOptions.forEach { option ->
+                NavigationDrawerItem(
+                    label = { Text(option.label) },
+                    icon = { Icon(option.icon, "") },
+                    selected = option.id == "chat_libre",
+                    onClick = { /* acción */ }
+                )
+            }
+        }
+    }
+) {
+    // Contenido del chat
+}
+</pre>
+
+<h3>Opciones del Menú (MenuBuilder.kt)</h3>
+<table>
+<tr>
+<th>ID</th>
+<th>Label</th>
+<th>Icono</th>
+<th>Acción</th>
+</tr>
+<tr>
+<td><code>chat_libre</code></td>
+<td>Chat Libre</td>
+<td>Chat icon</td>
+<td>Navegar a <code>/chat</code></td>
+</tr>
+<tr>
+<td><code>mis_clases_hoy</code></td>
+<td>Mis clases de hoy</td>
+<td>Calendar icon</td>
+<td>Enviar mensaje automático: "Muéstrame mis clases de hoy"</td>
+</tr>
+<tr>
+<td><code>mis_alumnos</code></td>
+<td>Mis alumnos</td>
+<td>People icon</td>
+<td>Enviar mensaje: "Ver todos mis alumnos"</td>
+</tr>
+<tr>
+<td><code>cerrar_sesion</code></td>
+<td>Cerrar Sesión</td>
+<td>Logout icon</td>
+<td>Cierra la sesión del usuario y vuelve a la pantalla de login con animación de transición</td>
+</tr>
+</table>
+
+<div class="info-box">
+<strong>🔄 Navegación conversacional:</strong> Opciones como "Mis clases de hoy" no abren nueva pantalla, sino que envían un mensaje al chat automáticamente. El usuario ve el mensaje aparecer como si lo hubiera escrito, manteniendo la coherencia de la interfaz conversacional.
+</div>
+
+<hr>
+
+<h2 id="interacciones">9. Interacciones Clave</h2>
+
+<h3>1. Pasar Lista (AlumnosSesionTable)</h3>
+<div class="interaction-box">
+<strong>Flujo de interacción:</strong><br>
+1️⃣ Usuario hace tap en botón "Pasar lista" desde tarjeta de sesión<br>
+2️⃣ Chat muestra tabla interactiva con checkboxes (✅/❌) por cada alumno<br>
+3️⃣ Usuario toca checkboxes para marcar ausencias - cambio visual instantáneo<br>
+4️⃣ Botón "Confirmar Asistencia" se activa en footer de tabla<br>
+5️⃣ Al confirmar, aparece indicador de carga (TypingIndicator)<br>
+6️⃣ Feedback visual: Resumen de asistencia con nuevas opciones de acción
+</div>
+
+<h3>2. Ver Detalles (Modal BottomSheet)</h3>
+<div class="interaction-box">
+<strong>Flujo de interacción:</strong><br>
+1️⃣ Usuario hace tap en icono 🔍 en cualquier fila de tabla<br>
+2️⃣ Aparece panel deslizante desde abajo (BottomSheet) con animación suave<br>
+3️⃣ Muestra todos los campos del registro en formato legible<br>
+4️⃣ Usuario puede cerrar tocando fuera del panel o arrastrando hacia abajo<br>
+5️⃣ Animación de cierre con efecto de deslizamiento
+</div>
+
+<pre>
+if (ui.detailsItem != null) {
+    ModalBottomSheet(onDismissRequest = vm::hideDetailsItem) {
+        Column(padding = 16.dp) {
+            Text("Detalles del registro", style = titleLarge)
+            HorizontalDivider(...)
+            
+            // Por cada campo en el item
+            itemMap.forEach { (key, value) ->
+                Card(...) {
+                    Text(key, style = labelMedium, color = #666666)
+                    Text(formatValue(value), style = bodyMedium)
+                }
+            }
+            
+            Button(onClick = vm::hideDetailsItem) { Text("Cerrar") }
+        }
+    }
+}
+</pre>
+
+<h3>3. Aclaración de Sugerencias (Diálogo Interactivo)</h3>
+<div class="component-box">
+<strong>Experiencia de usuario:</strong><br>
+• Cuando una acción requiere información adicional, aparece un diálogo emergente<br>
+• Campo de texto pre-rellenado con el texto de la sugerencia seleccionada<br>
+• Usuario puede editar o ampliar el mensaje antes de enviar<br>
+• Botones "Cancelar" (cierra sin enviar) y "Enviar" (confirma acción)<br>
+• Feedback visual inmediato: diálogo se cierra y mensaje aparece en el chat
+</div>
+
+<h3>4. Formularios Interactivos (AlumnoForm)</h3>
+<div class="component-box">
+<strong>📝 Formulario unificado con dos modos:</strong><br>
+• <strong>Modo Alta:</strong> Todos los campos vacíos para crear nuevo alumno<br>
+• <strong>Modo Modificación:</strong> Campos pre-rellenados con datos actuales del alumno
+</div>
+
+<table>
+<tr>
+<th>Campo</th>
+<th>Tipo</th>
+<th>Validación Visual</th>
+</tr>
+<tr>
+<td>Nombre</td>
+<td>Texto obligatorio</td>
+<td>Borde rojo si vacío al enviar</td>
+</tr>
+<tr>
+<td>Teléfono</td>
+<td>Numérico</td>
+<td>Formato automático (XXX XXX XXX)</td>
+</tr>
+<tr>
+<td>Fecha Nacimiento</td>
+<td>Selector de fecha</td>
+<td>Popup calendario Material Design</td>
+</tr>
+<tr>
+<td>Email</td>
+<td>Texto con validación</td>
+<td>Icono ✅ si formato correcto</td>
+</tr>
+<tr>
+<td>Curso</td>
+<td>Dropdown</td>
+<td>Lista desplegable con cursos disponibles</td>
+</tr>
+</table>
+
+<p><strong>Interacciones del formulario:</strong></p>
+<ul>
+<li><strong>Cancelar:</strong> Cierra el formulario sin guardar cambios, vuelve al chat</li>
+<li><strong>Enviar/Guardar:</strong> Valida campos, muestra indicador de carga, confirma con mensaje de éxito</li>
+<li><strong>Validación en tiempo real:</strong> Campos obligatorios muestran ayuda visual si están incompletos</li>
+</ul>
+
+<h3>Validación Visual de Campos</h3>
+<table>
+<tr>
+<th>Estado del Campo</th>
+<th>Indicador Visual</th>
+<th>Color de Fondo</th>
+<th>Comportamiento</th>
+</tr>
+<tr>
+<td>✅ Campo válido</td>
+<td>Fondo transparente, borde normal gris</td>
+<td><code>Transparent</code></td>
+<td>Usuario puede escribir normalmente</td>
+</tr>
+<tr>
+<td>⚠️ Campo obligatorio vacío</td>
+<td>Fondo naranja claro + borde rojo + asterisco (*)</td>
+<td><div class="color-box" style="background: #FFE0B2; display: inline-block; width: 40px; height: 20px; vertical-align: middle;"></div> <code>#FFE0B2</code></td>
+<td>Se activa al intentar enviar formulario sin completar</td>
+</tr>
+<tr>
+<td>🔍 Focus activo</td>
+<td>Cursor parpadeante, fondo se limpia al escribir</td>
+<td><code>Transparent</code></td>
+<td>El color naranja desaparece automáticamente cuando el usuario empieza a escribir</td>
+</tr>
+</table>
+
+<div class="info-box">
+<strong>🎯 Feedback instantáneo:</strong> Cuando el usuario intenta enviar el formulario sin completar los campos obligatorios (Nombre, Teléfono, Fecha de nacimiento), estos campos se resaltan automáticamente con fondo naranja claro (<code>#FFE0B2</code>) y el foco se posiciona en el primer campo con error. Al empezar a escribir, el color de advertencia desaparece instantáneamente.
+</div>
+
+<hr>
+
+<h2>Resumen UX</h2>
+
+<p>AcademiaAPP implementa un patrón de interacción <strong>chat-first</strong>:</p>
+
+<ul>
+<li>✅ <strong>Una sola pantalla</strong> (ChatScreen) post-login</li>
+<li>✅ <strong>Navegación conversacional</strong> mediante drawer + auto-envío de mensajes</li>
+<li>✅ <strong>Tarjetas contextuales</strong> (SesionesDelDiaCards, CompactList, AlumnosSesionTable)</li>
+<li>✅ <strong>Interacción directa</strong> (checkboxes en tablas, botones en tarjetas)</li>
+<li>✅ <strong>Feedback visual</strong> (TypingIndicator, ModalBottomSheet, Snackbars)</li>
+<li>✅ <strong>Paleta WhatsApp</strong> (#128C7E, #DCF8C6, #ECE5DD) para familiaridad</li>
+<li>✅ <strong>Material Design 3</strong> con Jetpack Compose nativo</li>
+</ul>
+
+<hr>
+
+<p style="text-align: center; color: #666; font-size: 12px; margin-top: 40px;">
+Documento basado 100% en el código fuente de AcademiaAPP<br>
+<strong>Ángel Fernández Vidal</strong> - TFG FP DAM - IES Fernando Wirtz Suárez<br>
+Noviembre 2025
+</p>
+
+</body>
+</html>

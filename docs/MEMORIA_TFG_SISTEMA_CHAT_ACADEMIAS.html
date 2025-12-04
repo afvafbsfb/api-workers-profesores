@@ -522,6 +522,33 @@ Este documento incluye las últimas mejoras implementadas en el sistema:
 <li>✅ Actualización de tecnologías (Spring Boot 3.5.5, Java 21, GPT-4o)</li>
 </ul>
 </div>
+
+<h2 id="%C3%ADndice">Índice</h2>
+<ol>
+<li><a href="#repositorios-github">Repositorios GitHub del Proyecto</a></li>
+<li><a href="#1-visi%C3%B3n-general">Visión General</a></li>
+<li><a href="#2-diagrama-de-arquitectura-general-simplificado">Diagrama de Arquitectura General (Simplificado)</a></li>
+<li><a href="#3-diagrama-de-seguridad-jwt---token-delegado">Diagrama de Seguridad JWT - Token Delegado</a></li>
+<li><a href="#4-modelo-de-datos---base-de-datos-mysql">Modelo de Datos - Base de Datos MySQL</a>
+<ul>
+<li><a href="#cadenas-de-conexi%C3%B3n">Cadenas de Conexión</a></li>
+<li><a href="#tablas-de-la-base-de-datos">Tablas de la Base de Datos</a></li>
+<li><a href="#diagrama-erd-simplificado">Diagrama ERD Simplificado</a></li>
+<li><a href="#diccionario-de-datos-completo">Diccionario de Datos Completo</a></li>
+</ul>
+</li>
+<li><a href="#5-contrato-de-respuesta-del-chat">Contrato de Respuesta del Chat</a></li>
+<li><a href="#6-tabla-de-endpoints-y-seguridad">Tabla de Endpoints y Seguridad</a></li>
+<li><a href="#7-flujo-completo-caso-de-uso-real">Flujo Completo: Caso de Uso Real</a></li>
+<li><a href="#8-ventajas-de-la-arquitectura">Ventajas de la Arquitectura</a></li>
+<li><a href="#9-tecnolog%C3%ADas-utilizadas">Tecnologías Utilizadas</a></li>
+<li><a href="#10-testing-y-calidad">Testing y Calidad</a></li>
+<li><a href="#11-plan-de-despliegue-en-producci%C3%B3n">Plan de Despliegue en Producción</a></li>
+<li><a href="#12-an%C3%A1lisis-econ%C3%B3mico-del-proyecto">Análisis Económico del Proyecto</a></li>
+</ol>
+
+<hr>
+
 <h2 id="repositorios-github">Repositorios GitHub del Proyecto</h2>
 
 <div style="background-color: #E3F2FD; border-left: 4px solid #2196F3; padding: 16px; margin: 20px 0; border-radius: 4px;">
@@ -570,6 +597,8 @@ github.com/afvafbsfb/api-workers-profesores
 <p style="margin-top: 16px;"><strong>📄 Documentación Adicional Disponible:</strong></p>
 <ul style="margin: 8px 0;">
 <li><strong>API REST (Swagger):</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/API_SWAGGER_STANDALONE_TFG.html" target="_blank" style="color: #1976D2;">Documentación Interactiva Online</a></li>
+<li><strong>Arquitectura Android (MVVM):</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/ARQUITECTURA_ACADEMIAAPP_ANDROID.html" target="_blank" style="color: #1976D2;">Documentación Completa de la Arquitectura MVVM</a></li>
+<li><strong>Experiencia de Usuario (UX):</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/UX_ACADEMIAAPP_ANDROID.html" target="_blank" style="color: #1976D2;">Guía UX del Cliente Android</a></li>
 <li><strong>README:</strong> Cada repositorio incluye instrucciones de instalación, configuración y despliegue</li>
 <li><strong>Scripts SQL:</strong> Esquema completo de base de datos y datos de prueba en <code>api-workers-profesores/docs/</code></li>
 <li><strong>Testing:</strong> Tests unitarios y de integración documentados en cada proyecto</li>
@@ -583,30 +612,6 @@ Incluyen toda la documentación técnica, diagramas de arquitectura, y configura
 
 <hr>
 
-<h2 id="%C3%ADndice">Índice</h2>
-<ol>
-<li><a href="#repositorios-github">Repositorios GitHub del Proyecto</a></li>
-<li><a href="#1-visi%C3%B3n-general">Visión General</a></li>
-<li><a href="#2-diagrama-de-arquitectura-general-simplificado">Diagrama de Arquitectura General (Simplificado)</a></li>
-<li><a href="#3-diagrama-de-seguridad-jwt---token-delegado">Diagrama de Seguridad JWT - Token Delegado</a></li>
-<li><a href="#4-modelo-de-datos---base-de-datos-mysql">Modelo de Datos - Base de Datos MySQL</a>
-<ul>
-<li><a href="#cadenas-de-conexi%C3%B3n">Cadenas de Conexión</a></li>
-<li><a href="#tablas-de-la-base-de-datos">Tablas de la Base de Datos</a></li>
-<li><a href="#diagrama-erd-simplificado">Diagrama ERD Simplificado</a></li>
-<li><a href="#diccionario-de-datos-completo">Diccionario de Datos Completo</a></li>
-</ul>
-</li>
-<li><a href="#5-contrato-de-respuesta-del-chat">Contrato de Respuesta del Chat</a></li>
-<li><a href="#6-tabla-de-endpoints-y-seguridad">Tabla de Endpoints y Seguridad</a></li>
-<li><a href="#7-flujo-completo-caso-de-uso-real">Flujo Completo: Caso de Uso Real</a></li>
-<li><a href="#8-ventajas-de-la-arquitectura">Ventajas de la Arquitectura</a></li>
-<li><a href="#9-tecnolog%C3%ADas-utilizadas">Tecnologías Utilizadas</a></li>
-<li><a href="#10-testing-y-calidad">Testing y Calidad</a></li>
-<li><a href="#11-plan-de-despliegue-en-producci%C3%B3n">Plan de Despliegue en Producción</a></li>
-<li><a href="#12-an%C3%A1lisis-econ%C3%B3mico-del-proyecto">Análisis Económico del Proyecto</a></li>
-</ol>
-<hr>
 <h2 id="1-visi%C3%B3n-general">1. Visión General</h2>
 <p>El sistema <strong>Academia Chat-Driven</strong> es una plataforma educativa que utiliza inteligencia artificial conversacional como única interfaz de usuario. La arquitectura se basa en tres pilares fundamentales:</p>
 <h3 id="componentes-principales">Componentes Principales</h3>
