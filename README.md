@@ -1,6 +1,38 @@
-# API Workers Profesores
+# API Workers Profesores - Backend REST
 
-API REST backend para la gestión de academias, alumnos, cursos, sesiones e inscripciones. Construida con Python/Flask, siguiendo patrón Domain-Driven Design (DDD) y MySQL 8.0 como base de datos.
+> **API REST backend para gestión de academias mediante sistema de permisos avanzado**  
+> Proyecto Final de Ciclo - FP DAM | Ángel Fernández Vidal | 2025
+
+## 📋 Descripción
+
+API REST backend para la gestión integral de academias, incluyendo usuarios, alumnos, cursos, sesiones, inscripciones y gestión financiera. Implementa autenticación JWT con refresh tokens, sistema de permisos basado en roles (RBAC) con scoping multi-tenancy, y arquitectura Domain-Driven Design (DDD).
+
+### Características Principales
+
+- 🔐 **Autenticación JWT** con refresh tokens rotatorios (15min access + 30 días refresh)
+- 👥 **Sistema de roles**: Admin_plataforma, Admin_academia, Profesor_academia
+- 🏢 **Multi-tenancy** con scoping por academia_id
+- 📊 **20+ entidades** del dominio académico y financiero
+- 🔒 **Sistema de permisos avanzado** con extensión OpenAPI (x-permissions)
+- 📝 **Especificación OpenAPI** automática con anotaciones de permisos
+- 🧪 **Testing completo** con pytest (unitarios + integración)
+- 🗄️ **MySQL 8.0** con SQLAlchemy ORM
+- 🚀 **Arquitectura DDD** (Domain-Driven Design)
+
+## 🏗️ Stack Tecnológico
+
+| Componente | Tecnología | Versión |
+|------------|------------|---------|
+| **Lenguaje** | Python | 3.11+ |
+| **Framework Web** | Flask | 3.0.0 |
+| **ORM** | SQLAlchemy | 2.0.23 |
+| **Base de Datos** | MySQL | 8.0 |
+| **Autenticación** | Flask-JWT-Extended | 4.5.3 |
+| **Validación** | Marshmallow | 3.20.1 |
+| **Testing** | pytest | 7.4.3 |
+| **API Docs** | Flasgger (Swagger UI) | 0.9.7.1 |
+| **CORS** | Flask-CORS | 4.0.0 |
+| **Migrations** | Alembic | 1.12.1 |
 
 ## 📋 Requisitos
 
@@ -102,6 +134,18 @@ pytest -q tests/usuarios/test_login.py -s 2>&1 | Tee-Object -FilePath .\logs\api
 
 ## 📚 Documentación Adicional
 
+### Documentación en GitHub Pages
+
+- 📖 **[Memoria Completa del TFG](https://afvafbsfb.github.io/api-workers-profesores/MEMORIA_TFG_SISTEMA_CHAT_ACADEMIAS.html)** - Documentación técnica completa del sistema
+- 🔗 **[API REST (Swagger Standalone)](https://afvafbsfb.github.io/api-workers-profesores/API_SWAGGER_STANDALONE_TFG.html)** - Documentación interactiva online
+- 📄 **[Especificación OpenAPI (JSON)](https://afvafbsfb.github.io/api-workers-profesores/served-openapi.json)** - Archivo consumido por Backend Chat + OpenAI GPT-4
+- 🤖 **[Ingeniería de Prompts LLM](https://afvafbsfb.github.io/api-workers-profesores/INGENIERIA_PROMPTS_Y_OPTIMIZACION_LLM.html)** - Análisis técnico del sistema de chat IA
+- 🏗️ **[Arquitectura Android MVVM](https://afvafbsfb.github.io/api-workers-profesores/ARQUITECTURA_ACADEMIAAPP_ANDROID.html)** - Documentación del cliente móvil
+- 🎨 **[Experiencia de Usuario (UX)](https://afvafbsfb.github.io/api-workers-profesores/UX_ACADEMIAAPP_ANDROID.html)** - Guía UX del cliente Android
+- 🗄️ **[Diagrama EER Base de Datos](https://afvafbsfb.github.io/api-workers-profesores/Diagrama%20EER%20Academias.pdf)** - Modelo de datos completo
+
+### Documentación Local
+
 - **[Guía de Desarrollo](docs/DEVELOPMENT.md)** - Setup completo, debugging, best practices
 - **[Sistema de Permisos](docs/PERMISSIONS.md)** - Autorización, roles, scoping
 - **[Workflow OpenAPI](docs/OPENAPI_WORKFLOW.md)** - Generación de especificaciones para mediador
@@ -194,6 +238,24 @@ Ver [CONTRIBUTING.md](docs/CONTRIBUTING.md) para más detalles.
 - El archivo `served-openapi.json` es consumido por el mediador (Backend Chat)
 - Para desarrollo local, usa `DB_ENV=developmentAWS` (RDS development)
 
-## 📞 Soporte
+## 📞 Contacto y Soporte
 
-Para issues o preguntas sobre la API, consulta la [documentación completa](docs/) o contacta al equipo de desarrollo.
+**Autor:** Ángel Fernández Vidal  
+**Proyecto:** Trabajo Final de Ciclo - FP Desarrollo de Aplicaciones Multiplataforma  
+**Fecha:** Diciembre 2025  
+**Email:** angel.fernandez@academia.es  
+**GitHub:** [@afvafbsfb](https://github.com/afvafbsfb)
+
+Para issues o consultas sobre la API, revisa la [documentación completa](https://afvafbsfb.github.io/api-workers-profesores/) o consulta los documentos técnicos en GitHub Pages.
+
+## 🔗 Repositorios Relacionados
+
+Este proyecto es parte de un ecosistema de 3 aplicaciones:
+
+- 🐍 **API REST Python (este repo):** [api-workers-profesores](https://github.com/afvafbsfb/api-workers-profesores) - Backend principal con autenticación y datos
+- ☕ **Backend Chat Java:** [backend-chat-openai-worker-profesores](https://github.com/afvafbsfb/backend-chat-openai-worker-profesores) - Mediador entre cliente y OpenAI GPT-4
+- 📱 **Cliente Android (Kotlin):** [AcademiaAPP](https://github.com/afvafbsfb/AcademiaAPP) - App móvil con Jetpack Compose + MVVM
+
+## 📄 Licencia
+
+Este proyecto es parte de un Trabajo Final de Grado (TFG) y está disponible públicamente para fines educativos y de evaluación.
