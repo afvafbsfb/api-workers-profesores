@@ -230,10 +230,13 @@ CREATE TABLE Descuentos_tarifa (
 );
 
 -- Tabla familias_alumnos (nueva)
+-- Permite agrupar alumnos que pertenecen a la misma familia para aplicar descuentos familiares
+-- La PK compuesta (id_familia_alumno, id_alumno) permite que múltiples alumnos compartan el mismo id_familia_alumno
 CREATE TABLE familias_alumnos (
-    id_familia_alumno INT AUTO_INCREMENT PRIMARY KEY,
-    id_alumno INT NOT NULL,
-    relacion_familiar VARCHAR(100) NOT NULL,
+    id_familia_alumno INT NOT NULL COMMENT 'Identificador de la familia (manual o generado). Múltiples alumnos con el mismo id forman una familia',
+    id_alumno INT NOT NULL COMMENT 'Alumno que pertenece a la familia',
+    relacion_familiar VARCHAR(100) NOT NULL COMMENT 'Tipo de relación: Hermano, Hermana, Primo, etc.',
+    PRIMARY KEY (id_familia_alumno, id_alumno),
     FOREIGN KEY (id_alumno) REFERENCES Alumno(id)
 );
 
