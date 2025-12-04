@@ -206,7 +206,6 @@ CREATE TABLE Curso_Profesores (
 CREATE TABLE Sesion (
     id INT AUTO_INCREMENT PRIMARY KEY,
     horario_curso_id INT NOT NULL,
-    aula_id INT NOT NULL,
     curso_profesor_id INT NOT NULL,
     timestamp_alta DATETIME NOT NULL,
     hora_inicio TIME NOT NULL,
@@ -216,8 +215,7 @@ CREATE TABLE Sesion (
     notas_sesion TEXT,
     notas_materia TEXT,
     FOREIGN KEY (horario_curso_id) REFERENCES HorarioCurso(id),
-    FOREIGN KEY (curso_profesor_id) REFERENCES Curso_Profesores(id),
-    FOREIGN KEY (aula_id) REFERENCES Aula(id)
+    FOREIGN KEY (curso_profesor_id) REFERENCES Curso_Profesores(id)
 );
 
 -- Tabla Descuentos_tarifa (nueva)
@@ -234,11 +232,9 @@ CREATE TABLE Descuentos_tarifa (
 -- Tabla familias_alumnos (nueva)
 CREATE TABLE familias_alumnos (
     id_familia_alumno INT AUTO_INCREMENT PRIMARY KEY,
-    id_alumno1 INT NOT NULL,
-    id_alumno2 INT NOT NULL,
+    id_alumno INT NOT NULL,
     relacion_familiar VARCHAR(100) NOT NULL,
-    FOREIGN KEY (id_alumno1) REFERENCES Alumno(id),
-    FOREIGN KEY (id_alumno2) REFERENCES Alumno(id)
+    FOREIGN KEY (id_alumno) REFERENCES Alumno(id)
 );
 
 -- Tabla AnotacionesAlumnoSesion (antes AusenciaAlumnoSesion)
@@ -246,27 +242,19 @@ CREATE TABLE AnotacionesAlumnoSesion (
     id INT AUTO_INCREMENT PRIMARY KEY,
     sesion_id INT NOT NULL,
     inscripcion_id INT NOT NULL,
-    curso_id INT NOT NULL,
-    curso_profesor_id INT NOT NULL,
-    alumno_id INT NOT NULL,
     tipo_anotacion ENUM('Ausencia', 'Evaluacion', 'Comportamiento', 'Observacion', 'Otros') NOT NULL,
     texto VARCHAR(255),
     timestamp_alta DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     timestamp_baja DATETIME,
     motivo_baja VARCHAR(255),
     FOREIGN KEY (sesion_id) REFERENCES Sesion(id),
-    FOREIGN KEY (alumno_id) REFERENCES Alumno(id),
-    FOREIGN KEY (inscripcion_id) REFERENCES Inscripcion(id),
-    FOREIGN KEY (curso_id) REFERENCES Curso(id),
-    FOREIGN KEY (curso_profesor_id) REFERENCES Curso_Profesores(id)
+    FOREIGN KEY (inscripcion_id) REFERENCES Inscripcion(id)
 );
 
 -- Tabla Extractos (nueva)
 CREATE TABLE Extractos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     inscripcion_id INT NOT NULL,
-    curso_id INT NOT NULL,
-    alumno_id INT NOT NULL,
     numero_extracto INT NOT NULL,
     saldo_ingreso_cuenta_anterior FLOAT,
     estado_liquidacion_extracto ENUM('1', '2') NOT NULL COMMENT '1: Pendiente de liquidación, 2: Liquidado',
@@ -294,17 +282,12 @@ CREATE TABLE Extractos (
     importe_cuota_mensual_con_descuentos FLOAT NOT NULL, -- cuota mensual con descuentos
     importe_exceso_ingresos FLOAT,
     total_importe_a_cobrar FLOAT NOT NULL,
-    FOREIGN KEY (inscripcion_id) REFERENCES Inscripcion(id),
-    FOREIGN KEY (curso_id) REFERENCES Curso(id),
-    FOREIGN KEY (alumno_id) REFERENCES Alumno(id)
+    FOREIGN KEY (inscripcion_id) REFERENCES Inscripcion(id)
 );
 
 -- Tabla Movimientos_Extracto (antes Pago)
 CREATE TABLE Movimientos_Extracto (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    inscripcion_id INT NOT NULL,
-    curso_id INT NOT NULL,
-    alumno_id INT NOT NULL,
     extracto_id INT NOT NULL,
     fecha_movimiento DATE NOT NULL,
     tipo_movimiento ENUM('Ingreso', 'Anulacion_Ingreso') NOT NULL,
@@ -313,9 +296,6 @@ CREATE TABLE Movimientos_Extracto (
     descripcion_movimiento VARCHAR(255),
     metodo_pago VARCHAR(50) NOT NULL,
     indicador_movimiento_anulado ENUM('S', 'N') NOT NULL DEFAULT 'N' COMMENT 'S: Anulado, N: No Anulado',
-    FOREIGN KEY (inscripcion_id) REFERENCES Inscripcion(id),
-    FOREIGN KEY (curso_id) REFERENCES Curso(id),
-    FOREIGN KEY (alumno_id) REFERENCES Alumno(id),
     FOREIGN KEY (extracto_id) REFERENCES Extractos(id)
 );
 
