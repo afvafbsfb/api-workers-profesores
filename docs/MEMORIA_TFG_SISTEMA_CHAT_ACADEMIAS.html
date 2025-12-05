@@ -5971,40 +5971,42 @@ git checkout &lt;tag-anterior&gt;
 
 <p><strong>Costes Adicionales:</strong></p>
 <ul>
-<li><strong>OpenAI API:</strong> €0.50 - €1.50 por academia/mes (estimado según uso)</li>
+<li><strong>OpenAI API + Soporte técnico:</strong> €450/mes (estimado hasta 50 academias, incluye 10h/mes soporte)</li>
 <li><strong>Dominio:</strong> €12/año (€1/mes)</li>
-<li><strong>Soporte y mantenimiento:</strong> 10h/mes × €40/h = €400/mes</li>
 </ul>
+
+<p class="nota">
+<strong>Nota:</strong> El coste de €450/mes incluye uso estimado de OpenAI API (GPT-4o) basado en uso moderado (~50-100 consultas/academia/mes) y 10 horas mensuales de soporte técnico. Para 50-100 academias, considerar €900/mes con 20h de soporte.
+</p>
 
 <h3 id="123-punto-de-equilibrio-break-even">12.3 - Punto de Equilibrio (Break-even)</h3>
 
 <p><strong>Escenario 1: Primer Año (Free Tier de AWS)</strong></p>
 <pre class="hljs"><code><div>Inversión inicial: €35,200
-Costes operativos: €0/mes (AWS) + €1/mes (dominio) + €50/mes (OpenAI) ≈ €51/mes
+Costes operativos: €0/mes (AWS) + €1/mes (dominio) + €450/mes (OpenAI + Soporte) = €451/mes
 Ingresos por academia: €50/mes
-Ingresos netos por academia: €50 - €51/N academias
 
-<span class="hljs-comment"># Punto de equilibrio (sin contar costes de soporte):</span>
-Academias necesarias = €35,200 / (€50/mes) = <span class="hljs-number">704</span> meses-academia
-= <span class="hljs-number">704</span> / <span class="hljs-number">12</span> = <strong><span class="hljs-number">59</span> academias durante <span class="hljs-number">1</span> año</strong>
-= <span class="hljs-number">704</span> / <span class="hljs-number">24</span> = <strong><span class="hljs-number">30</span> academias durante <span class="hljs-number">2</span> años</strong>
+<span class="hljs-comment"># Punto de equilibrio:</span>
+Con <span class="hljs-number">10</span> academias: €500 - €451 = <strong>€49/mes beneficio</strong>
+Con <span class="hljs-number">40</span> academias: €2,000 - €451 = <strong>€1,549/mes beneficio</strong>
+
+Recuperación inversión con <span class="hljs-number">40</span> academias: €35,200 / €1,549 = <strong><span class="hljs-number">22.7</span> meses</strong>
 </div></code></pre>
 
 <p><strong>Escenario 2: Post Free Tier (€12/mes de AWS)</strong></p>
 <pre class="hljs"><code><div>Inversión inicial: €35,200
-Costes operativos: €12/mes (AWS) + €1/mes (dominio) + €50/mes (OpenAI) ≈ €63/mes
+Costes operativos: €12/mes (AWS) + €1/mes (dominio) + €450/mes (OpenAI + Soporte) = €463/mes
 Ingresos por academia: €50/mes
 
-<span class="hljs-comment"># Con 1 academia:</span>
-Ingresos netos: €50 - €63 = <strong>-€13/mes</strong> (pérdida)
-
 <span class="hljs-comment"># Con 10 academias:</span>
-Ingresos netos: €500 - €63 = <strong>€437/mes</strong>
-Tiempo para recuperar inversión: €35,200 / €437 ≈ <span class="hljs-number">81</span> meses (<span class="hljs-number">6.7</span> años)
+Ingresos netos: €500 - €463 = <strong>€37/mes</strong> (beneficio)
+
+<span class="hljs-comment"># Con 40 academias:</span>
+Ingresos netos: €2,000 - €463 = <strong>€1,537/mes</strong>
+Tiempo para recuperar inversión: €35,200 / €1,537 ≈ <span class="hljs-number">22.9</span> meses
 
 <span class="hljs-comment"># Punto de equilibrio óptimo:</span>
-Academias necesarias ≈ <strong><span class="hljs-number">77</span> academias durante <span class="hljs-number">1</span> año</strong>
-= <strong><span class="hljs-number">39</span> academias durante <span class="hljs-number">2</span> años</strong>
+Con <strong><span class="hljs-number">40</span> academias</strong> el proyecto es rentable en <strong><span class="hljs-number">23</span> meses</strong>
 </div></code></pre>
 
 <h3 id="124-proyecci%C3%B3n-de-rentabilidad">12.4 - Proyección de Rentabilidad</h3>
@@ -6026,47 +6028,47 @@ Academias necesarias ≈ <strong><span class="hljs-number">77</span> academias d
 <tr>
 <td>10</td>
 <td>€500</td>
-<td>€12 (AWS) + €51 (otros)</td>
-<td>€437</td>
-<td>-€24,712</td>
+<td>€463</td>
+<td>€37</td>
+<td>-€34,312</td>
 <td>❌ No rentable</td>
 </tr>
 <tr>
 <td>25</td>
 <td>€1,250</td>
-<td>€12 + €51</td>
-<td>€1,187</td>
-<td>-€6,712</td>
+<td>€463</td>
+<td>€787</td>
+<td>-€16,312</td>
 <td>❌ No rentable</td>
 </tr>
 <tr>
 <td>40</td>
 <td>€2,000</td>
-<td>€75 + €51</td>
-<td>€1,874</td>
-<td>€9,776</td>
+<td>€463</td>
+<td>€1,537</td>
+<td>€1,688</td>
 <td>✅ Rentable</td>
 </tr>
 <tr>
 <td>60</td>
 <td>€3,000</td>
-<td>€75 + €51</td>
-<td>€2,874</td>
-<td>€33,776</td>
+<td>€463</td>
+<td>€2,537</td>
+<td>€25,688</td>
 <td>✅✅ Muy rentable</td>
 </tr>
 <tr>
 <td>100</td>
 <td>€5,000</td>
-<td>€75 + €51</td>
-<td>€4,874</td>
-<td>€81,776</td>
+<td>€976</td>
+<td>€4,024</td>
+<td>€61,376</td>
 <td>✅✅✅ Altamente rentable</td>
 </tr>
 </tbody>
 </table>
 
-<p><strong>Conclusión:</strong> Con <strong>40 academias</strong> suscritas, el proyecto se vuelve rentable en aproximadamente <strong>20-22 meses</strong>.</p>
+<p><strong>Conclusión:</strong> Con <strong>40 academias</strong> suscritas, el proyecto se vuelve rentable en aproximadamente <strong>23 meses</strong>.</p>
 
 <h3 id="125-valor-a%C3%B1adido-reutilizaci%C3%B3n-del-backend-chat">12.5 - Valor Añadido: Reutilización del Backend Chat</h3>
 

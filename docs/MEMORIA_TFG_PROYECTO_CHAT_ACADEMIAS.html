@@ -313,8 +313,7 @@ li {
             <li>3.1. Motivación Personal</li>
             <li>3.2. Problemática del Cliente</li>
             <li>3.3. Solución Propuesta</li>
-            <li>3.4. Código Destacado</li>
-            <li>3.5. Dificultades Técnicas Superadas</li>
+            <li>3.4. Dificultades Técnicas</li>
         </ul>
     </li>
     <li><strong>ALCANCE</strong>
@@ -348,13 +347,9 @@ li {
             <li>7.3. Análisis Económico del Proyecto</li>
         </ul>
     </li>
-    <li><strong>EJECUCIÓN</strong>
+    <li><strong>DEMOSTRACIÓN</strong>
         <ul style="list-style: none; padding-left: 1cm;">
-            <li>8.1. Arquitectura Implementada</li>
-            <li>8.2. Implementación Técnica Destacada</li>
-            <li>8.3. Testing y Calidad</li>
-            <li>8.4. Demostración del Funcionamiento</li>
-            <li>8.5. Resultados Alcanzados</li>
+            <li>8. Vídeo Demostrativo del Sistema</li>
         </ul>
     </li>
 </ol>
@@ -380,7 +375,7 @@ li {
 <h2>1.2. Identificación de la Necesidad del Sector</h2>
 
 <p>
-El sector educativo privado en España, compuesto por miles de academias de enseñanza no reglada (música, idiomas, pintura, refuerzo escolar, etc.), presenta una problemática común: <strong>la digitalización de procesos administrativos resulta compleja para perfiles no técnicos</strong>.
+El sector educativo privado en España, compuesto por miles de academias de enseñanza (música, idiomas, pintura, refuerzo escolar, etc.), presenta una problemática común: <strong>la digitalización de procesos administrativos resulta compleja para perfiles no técnicos</strong>.
 </p>
 
 <p>
@@ -427,15 +422,15 @@ Durante el análisis del sector se identificaron las siguientes características
 <h2>1.3. Oportunidad de Negocio</h2>
 
 <p>
-<strong>Mercado Potencial:</strong> Miles de academias de enseñanza no reglada en España con necesidades similares.
+<strong>Mercado Potencial:</strong> Miles de academias de enseñanza en España con necesidades similares.
 </p>
 
 <p>
-<strong>Propuesta de Valor Diferencial:</strong> Interfaz conversacional con IA (tipo WhatsApp) que elimina la complejidad de interfaces CRUD tradicionales.
+<strong>Propuesta de Valor Diferencial:</strong> Interfaz conversacional con IA (tipo WhatsApp) que elimina la complejidad de interfaces tradicionales.
 </p>
 
 <p>
-<strong>Modelo de Negocio:</strong> SaaS €50/mes por academia, con punto de equilibrio en 40 clientes (20-22 meses de retorno de inversión).
+<strong>Modelo de Negocio:</strong> SaaS €50/mes por academia, con punto de equilibrio en 40 clientes (23 meses de retorno de inversión).
 </p>
 
 <p class="nota">
@@ -448,7 +443,10 @@ Durante el análisis del sector se identificaron las siguientes características
 
 <div class="objetivo-box">
 <p style="margin-bottom:0.3cm;">
-Desarrollar una <strong>plataforma SaaS completa</strong> para gestión de academias que utiliza <strong>inteligencia artificial conversacional (OpenAI GPT-4)</strong> como <strong>ÚNICA interfaz de usuario</strong>, eliminando la complejidad de interfaces tradicionales CRUD y permitiendo realizar todas las operaciones administrativas mediante <strong>lenguaje natural en español</strong>.
+Desarrollar una <strong>plataforma SaaS completa</strong> para gestión de academias que utiliza <strong>inteligencia artificial conversacional (OpenAI GPT-4)</strong> como <strong>ÚNICA interfaz de usuario</strong>, sustituyendo pantallas y formularios tradicionales por una experiencia de chat conversacional que permite realizar todas las operaciones administrativas mediante <strong>lenguaje natural</strong>.
+</p>
+<p style="margin-bottom:0; margin-top:0.3cm; font-size: 0.95em;">
+<strong>Objetivo Secundario:</strong> Diseñar una arquitectura modular y reutilizable que permita adaptar el Backend Chat conversacional a otros sectores de negocio (autoescuelas, gimnasios, etc.) mediante cambios mínimos en la whitelist de funciones y los prompts de sistema, maximizando el retorno de inversión del desarrollo inicial.
 </p>
 </div>
 
@@ -517,7 +515,7 @@ Observando el panorama actual, veo que muchos profesionales autónomos y pequeñ
 </p>
 
 <p>
-Tenemos un caso de negocio real: una academia de clases de pintura artística que representa perfectamente este escenario. Gestión compleja (alumnos, horarios, pagos, asistencias) pero recursos limitados y personal sin formación técnica. Durante una conversación con el director, surgió la pregunta clave:
+Las pequeñas academias y negocios de formación representan perfectamente este escenario: gestión compleja (alumnos, horarios, pagos, asistencias) pero recursos limitados y personal sin formación técnica. La pregunta clave que motiva este proyecto es:
 </p>
 
 <div class="solucion-box">
@@ -534,12 +532,12 @@ Esta idea evolucionó hacia un concepto ambicioso: <strong>eliminar completament
 El reto técnico era formidable: hacer que una IA entienda contexto empresarial, resuelva operaciones CRUD mediante conversaciones, mantenga seguridad a nivel empresarial y ofrezca una experiencia de usuario fluida. Este proyecto representa un caso práctico de cómo los <strong>trabajadores virtuales con IA</strong> pueden revolucionar la digitalización de pequeños negocios.
 </p>
 
-<h2>3.2. Problemática del Cliente</h2>
+<h2>3.2. Problemática Identificada</h2>
 
-<h3>3.2.1. Caso de Estudio: "Clases de pintura y taller Vanessa Lodeiro"</h3>
+<h3>3.2.1. Perfil de Negocio Objetivo</h3>
 
 <p>
-El cliente seleccionado para el desarrollo del proyecto es una academia de pintura artística ubicada en A Coruña, con la siguiente estructura:
+El proyecto está diseñado para pequeñas academias y negocios de formación con la siguiente estructura típica:
 </p>
 
 <table>
@@ -553,17 +551,17 @@ El cliente seleccionado para el desarrollo del proyecto es una academia de pintu
 <tbody>
 <tr>
     <td><strong>Dirección</strong></td>
-    <td>1 persona</td>
+    <td>1-2 personas</td>
     <td>Admin_academia</td>
 </tr>
 <tr>
     <td><strong>Profesorado</strong></td>
-    <td>1 persona (Vanessa)</td>
+    <td>1-3 personas</td>
     <td>Profesor_academia</td>
 </tr>
 <tr>
     <td><strong>Alumnado</strong></td>
-    <td>150 personas</td>
+    <td>100-200 personas</td>
     <td>Sin acceso (beneficiarios)</td>
 </tr>
 </tbody>
@@ -633,7 +631,7 @@ El proyecto propone una <strong>arquitectura de tres capas</strong> con IA conve
 </tbody>
 </table>
 
-<h3>3.3.2. Concepto Innovador: Token Delegation</h3>
+<h3>3.3.2. Patrón Arquitectónico Clave: Token Delegation</h3>
 
 <p>
 Una de las decisiones arquitectónicas más importantes del proyecto es el <strong>patrón de Token Delegation</strong>:
@@ -650,7 +648,7 @@ Una de las decisiones arquitectónicas más importantes del proyecto es el <stro
 Ver diagrama de flujo completo en sección 8.2 y <strong>Anexo H: Diagramas de Secuencia</strong>.
 </p>
 
-<h2>3.4. Dificultades Técnicas Superadas</h2>
+<h2>3.4. Dificultades Técnicas</h2>
 
 <p>
 El desarrollo del proyecto presentó desafíos técnicos significativos, propios de trabajar con tecnologías emergentes (IA generativa) y arquitecturas distribuidas:
@@ -754,7 +752,7 @@ Garantizar que un profesor de la Academia A NO pueda ver datos de la Academia B,
 <div class="solucion-box">
 <h4>Solución: Filtrado Automático por academiaId</h4>
 <p>
-El <code>academiaId</code> del JWT se inyecta automáticamente en todas las queries SQL:
+Para roles <code>admin_academia</code> y <code>profesor_academia</code>, el <code>academiaId</code> del JWT se inyecta automáticamente en todas las queries SQL:
 </p>
 <div class="codigo">
 SELECT * FROM Curso 
@@ -763,111 +761,13 @@ WHERE academia_id = {academiaId_from_JWT}
 <p style="margin-bottom:0;">
 El desarrollador NO necesita recordar añadir este filtro. Es gestionado por decoradores en Python (API Workers).
 </p>
+<p style="margin-top:10px; margin-bottom:0; font-size:0.9em; color:#555;">
+<strong>Caso especial - admin_plataforma:</strong> Este rol NO tiene <code>academia_id</code> en su JWT (gestiona múltiples academias). Puede especificar opcionalmente <code>academia_id</code> en los parámetros de la query. Si no lo especifica, puede consultar datos de todas las academias.
+</p>
 <p style="margin-top:10px; font-size:0.9em; color:#555;">
-<strong>Implementación real:</strong> <code>src/shared/application/permissions.py</code> (función <code>can_query_*</code> con <code>enforced_filters</code>), <code>src/shared/auth_helpers.py</code> (decorador <code>require_role_kind</code>), <code>src/autenticacion/infrastructure/jwt_provider.py</code> (inclusión de <code>academia_id</code> en JWT).
+<strong>Implementación real:</strong> <code>src/shared/application/permissions.py</code> (función <code>can_query_*</code> con <code>enforced_filters</code>, líneas 145-178 muestran cómo <code>admin_plataforma</code> puede filtrar opcionalmente por <code>academia_id</code> mientras que otros roles lo tienen forzado), <code>src/shared/auth_helpers.py</code> (decorador <code>require_role_kind</code>), <code>src/autenticacion/infrastructure/jwt_provider.py</code> (inclusión de <code>academia_id</code> en JWT solo para roles de academia).
 </p>
 </div>
-
-<h2>3.5. Código Destacado</h2>
-
-<p>
-A continuación se presentan fragmentos de código que demuestran la complejidad técnica y las soluciones innovadoras implementadas:
-</p>
-
-<h3>3.5.1. Sistema de Prompts Multi-Turno (PromptOpenAi.java)</h3>
-
-<p>
-El núcleo del sistema de IA reside en la clase <code>PromptOpenAi.java</code> (699 líneas), que construye dinámicamente los prompts según el turno de conversación:
-</p>
-
-<div class="codigo">
-// Fragmento simplificado de PromptOpenAi.java
-
-public String buildSystemPrompt(UserClaims claims, String whitelistContent) {
-    StringBuilder prompt = new StringBuilder();
-    
-    // 1. Definición de Rol
-    prompt.append("Eres un asistente (secretaria) para academias en España.\n");
-    prompt.append("Tu objetivo: ayudar con gestión administrativa.\n\n");
-    
-    // 2. Whitelist de Endpoints (2,557 líneas desde OpenAPI)
-    prompt.append("=== ENDPOINTS DISPONIBLES ===\n");
-    prompt.append(whitelistContent); // ← Causa del problema de latencia
-    
-    // 3. Contexto Usuario
-    prompt.append("\n=== USUARIO LOGUEADO ===\n");
-    prompt.append("ID: " + claims.getUsuarioId() + "\n");
-    prompt.append("Academia: " + claims.getAcademiaId() + "\n");
-    prompt.append("Rol: " + claims.getRole() + "\n\n");
-    
-    // 4. Resolución de FKs
-    prompt.append("⚠️ IMPORTANTE: Si necesitas un ID foráneo:\n");
-    prompt.append("1. GET del recurso relacionado\n");
-    prompt.append("2. Extraer el 'id' de la respuesta\n");
-    prompt.append("3. POST/PUT usando ese 'id'\n\n");
-    
-    // 5. Contrato JSON
-    prompt.append("=== FORMATO RESPUESTA ===\n");
-    prompt.append("{ \"text\": \"...\", \"ui_suggestions\": [...], ... }\n");
-    
-    return prompt.toString();
-}
-</div>
-
-<p class="nota">
-<strong>Líneas de código:</strong> 699 | <strong>Archivo:</strong> <code>src/main/java/com/workers/profesores/chat/prompt/PromptOpenAi.java</code>
-</p>
-
-<h3>3.5.2. Token Delegation (ApiProxyService.java)</h3>
-
-<div class="codigo">
-// Fragmento de ApiProxyService.java
-
-private String forwardRequestToApi(String jwt, String method, String path, String body) {
-    HttpHeaders headers = new HttpHeaders();
-    
-    // ← REENVÍO DEL MISMO JWT (sin modificar)
-    headers.set("Authorization", "Bearer " + jwt);
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    
-    HttpEntity<String> entity = new HttpEntity<>(body, headers);
-    
-    ResponseEntity<String> response = restTemplate.exchange(
-        API_WORKERS_BASE_URL + path,
-        HttpMethod.valueOf(method),
-        entity,
-        String.class
-    );
-    
-    return response.getBody();
-}
-</div>
-
-<h3>3.5.3. Contrato Envelope (ChatDtos.kt - Android)</h3>
-
-<p>
-El Backend Chat devuelve respuestas en formato <strong>envelope</strong> que combina texto conversacional + datos estructurados (tablas, listas, formularios):
-</p>
-
-<div class="codigo">
-// ChatDtos.kt - Contrato de respuesta del chat
-
-data class Envelope&lt;T&gt;(
-    val status: String,               // "success", "error"
-    val message: String?,             // Texto de respuesta del LLM
-    val data: DataSection&lt;T&gt;?,        // Datos estructurados (tabla/lista)
-    val uiSuggestions: List&lt;Suggestion&gt;?  // Botones sugeridos
-)
-
-// Ejemplo:
-// { "status": "success", "message": "Encontré 3 alumnos", 
-//   "data": { "type": "alumno", "items": [...] } }
-</div>
-
-<p class="nota">
-<strong>Implementación real:</strong> <code>AcademiaAPP/app/src/main/java/com/example/academiaapp/data/remote/dto/ChatDtos.kt</code><br/>
-Ver especificación completa en <a href="https://afvafbsfb.github.io/backend-chat-openai-worker-profesores/MEMORIA_TFG_SISTEMA_CHAT_ACADEMIAS.html#5-contrato-de-respuesta-del-chat">Documentación Técnica - Sección 5: Contrato Envelope</a>
-</p>
 
 <!-- ======================== 4. ALCANCE ======================== -->
 <div class="page-break"></div>
@@ -906,7 +806,7 @@ El proyecto se estructura en <strong>tres módulos principales completamente fun
 <tr>
     <td>Base de Datos</td>
     <td><span class="badge badge-success">✓ 20 tablas</span></td>
-    <td>MySQL 8.0 normalizada con triggers y constraints</td>
+    <td>MySQL 8.0 normalizada con foreign keys y constraints</td>
 </tr>
 <tr>
     <td>Lógica de Negocio</td>
@@ -925,8 +825,8 @@ El proyecto se estructura en <strong>tres módulos principales completamente fun
 </tr>
 <tr>
     <td>Despliegue</td>
-    <td><span class="badge badge-success">✓ AWS EB</span></td>
-    <td>Elastic Beanstalk + RDS MySQL + SSL/TLS</td>
+    <td><span class="badge badge-success">✓ RDS MySQL</span></td>
+    <td>Base de datos desplegada en AWS RDS (plan completo AWS documentado en Anexo B)</td>
 </tr>
 </tbody>
 </table>
@@ -953,8 +853,8 @@ El proyecto se estructura en <strong>tres módulos principales completamente fun
 </tr>
 <tr>
     <td>Prompts Multi-Turno</td>
-    <td><span class="badge badge-success">✓ 90%</span></td>
-    <td>Completo/Compacto/Reformateo (699 líneas código)</td>
+    <td><span class="badge badge-success">✓ 3 modos</span></td>
+    <td>Completo/Compacto/Reformateo (PromptOpenAi.java - 699 líneas)</td>
 </tr>
 <tr>
     <td>Token Delegation</td>
@@ -973,13 +873,13 @@ El proyecto se estructura en <strong>tres módulos principales completamente fun
 </tr>
 <tr>
     <td>Testing</td>
-    <td><span class="badge badge-success">✓ 80+ tests</span></td>
-    <td>JUnit 5 + Mockito</td>
+    <td><span class="badge badge-success">✓ JUnit 5</span></td>
+    <td>Tests unitarios + integración (Mockito para mocks)</td>
 </tr>
 <tr>
     <td>Despliegue</td>
-    <td><span class="badge badge-success">✓ AWS EB</span></td>
-    <td>Elastic Beanstalk + Let's Encrypt</td>
+    <td><span class="badge badge-warning">⚠ Planificado</span></td>
+    <td>Plan AWS documentado (Anexo B: Elastic Beanstalk + SSL/TLS)</td>
 </tr>
 </tbody>
 </table>
@@ -1208,7 +1108,7 @@ Se ha diseñado un <strong>plan técnico completo de optimización</strong>, tra
 </div>
 
 <p class="nota">
-<strong>Documentación completa:</strong> El plan de 8 semanas está detallado profesionalmente (cronograma Gantt, recursos, entregables por fase) en <strong>Anexo E: Ingeniería de Prompts y Optimización LLM</strong>.
+<strong>Documentación completa:</strong> El plan de 8 semanas está detallado profesionalmente (cronograma Gantt, recursos, fases de optimización) en <strong>Anexo E: Ingeniería de Prompts y Optimización LLM</strong>.
 </p>
 
 <h2>4.3. Justificación de Decisiones Técnicas</h2>
@@ -1216,8 +1116,7 @@ Se ha diseñado un <strong>plan técnico completo de optimización</strong>, tra
 <h3>4.3.1. ¿Por qué OpenAI GPT-4?</h3>
 
 <ul>
-<li><strong>Function Calling Nativo:</strong> GPT-4o soporta tool calling de forma nativa, permitiendo ejecutar hasta 10 llamadas iterativas a la API Workers (consultar alumnos, crear sesiones, pasar lista, etc.)</li>
-<li><strong>Sin infraestructura GPU propia:</strong> No requiere servidores dedicados con GPUs ni gestión de modelos locales (ahorro de costos de hardware)</li>
+<li><strong>Function Calling Nativo:</strong> GPT-4o soporta tool calling de forma nativa. El sistema implementa un límite de hasta 10 llamadas iterativas a la API Workers (consultar alumnos, crear sesiones, pasar lista, etc.) para evitar bucles infinitos y controlar costes</li>
 <li><strong>API REST estándar:</strong> Integración directa desde Spring Boot mediante cliente HTTP (biblioteca OpenAI Java SDK)</li>
 <li><strong>Modelo GPT-4o:</strong> Versión optimizada con mejor balance velocidad/calidad para aplicaciones conversacionales en producción</li>
 <li><strong>Comprensión en español:</strong> Interpreta correctamente consultas en lenguaje natural coloquial ("¿cuántos alumnos vinieron hoy?")</li>
@@ -1254,6 +1153,22 @@ Se ha diseñado un <strong>plan técnico completo de optimización</strong>, tra
 <strong>Arquitectura detallada:</strong> Ver <a href="https://afvafbsfb.github.io/backend-chat-openai-worker-profesores/MEMORIA_TFG_SISTEMA_CHAT_ACADEMIAS.html#102-arquitectura-de-la-api-workers-flask-python">Documentación Técnica Completa - Sección 10.2: Arquitectura API Workers</a> para explicación completa del patrón DDD, estructura de carpetas y flujo de datos.
 </p>
 
+<h3>4.3.4. ¿Por qué Spring Boot para el Backend Chat?</h3>
+
+<ul>
+<li><strong>Spring Boot 3.5.5:</strong> Framework empresarial maduro con ecosistema completo para desarrollo de microservicios</li>
+<li><strong>Java 21:</strong> Versión LTS moderna con mejoras de rendimiento, records, pattern matching y Virtual Threads</li>
+<li><strong>OpenAI Java SDK:</strong> Cliente oficial de OpenAI que simplifica la integración con GPT-4o y function calling</li>
+<li><strong>Ecosistema robusto:</strong> Spring Security para JWT, Spring Web para REST, Jackson para JSON, Lombok para reducir boilerplate</li>
+<li><strong>Tipado estático:</strong> Detección de errores en tiempo de compilación, refactoring seguro y mejor mantenibilidad</li>
+<li><strong>Rendimiento:</strong> JVM optimizada para aplicaciones de alta concurrencia y baja latencia</li>
+<li><strong>Separación de responsabilidades:</strong> Backend Chat como orquestador inteligente (IA + lógica de negocio compleja), API Workers como capa de datos (CRUD simple)</li>
+</ul>
+
+<p class="nota">
+<strong>Arquitectura detallada:</strong> Ver <a href="https://afvafbsfb.github.io/backend-chat-openai-worker-profesores/MEMORIA_TFG_SISTEMA_CHAT_ACADEMIAS.html#101-arquitectura-del-backend-chat-spring-boot-java-21">Documentación Técnica Completa - Sección 10.1: Arquitectura Backend Chat</a> para explicación completa de la estructura de paquetes, PromptOpenAi.java (699 líneas) y sistema de delegation.
+</p>
+
 <!-- ======================== 5. PLANIFICACIÓN ======================== -->
 <div class="page-break"></div>
 <h1>5. PLANIFICACIÓN</h1>
@@ -1278,25 +1193,13 @@ El proyecto se desarrolló entre <strong>julio y diciembre de 2025</strong> (6 m
     <td>Julio 2025</td>
     <td>4</td>
     <td>160h</td>
-    <td>Análisis y Requisitos</td>
+    <td>Análisis de Necesidades</td>
 </tr>
 <tr>
-    <td>Agosto 2025</td>
-    <td>4</td>
-    <td>160h</td>
-    <td>Backend Chat Orquestador</td>
-</tr>
-<tr>
-    <td>Septiembre 2025</td>
-    <td>4</td>
-    <td>160h</td>
-    <td>API Workers</td>
-</tr>
-<tr>
-    <td>Octubre 2025</td>
-    <td>4</td>
-    <td>160h</td>
-    <td>Android APP + Integración</td>
+    <td>Agosto - Octubre 2025</td>
+    <td>12</td>
+    <td>480h</td>
+    <td>Desarrollo (Backend + API + Android)</td>
 </tr>
 <tr>
     <td>Noviembre 2025</td>
@@ -1320,71 +1223,70 @@ El proyecto se desarrolló entre <strong>julio y diciembre de 2025</strong> (6 m
 
 <h2>5.2. Fases del Proyecto</h2>
 
-<h3>FASE 0: Análisis y Toma de Requisitos (Julio 2025 - 160h)</h3>
+<h3>FASE DE ANÁLISIS: Análisis de Necesidades de Usuarios (Julio 2025 - 160h)</h3>
 
 <table class="no-break">
 <thead>
 <tr>
     <th>Actividad</th>
     <th>Horas</th>
-    <th>Entregables</th>
+    <th>Tareas</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-    <td>Reuniones con cliente (Clases de pintura y taller Vanessa Lodeiro)</td>
+    <td>Investigación de problemática academias</td>
     <td>40h</td>
     <td>
-        • Acta de reuniones<br/>
-        • Listado de requisitos funcionales<br/>
-        • Casos de uso documentados
+        • Análisis de necesidades funcionales<br/>
+        • Identificación de necesidades comunes<br/>
+        • Definición de casos de uso
     </td>
 </tr>
 <tr>
-    <td>Análisis de problemática (descontrol alumnos, horarios, pagos)</td>
+    <td>Análisis de procesos de gestión académica</td>
     <td>30h</td>
     <td>
-        • Documento de problemática<br/>
-        • Análisis de procesos actuales
+        • Estudio de flujos de trabajo típicos<br/>
+        • Análisis de procesos: alumnos, horarios, pagos<br/>
+        • Diseño de modelo de datos inicial
     </td>
 </tr>
 <tr>
-    <td>Estudio de viabilidad técnica</td>
+    <td>Investigación y aprendizaje de tecnologías IA</td>
+    <td>50h</td>
+    <td>
+        • Documentación OpenAI API y function calling<br/>
+        • Tutoriales Spring Boot 3 + Java 21<br/>
+        • Pruebas iniciales de integración OpenAI
+    </td>
+</tr>
+<tr>
+    <td>Diseño de arquitectura del sistema</td>
     <td>40h</td>
     <td>
-        • Comparativa de tecnologías<br/>
-        • Proof of concept OpenAI
-    </td>
-</tr>
-<tr>
-    <td>Decisión arquitectónica (Chat IA como interfaz única)</td>
-    <td>30h</td>
-    <td>
-        • Diagrama de arquitectura v1<br/>
-        • Justificación técnica
-    </td>
-</tr>
-<tr>
-    <td>Selección de stack tecnológico</td>
-    <td>20h</td>
-    <td>
-        • Documento de decisiones técnicas<br/>
-        • Setup inicial de repositorios
+        • Definición de capas (Android → Backend → API → DB)<br/>
+        • Diseño de patrón token delegation<br/>
+        • Setup repositorios Git y estructura de proyecto
     </td>
 </tr>
 </tbody>
 </table>
 
-<h3>FASE 1: Backend Chat Orquestador (Agosto 2025 - 160h)</h3>
+<h3>FASE DE DESARROLLO: Desarrollo de los 3 Módulos (Agosto - Octubre 2025 - 480h)</h3>
 
-<p><strong>Fecha inicio:</strong> 25 agosto 2025 (primer commit en Git)</p>
+<p>
+Durante esta fase se desarrollaron <strong>en paralelo</strong> los tres módulos principales del sistema mediante sprints iterativos (ver sección 5.3.1). A continuación se detallan las actividades realizadas en cada módulo:
+</p>
+
+<h4>Módulo 1: Backend Chat Orquestador (160h)</h4>
 
 <table class="no-break">
 <thead>
 <tr>
     <th>Actividad</th>
     <th>Horas</th>
-    <th>Entregables</th>
+    <th>Tareas</th>
 </tr>
 </thead>
 <tbody>
@@ -1392,8 +1294,9 @@ El proyecto se desarrolló entre <strong>julio y diciembre de 2025</strong> (6 m
     <td>Setup Spring Boot 3.2 + Java 21</td>
     <td>20h</td>
     <td>
-        • pom.xml configurado<br/>
-        • Estructura de proyecto Maven
+        • Configuración pom.xml<br/>
+        • Estructura de proyecto Maven<br/>
+        • Configuración application.properties
     </td>
 </tr>
 <tr>
@@ -1413,11 +1316,12 @@ El proyecto se desarrolló entre <strong>julio y diciembre de 2025</strong> (6 m
     </td>
 </tr>
 <tr>
-    <td>Implementación JWT delegation</td>
+    <td>Sistema de autenticación y delegación JWT</td>
     <td>25h</td>
     <td>
-        • Middleware de validación<br/>
-        • Reenvío a API Workers
+        • Validación de JWT en Backend Chat<br/>
+        • Cliente HTTP para llamadas a API Workers<br/>
+        • Propagación de headers de autenticación
     </td>
 </tr>
 <tr>
@@ -1427,26 +1331,17 @@ El proyecto se desarrolló entre <strong>julio y diciembre de 2025</strong> (6 m
         • 40+ tests iniciales
     </td>
 </tr>
-<tr>
-    <td>Plan despliegue AWS (documentado)</td>
-    <td>10h</td>
-    <td>
-        • Documentación plan despiegue (<a href="https://afvafbsfb.github.io/backend-chat-openai-worker-profesores/MEMORIA_TFG_SISTEMA_CHAT_ACADEMIAS.html#12-plan-de-despliegue-en-producci%C3%B3n" target="_blank">ver sección 12</a>)
-    </td>
-</tr>
 </tbody>
 </table>
 
-<h3>FASE 2: API Workers (Septiembre 2025 - 160h)</h3>
-
-<p><strong>Fecha inicio:</strong> 1 septiembre 2025</p>
+<h4>Módulo 2: API Workers (160h)</h4>
 
 <table class="no-break">
 <thead>
 <tr>
     <th>Actividad</th>
     <th>Horas</th>
-    <th>Entregables</th>
+    <th>Tareas</th>
 </tr>
 </thead>
 <tbody>
@@ -1454,35 +1349,27 @@ El proyecto se desarrolló entre <strong>julio y diciembre de 2025</strong> (6 m
     <td>Diseño de modelo de datos (20 tablas MySQL)</td>
     <td>30h</td>
     <td>
-        • Diagrama ERD<br/>
-        • Diccionario de datos<br/>
+        • Diseño diagrama ERD<br/>
+        • Creación diccionario de datos<br/>
         • Scripts SQL CREATE TABLE
     </td>
 </tr>
 <tr>
-    <td>Desarrollo endpoints CRUD (Flask + Marshmallow)</td>
-    <td>60h</td>
+    <td>Desarrollo de endpoints API REST</td>
+    <td>80h</td>
     <td>
-        • 20 recursos CRUD funcionales<br/>
-        • Schemas de validación
+        • 20 recursos CRUD funcionales (Flask)<br/>
+        • Validación de datos de entrada<br/>
+        • Lógica de negocio
     </td>
 </tr>
 <tr>
-    <td>Sistema de autenticación (JWT + refresh tokens)</td>
+    <td>Sistema de autenticación y autorización</td>
     <td>25h</td>
     <td>
-        • /auth/login<br/>
-        • /auth/refresh<br/>
-        • Middleware de autorización
-    </td>
-</tr>
-<tr>
-    <td>Lógica de negocio y validaciones</td>
-    <td>20h</td>
-    <td>
-        • Triggers MySQL<br/>
-        • Constraints<br/>
-        • Validaciones de negocio
+        • Endpoint /auth/login<br/>
+        • Endpoint /auth/refresh (renovación tokens)<br/>
+        • Validación de permisos por rol
     </td>
 </tr>
 <tr>
@@ -1510,16 +1397,14 @@ El proyecto se desarrolló entre <strong>julio y diciembre de 2025</strong> (6 m
 </tbody>
 </table>
 
-<h3>FASE 3: Android APP (Octubre 2025 - 160h)</h3>
-
-<p><strong>Fecha inicio:</strong> 15 octubre 2025 (primer commit en Git)</p>
+<h4>Módulo 3: Android APP (160h)</h4>
 
 <table class="no-break">
 <thead>
 <tr>
     <th>Actividad</th>
     <th>Horas</th>
-    <th>Entregables</th>
+    <th>Tareas</th>
 </tr>
 </thead>
 <tbody>
@@ -1527,22 +1412,23 @@ El proyecto se desarrolló entre <strong>julio y diciembre de 2025</strong> (6 m
     <td>Setup Jetpack Compose + MVVM</td>
     <td>20h</td>
     <td>
-        • build.gradle configurado<br/>
-        • Estructura MVVM base
+        • Implementación estructura MVVM base<br/>
+        • Configuración dependencias del proyecto
     </td>
 </tr>
 <tr>
     <td>Desarrollo ChatScreen (interfaz conversacional)</td>
-    <td>50h</td>
+    <td>70h</td>
     <td>
-        • UI chat completa<br/>
-        • Lista de mensajes<br/>
-        • Input de texto
+        • UI chat completa con Jetpack Compose<br/>
+        • Lista de mensajes (LazyColumn)<br/>
+        • Input de texto y envío de mensajes<br/>
+        • Gestión de estados de carga
     </td>
 </tr>
 <tr>
     <td>Integración Retrofit + DataStore</td>
-    <td>30h</td>
+    <td>10h</td>
     <td>
         • Cliente HTTP configurado<br/>
         • Persistencia local de JWT
@@ -1558,104 +1444,94 @@ El proyecto se desarrolló entre <strong>julio y diciembre de 2025</strong> (6 m
     </td>
 </tr>
 <tr>
-    <td>Sistema de navegación por contexto</td>
+    <td>Sistema de navegación basado en estados</td>
     <td>15h</td>
     <td>
-        • Navegación conversacional<br/>
-        • Sin NavController
+        • Navegación mediante cambios de estado en ViewModel<br/>
+        • Pantallas controladas por flags booleanos<br/>
+        • Sin uso de Navigation Component tradicional
     </td>
 </tr>
 <tr>
-    <td>Build flavors (Mock/Real)</td>
+    <td>Variantes de compilación (Mock/Real)</td>
     <td>10h</td>
     <td>
-        • mockDebug/realDebug<br/>
-        • Configuraciones por flavor
-    </td>
-</tr>
-<tr>
-    <td>Testing UI (Espresso + Compose)</td>
-    <td>10h</td>
-    <td>
-        • Tests de UI automatizados
+        • Variante mockDebug (datos simulados)<br/>
+        • Variante realDebug (APIs reales)<br/>
+        • Configuración por entorno
     </td>
 </tr>
 </tbody>
 </table>
 
-<h3>FASE 4: Integración y Testing (Noviembre 2025 - 160h)</h3>
+<h3>FASE DE TESTING: Integración y Testing (Noviembre 2025 - 160h)</h3>
 
 <table class="no-break">
 <thead>
 <tr>
     <th>Actividad</th>
     <th>Horas</th>
-    <th>Entregables</th>
+    <th>Tareas</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-    <td>Testing end-to-end (flujos completos)</td>
+    <td>Pruebas manuales end-to-end</td>
+    <td>50h</td>
+    <td>
+        • Pruebas de flujos completos desde Android<br/>
+        • Validación de operaciones CRUD<br/>
+        • Verificación de permisos por rol<br/>
+        • Documentación de casos de prueba
+    </td>
+</tr>
+<tr>
+    <td>Optimización de prompts y system instructions</td>
     <td>40h</td>
     <td>
-        • Flujo login completo<br/>
-        • Alta de usuario<br/>
-        • Consultas complejas<br/>
-        • Modificaciones y bajas
+        • Mejoras iterativas en interpretación de lenguaje natural<br/>
+        • Ajuste de ejemplos en prompts<br/>
+        • Refinamiento de whitelist de funciones
     </td>
 </tr>
 <tr>
-    <td>Ajustes de prompts según feedback</td>
-    <td>35h</td>
-    <td>
-        • Mejoras en interpretación<br/>
-        • Ajuste de ejemplos few-shot
-    </td>
-</tr>
-<tr>
-    <td>Identificación y análisis problema latencia</td>
+    <td>Análisis y documentación de latencia</td>
     <td>30h</td>
     <td>
-        • Diagnóstico completo<br/>
-        • Medición de tokens<br/>
-        • Propuesta de solución
+        • Identificación del problema de latencia<br/>
+        • Análisis de causas (tamaño de prompts, tokens)<br/>
+        • Propuesta de solución documentada
     </td>
 </tr>
 <tr>
-    <td>Corrección de bugs críticos</td>
+    <td>Debugging y corrección de errores</td>
     <td>25h</td>
     <td>
-        • Bugs resueltos<br/>
-        • Registro en GitHub Issues
+        • Resolución de bugs críticos<br/>
+        • Validación de correcciones<br/>
+        • Mejora de manejo de errores
     </td>
 </tr>
 <tr>
-    <td>Validación de seguridad</td>
+    <td>Generación de reportes de pruebas</td>
     <td>15h</td>
     <td>
-        • Penetration testing básico<br/>
-        • Validación JWT
-    </td>
-</tr>
-<tr>
-    <td>Generación HTMLs de pruebas</td>
-    <td>15h</td>
-    <td>
-        • Logs estructurados<br/>
-        • HTMLs en documentacion/
+        • Generación de logs estructurados<br/>
+        • Creación de HTMLs de pruebas<br/>
+        • Archivos en carpeta documentacion/
     </td>
 </tr>
 </tbody>
 </table>
 
-<h3>FASE 5: Documentación (Diciembre 2025 - 80h hasta día 5)</h3>
+<h3>FASE DE DOCUMENTACIÓN: Documentación (Diciembre 2025 - 80h hasta día 5)</h3>
 
 <table class="no-break">
 <thead>
 <tr>
     <th>Actividad</th>
     <th>Horas</th>
-    <th>Entregables</th>
+    <th>Tareas</th>
 </tr>
 </thead>
 <tbody>
@@ -1663,10 +1539,10 @@ El proyecto se desarrolló entre <strong>julio y diciembre de 2025</strong> (6 m
     <td>Documentación técnica (MEMORIA_TFG, INGENIERIA_PROMPTS)</td>
     <td>35h</td>
     <td>
-        • Este documento<br/>
-        • Ingeniería de Prompts<br/>
-        • Arquitectura Android<br/>
-        • UX Guide
+        • Redacción memoria académica<br/>
+        • Documentación ingeniería de prompts<br/>
+        • Guía arquitectura Android<br/>
+        • Guía de UX conversacional
     </td>
 </tr>
 <tr>
@@ -1695,13 +1571,6 @@ El proyecto se desarrolló entre <strong>julio y diciembre de 2025</strong> (6 m
     </td>
 </tr>
 <tr>
-    <td>Plan certificados SSL/TLS</td>
-    <td>5h</td>
-    <td>
-        • HTTPS en todos los endpoints
-    </td>
-</tr>
-<tr>
     <td>Publicación en GitHub Pages</td>
     <td>7h</td>
     <td>
@@ -1720,59 +1589,115 @@ El proyecto se desarrolló entre <strong>julio y diciembre de 2025</strong> (6 m
 
 <h2>5.3. Metodología de Trabajo</h2>
 
-<h3>5.3.1. Desarrollo en Paralelo</h3>
+<h3>5.3.1. Desarrollo en Sprints</h3>
 
 <p>
-Aunque trabajé en solitario, apliqué una <strong>metodología de sprints paralelos</strong> para acelerar el desarrollo:
+Aunque trabajé en solitario, apliqué una <strong>metodología de sprints iterativos con trabajo paralelo</strong> entre los diferentes módulos. <strong>Julio 2025 se dedicó exclusivamente al análisis</strong>, comenzando el desarrollo en agosto con iteraciones que priorizaban diferentes módulos según las necesidades:
 </p>
 
 <table class="no-break">
 <thead>
 <tr>
     <th>Sprint</th>
-    <th>Duración</th>
-    <th>Módulos Afectados</th>
-    <th>Objetivo</th>
+    <th>Periodo</th>
+    <th>Duración Total</th>
+    <th>Distribución Semanal</th>
+    <th>Entregas Clave</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-    <td><strong>Sprint 1: Autenticación</strong></td>
-    <td>3 semanas</td>
-    <td>API + Backend + Android</td>
+    <td><strong>Sprint 1</strong></td>
+    <td>Agosto 2025</td>
+    <td>4 semanas<br/>(160h)</td>
     <td>
-        1. API: Endpoint /auth/login<br/>
-        2. Backend: Validación JWT<br/>
-        3. Android: Pantalla login + DataStore
+        <strong>3 semanas Backend Chat</strong><br/>
+        • Setup Spring Boot + OpenAI SDK<br/>
+        • Integración function calling<br/>
+        • Sistema JWT delegation<br/>
+        <br/>
+        <strong>1 semana API Workers</strong><br/>
+        • Setup Flask + SQLAlchemy<br/>
+        • Diseño modelo de datos inicial
+    </td>
+    <td>
+        ✅ Primer commit backend-chat (25 ago)<br/>
+        ✅ Primera llamada OpenAI exitosa (01 sep)
     </td>
 </tr>
 <tr>
-    <td><strong>Sprint 2: Roles y Permisos</strong></td>
-    <td>2 semanas</td>
-    <td>API + Backend</td>
+    <td><strong>Sprint 2</strong></td>
+    <td>Septiembre 2025</td>
+    <td>4 semanas<br/>(160h)</td>
     <td>
-        1. API: Endpoint /roles + x-permissions<br/>
-        2. Backend: Whitelist dinámica
+        <strong>2 semanas API Workers</strong><br/>
+        • Endpoints CRUD completos<br/>
+        • Sistema autenticación<br/>
+        • Despliegue RDS MySQL<br/>
+        <br/>
+        <strong>1 semana Backend Chat</strong><br/>
+        • Refinamiento PromptOpenAi.java<br/>
+        • Whitelist dinámica<br/>
+        <br/>
+        <strong>1 semana Android</strong><br/>
+        • Setup inicial proyecto<br/>
+        • Estructura MVVM base
+    </td>
+    <td>
+        ✅ Base de datos desplegada (15 sep)<br/>
+        ✅ OpenAPI generado automáticamente
     </td>
 </tr>
 <tr>
-    <td><strong>Sprint 3-5: Endpoints CORE</strong></td>
-    <td>6 semanas</td>
-    <td>API + Backend + Android</td>
+    <td><strong>Sprint 3</strong></td>
+    <td>Octubre 2025</td>
+    <td>4 semanas<br/>(160h)</td>
     <td>
-        1. API: Academias, Usuarios, Cursos<br/>
-        2. Backend: Tool calling multi-turno<br/>
-        3. Android: UI sugerencias
+        <strong>1 semana API Workers</strong><br/>
+        • Endpoints finales (pagos, inscripciones)<br/>
+        • Testing y ajustes<br/>
+        <br/>
+        <strong>3 semanas Android</strong><br/>
+        • ChatScreen completa<br/>
+        • Integración Retrofit + DataStore<br/>
+        • Sistema de navegación<br/>
+        • ViewModels y StateFlow
+    </td>
+    <td>
+        ✅ Primer commit Android (15 oct)<br/>
+        ✅ Primera conversación E2E (01 nov)
     </td>
 </tr>
 <tr>
-    <td><strong>Sprint 6-8: Flujos Complejos</strong></td>
-    <td>6 semanas</td>
-    <td>Todos</td>
+    <td><strong>Sprint 4</strong></td>
+    <td>Noviembre 2025</td>
+    <td>4 semanas<br/>(160h)</td>
     <td>
-        1. API: Sesiones, Pagos, Inscripciones<br/>
-        2. Backend: Resolución FK automática<br/>
-        3. Android: Navegación contextual
+        <strong>Testing y Optimización</strong><br/>
+        • Pruebas manuales end-to-end<br/>
+        • Optimización de prompts<br/>
+        • Análisis de latencia<br/>
+        • Debugging y corrección de errores
+    </td>
+    <td>
+        ✅ Identificación problema latencia (10 nov)<br/>
+        ✅ Plan despliegue AWS (20 nov)
+    </td>
+</tr>
+<tr>
+    <td><strong>Sprint 5</strong></td>
+    <td>Diciembre 2025</td>
+    <td>2 semanas<br/>(80h)</td>
+    <td>
+        <strong>Documentación TFG</strong><br/>
+        • MEMORIA_TFG (2 documentos)<br/>
+        • Diagramas técnicos<br/>
+        • READMEs de repositorios<br/>
+        • Publicación GitHub Pages
+    </td>
+    <td>
+        ✅ Documentación publicada (04 dic)<br/>
+        ✅ Memoria TFG completada (05 dic)
     </td>
 </tr>
 </tbody>
@@ -1792,20 +1717,6 @@ Aunque trabajé en solitario, apliqué una <strong>metodología de sprints paral
 </li>
 <li><strong>Commits:</strong> Mensajes descriptivos en español</li>
 </ul>
-
-<h3>5.3.3. Gestión de Incidencias</h3>
-
-<p>
-Durante el desarrollo se identificaron y resolvieron múltiples incidencias técnicas. Ejemplo destacado:
-</p>
-
-<div class="problema-box">
-<h4>Incidencia: WireMock incompatible con Java 21</h4>
-<p><strong>Fecha:</strong> Septiembre 2025</p>
-<p><strong>Problema:</strong> WireMock (para mocking de OpenAI en tests) no soporta Java 21</p>
-<p><strong>Solución:</strong> Documentado en <code>WIREMOCK-JAVA21-LIMITACION.md</code> y uso de alternativa (tests de integración sin mock)</p>
-<p><strong>Aprendizaje:</strong> Importancia de verificar compatibilidad de librerías con versiones recientes de Java</p>
-</div>
 
 <h2>5.4. Recursos Humanos</h2>
 
@@ -1831,7 +1742,7 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
         • Desarrollo Backend Java<br/>
         • Desarrollo Backend Python
     </td>
-    <td>60%</td>
+    <td>50%</td>
 </tr>
 <tr>
     <td><strong>Arquitecto de Software</strong></td>
@@ -1840,7 +1751,7 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
         • Decisiones técnicas<br/>
         • Patrones de diseño
     </td>
-    <td>10%</td>
+    <td>20%</td>
 </tr>
 <tr>
     <td><strong>Ingeniero de Prompts (IA)</strong></td>
@@ -1849,16 +1760,7 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
         • Optimización LLM<br/>
         • Análisis de best practices
     </td>
-    <td>10%</td>
-</tr>
-<tr>
-    <td><strong>DevOps Engineer</strong></td>
-    <td>
-        • Despliegue AWS<br/>
-        • CI/CD<br/>
-        • Certificados SSL
-    </td>
-    <td>5%</td>
+    <td>15%</td>
 </tr>
 <tr>
     <td><strong>QA Tester</strong></td>
@@ -1867,27 +1769,19 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
         • Testing integración<br/>
         • Testing E2E
     </td>
-    <td>8%</td>
+    <td>10%</td>
 </tr>
 <tr>
-    <td><strong>Documentador Técnico</strong></td>
+    <td><strong>DevOps Engineer</strong></td>
     <td>
-        • Memoria TFG<br/>
-        • READMEs<br/>
-        • Documentación HTML
+        • Despliegue RDS MySQL<br/>
+        • Documentación plan AWS<br/>
+        • Configuración infraestructura
     </td>
-    <td>7%</td>
+    <td>5%</td>
 </tr>
 </tbody>
 </table>
-
-<h3>5.4.2. Colaboración con Cliente</h3>
-
-<ul>
-<li><strong>Cliente/Product Owner:</strong> Vanessa Lodeiro (Directora de "Clases de pintura y taller Vanessa Lodeiro")</li>
-<li><strong>Dedicación del cliente:</strong> 40 horas (reuniones, revisiones, feedback)</li>
-<li><strong>Frecuencia reuniones:</strong> Semanal (julio-agosto), quincenal (sept-nov)</li>
-</ul>
 
 <h2>5.5. Hitos Clave del Proyecto</h2>
 
@@ -1901,9 +1795,9 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
 </thead>
 <tbody>
 <tr>
-    <td><strong>15 Jul 2025</strong></td>
-    <td>Kick-off proyecto</td>
-    <td>Primera reunión con cliente</td>
+    <td><strong>01 Jul 2025</strong></td>
+    <td>Inicio del proyecto</td>
+    <td>Análisis de necesidades y viabilidad</td>
 </tr>
 <tr>
     <td><strong>25 Ago 2025</strong></td>
@@ -1937,8 +1831,8 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
 </tr>
 <tr>
     <td><strong>20 Nov 2025</strong></td>
-    <td>Sistema desplegado en AWS</td>
-    <td>Plan despliegue completo documentado</td>
+    <td>Plan de despliegue AWS documentado</td>
+    <td>Documentación completa de arquitectura cloud</td>
 </tr>
 <tr>
     <td><strong>04 Dic 2025</strong></td>
@@ -2125,7 +2019,7 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
 <tr>
     <td><strong>Emuladores Android</strong></td>
     <td>
-        • Pixel 5 API 34 (Android 14)<br/>
+        • Pixel 8 API 34 (Android 14)<br/>
         • Pixel 7 Pro API 33 (Android 13)
     </td>
 </tr>
@@ -2135,11 +2029,10 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
 <h3>6.2.2. IDEs y Herramientas</h3>
 
 <ul>
-<li><strong>Android Studio:</strong> Hedgehog 2023.1.1 (desarrollo Android)</li>
-<li><strong>IntelliJ IDEA:</strong> 2023.3 (desarrollo Backend Chat Java)</li>
-<li><strong>VS Code:</strong> 1.85 (desarrollo API Workers Python + documentación)</li>
+<li><strong>Android Studio:</strong> Koala 2024.1.1 (desarrollo Android)</li>
+<li><strong>VS Code:</strong> 1.85 (desarrollo Backend Chat Java + API Workers Python + documentación)</li>
 <li><strong>Git:</strong> 2.42 (control de versiones)</li>
-<li><strong>Postman:</strong> 10.19 (testing de APIs)</li>
+<li><strong>Swagger UI:</strong> Interfaz web integrada (testing y documentación de APIs)</li>
 <li><strong>MySQL Workbench:</strong> 8.0 (diseño de BD)</li>
 <li><strong>DBeaver:</strong> 23.2 (gestión de BD)</li>
 </ul>
@@ -2214,14 +2107,9 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
     <td>Free Tier (año 1)</td>
     <td>€0/mes (primer año)</td>
 </tr>
-<tr>
-    <td><strong>Dominio</strong></td>
-    <td>-</td>
-    <td>€1/mes</td>
-</tr>
 <tr style="font-weight:bold;">
     <td colspan="2"><strong>TOTAL MENSUAL</strong></td>
-    <td><strong>~€55/mes</strong></td>
+    <td><strong>~€54/mes</strong></td>
 </tr>
 </tbody>
 </table>
@@ -2243,34 +2131,34 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
 </thead>
 <tbody>
 <tr>
-    <td><strong>Android APP (Kotlin/Compose)</strong></td>
-    <td>260h</td>
+    <td><strong>Análisis de Necesidades</strong></td>
+    <td>160h</td>
     <td>€40/h</td>
-    <td>€10,400</td>
+    <td>€6,400</td>
 </tr>
 <tr>
     <td><strong>Backend Chat (Spring Boot/OpenAI)</strong></td>
-    <td>200h</td>
+    <td>160h</td>
     <td>€40/h</td>
-    <td>€8,000</td>
+    <td>€6,400</td>
 </tr>
 <tr>
     <td><strong>API Workers (Python/Flask)</strong></td>
-    <td>200h</td>
+    <td>160h</td>
     <td>€40/h</td>
-    <td>€8,000</td>
+    <td>€6,400</td>
 </tr>
 <tr>
-    <td><strong>Base de Datos (Diseño + Scripts)</strong></td>
-    <td>60h</td>
+    <td><strong>Android APP (Kotlin/Compose)</strong></td>
+    <td>160h</td>
     <td>€40/h</td>
-    <td>€2,400</td>
+    <td>€6,400</td>
 </tr>
 <tr>
     <td><strong>Testing + QA</strong></td>
-    <td>80h</td>
+    <td>160h</td>
     <td>€40/h</td>
-    <td>€3,200</td>
+    <td>€6,400</td>
 </tr>
 <tr>
     <td><strong>Documentación</strong></td>
@@ -2291,7 +2179,7 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
 <strong>Tarifa horaria:</strong> €40/h corresponde a la tarifa promedio de un desarrollador mid-senior en España (2025). Fuente: InfoJobs, LinkedIn Salary Insights.
 </p>
 
-<h2>7.2. Costos Operativos (Infraestructura)</h2>
+<h2>7.2. Costes Operativos (Infraestructura)</h2>
 
 <h3>7.2.1. Escenario Actual (Desarrollo)</h3>
 
@@ -2318,12 +2206,6 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
     <td>✅ Activo</td>
 </tr>
 <tr>
-    <td>Dominio (.es o .com)</td>
-    <td>€1</td>
-    <td>€12</td>
-    <td>⏳ Planificado</td>
-</tr>
-<tr>
     <td>GitHub (cuenta gratuita)</td>
     <td>€0</td>
     <td>€0</td>
@@ -2331,99 +2213,123 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
 </tr>
 <tr style="font-weight:bold;">
     <td><strong>TOTAL DESARROLLO</strong></td>
-    <td><strong>€27/mes</strong></td>
-    <td><strong>€324/año</strong></td>
+    <td><strong>€26/mes</strong></td>
+    <td><strong>€312/año</strong></td>
     <td></td>
 </tr>
 </tbody>
 </table>
 
-<h3>7.2.2. Escenario Futuro: Despliegue Completo (AWS Free Tier)</h3>
+<h3>7.2.2. Escenario Futuro: Despliegue Completo (AWS Free Tier - Año 1)</h3>
 
 <table class="no-break">
 <thead>
 <tr>
     <th>Concepto</th>
+    <th>Configuración</th>
     <th>Costo Mensual</th>
-    <th>Costo Anual</th>
-    <th>Disponibilidad</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-    <td>AWS Elastic Beanstalk (2 × t2.micro)</td>
-    <td>€0</td>
-    <td>€0</td>
-    <td>12 meses Free Tier</td>
+    <td>AWS EC2 (Backend Chat + API Workers)</td>
+    <td>2 × t2.micro</td>
+    <td>€0 (Free Tier)</td>
 </tr>
 <tr>
-    <td>AWS RDS MySQL (db.t3.micro)</td>
-    <td>€0</td>
-    <td>€0</td>
-    <td>12 meses Free Tier (750h/mes)</td>
+    <td>AWS RDS MySQL</td>
+    <td>db.t3.micro (750h/mes)</td>
+    <td>€0 (Free Tier)</td>
 </tr>
 <tr>
-    <td>OpenAI API (estimado producción)</td>
-    <td>€50</td>
-    <td>€600</td>
-    <td>Según uso</td>
-</tr>
-<tr>
-    <td>Dominio</td>
-    <td>€1</td>
-    <td>€12</td>
-    <td>-</td>
+    <td>OpenAI API + Soporte técnico</td>
+    <td>~€9/academia/mes (hasta 50 academias)</td>
+    <td>€450</td>
 </tr>
 <tr style="font-weight:bold; background-color:#E8F5E9;">
-    <td><strong>TOTAL AÑO 1 (Free Tier)</strong></td>
-    <td><strong>€51/mes</strong></td>
-    <td><strong>€612/año</strong></td>
-    <td></td>
-</tr>
-</tbody>
-</table>
-
-<h3>7.2.3. Escenario Futuro: Post Free Tier (Año 2+)</h3>
-
-<table class="no-break">
-<thead>
-<tr>
-    <th>Concepto</th>
-    <th>Costo Mensual</th>
-    <th>Costo Anual</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-    <td>AWS Elastic Beanstalk (2 × t2.micro)</td>
-    <td>€6</td>
-    <td>€72</td>
-</tr>
-<tr>
-    <td>AWS RDS MySQL (db.t3.micro)</td>
-    <td>€6</td>
-    <td>€72</td>
-</tr>
-<tr>
-    <td>OpenAI API</td>
-    <td>€50</td>
-    <td>€600</td>
-</tr>
-<tr>
-    <td>Dominio</td>
-    <td>€1</td>
-    <td>€12</td>
-</tr>
-<tr style="font-weight:bold;">
-    <td><strong>TOTAL POST FREE TIER</strong></td>
-    <td><strong>€63/mes</strong></td>
-    <td><strong>€756/año</strong></td>
+    <td colspan="2"><strong>TOTAL AÑO 1 (Capa gratuita AWS)</strong></td>
+    <td><strong>€450/mes</strong></td>
 </tr>
 </tbody>
 </table>
 
 <p class="nota">
-<strong>Nota:</strong> Los costes de Elastic Beanstalk son proyecciones para cuando se desplieguen los backends. Actualmente solo está desplegado MySQL en AWS RDS.
+<strong>Nota:</strong> El coste de €450/mes incluye uso estimado de OpenAI API (GPT-4o) y 10h/mes de soporte técnico. Esta cifra es una proyección basada en uso moderado (aprox. 50-100 consultas/academia/mes). Requiere validación con datos reales de producción.
+</p>
+
+<h3>7.2.3. Escenario Post Free Tier (Año 2+ con Infraestructura Básica)</h3>
+
+<table class="no-break">
+<thead>
+<tr>
+    <th>Concepto</th>
+    <th>Configuración</th>
+    <th>Costo Mensual</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+    <td>AWS EC2 (Backend Chat + API Workers)</td>
+    <td>2 × t2.micro</td>
+    <td>€6</td>
+</tr>
+<tr>
+    <td>AWS RDS MySQL</td>
+    <td>db.t3.micro</td>
+    <td>€6</td>
+</tr>
+<tr>
+    <td>OpenAI API + Soporte técnico</td>
+    <td>~€9/academia/mes (hasta 50 academias)</td>
+    <td>€450</td>
+</tr>
+<tr style="font-weight:bold;">
+    <td colspan="2"><strong>TOTAL POST FREE TIER</strong></td>
+    <td><strong>€462/mes</strong></td>
+</tr>
+</tbody>
+</table>
+
+<h3>7.2.4. Escenario de Escalado (50-100 academias)</h3>
+
+<table class="no-break">
+<thead>
+<tr>
+    <th>Concepto</th>
+    <th>Configuración</th>
+    <th>Costo Mensual</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+    <td>AWS Application Load Balancer</td>
+    <td>ALB con balanceo</td>
+    <td>€18</td>
+</tr>
+<tr>
+    <td>AWS EC2 (escalado)</td>
+    <td>2 × t3.small</td>
+    <td>€35</td>
+</tr>
+<tr>
+    <td>AWS RDS MySQL Multi-AZ</td>
+    <td>db.t3.small (alta disponibilidad)</td>
+    <td>€22</td>
+</tr>
+<tr>
+    <td>OpenAI API + Soporte técnico</td>
+    <td>~€12/academia/mes (50-100 academias, ~15min soporte/academia/mes)</td>
+    <td>€900</td>
+</tr>
+<tr style="font-weight:bold; background-color:#FFF3E0;">
+    <td colspan="2"><strong>TOTAL ESCALADO</strong></td>
+    <td><strong>€975/mes</strong></td>
+</tr>
+</tbody>
+</table>
+
+<p class="nota">
+<strong>Nota:</strong> Actualmente solo está desplegado MySQL en AWS RDS. Los backends (Spring Boot y Flask) están en desarrollo local. Los costes AWS EC2 son proyecciones para el despliegue futuro documentado en la <a href="https://afvafbsfb.github.io/backend-chat-openai-worker-profesores/MEMORIA_TFG_SISTEMA_CHAT_ACADEMIAS.html#12-plan-de-despliegue-en-producci%C3%B3n" target="_blank">Sección 12 del documento técnico</a>.
 </p>
 
 <h2>7.3. Análisis de Rentabilidad (Modelo SaaS)</h2>
@@ -2438,113 +2344,162 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
 
 <h3>7.3.2. Punto de Equilibrio</h3>
 
+<p><strong>Escenario 1: Primer Año (AWS Free Tier)</strong></p>
+
 <div class="solucion-box">
 <p><strong>Inversión inicial:</strong> €35,200</p>
-<p><strong>Costes operativos mensuales (post free tier):</strong> €67/mes</p>
+<p><strong>Costes operativos mensuales:</strong></p>
+<ul>
+<li>AWS (EC2 + RDS): €0 (Free Tier)</li>
+<li>OpenAI API + Soporte: €450/mes</li>
+<li><strong>Total: €450/mes</strong></li>
+</ul>
+
 <p><strong>Ingresos por academia:</strong> €50/mes</p>
 
-<p><strong>Cálculo:</strong></p>
-<p>Con <strong>40 academias</strong> suscritas:</p>
+<p><strong>Punto de equilibrio:</strong></p>
 <ul style="margin-bottom:0;">
-<li>Ingresos mensuales: €2,000</li>
-<li>Costes mensuales: €67</li>
-<li>Beneficio neto mensual: €1,933</li>
-<li><strong>Recuperación inversión:</strong> €35,200 / €1,933 = <strong>18.2 meses</strong></li>
+<li>Con <strong>10 academias</strong>: €500/mes - €450 = <strong>€50/mes beneficio</strong></li>
+<li>Con <strong>40 academias</strong>: €2,000/mes - €450 = <strong>€1,550/mes beneficio</strong></li>
+<li><strong>Recuperación inversión con 40 academias:</strong> €35,200 / €1,550 = <strong>22.7 meses</strong></li>
 </ul>
 </div>
 
-<h3>7.3.3. Proyección a 24 Meses</h3>
+<p><strong>Escenario 2: Post Free Tier (Año 2+)</strong></p>
+
+<div class="solucion-box">
+<p><strong>Costes operativos mensuales:</strong></p>
+<ul>
+<li>AWS (EC2 + RDS): €12/mes</li>
+<li>OpenAI API + Soporte: €450/mes</li>
+<li><strong>Total: €462/mes</strong></li>
+</ul>
+
+<p><strong>Punto de equilibrio:</strong></p>
+<ul style="margin-bottom:0;">
+<li>Con <strong>10 academias</strong>: €500/mes - €462 = <strong>€38/mes beneficio</strong></li>
+<li>Con <strong>40 academias</strong>: €2,000/mes - €462 = <strong>€1,538/mes beneficio</strong></li>
+<li>Con <strong>100 academias</strong>: €5,000/mes - €462 = <strong>€4,538/mes beneficio</strong> (requiere escalado)</li>
+</ul>
+</div>
+
+<h3>7.3.3. Proyección de Rentabilidad a 24 Meses</h3>
 
 <table class="no-break">
 <thead>
 <tr>
     <th>Academias</th>
     <th>Ingresos/mes</th>
-    <th>Costes/mes</th>
+    <th>Costes/mes<br/>(AWS + OpenAI/Soporte)</th>
     <th>Beneficio/mes</th>
     <th>ROI 24 meses</th>
+    <th>Estado</th>
 </tr>
 </thead>
 <tbody>
 <tr>
+    <td>10</td>
+    <td>€500</td>
+    <td>€463</td>
+    <td>€37</td>
+    <td>-€34,312</td>
+    <td>❌ No rentable</td>
+</tr>
+<tr>
     <td>25</td>
     <td>€1,250</td>
-    <td>€67</td>
-    <td>€1,183</td>
-    <td>-€6,808</td>
+    <td>€463</td>
+    <td>€787</td>
+    <td>-€16,312</td>
+    <td>❌ No rentable</td>
 </tr>
 <tr>
     <td>40</td>
     <td>€2,000</td>
-    <td>€67</td>
-    <td>€1,933</td>
-    <td><strong>+€11,192</strong> ✅</td>
+    <td>€463</td>
+    <td>€1,537</td>
+    <td><strong>+€1,688</strong></td>
+    <td>✅ Rentable</td>
 </tr>
 <tr>
     <td>60</td>
     <td>€3,000</td>
-    <td>€67</td>
-    <td>€2,933</td>
-    <td><strong>+€35,192</strong> ✅✅</td>
+    <td>€463</td>
+    <td>€2,537</td>
+    <td><strong>+€25,688</strong></td>
+    <td>✅✅ Muy rentable</td>
 </tr>
 <tr>
     <td>100</td>
     <td>€5,000</td>
-    <td>€67</td>
-    <td>€4,933</td>
-    <td><strong>+€83,192</strong> ✅✅✅</td>
+    <td>€976</td>
+    <td>€4,024</td>
+    <td><strong>+€61,376</strong></td>
+    <td>✅✅✅ Altamente rentable</td>
 </tr>
 </tbody>
 </table>
 
 <p class="nota">
-<strong>Conclusión:</strong> El proyecto es rentable con 40 clientes en aproximadamente 20 meses. Ver análisis económico completo en <strong>Anexo D</strong>.
+<strong>Conclusión:</strong> Con <strong>40 academias</strong> suscritas, el proyecto recupera la inversión en aproximadamente <strong>23 meses</strong>. Con 60+ academias, la rentabilidad es muy alta. Los costes de €450/mes incluyen uso estimado de OpenAI API y soporte técnico (10h/mes).
 </p>
 
-<!-- ======================== 8. EJECUCIÓN ======================== -->
+<!-- ======================== 8. DEMOSTRACIÓN ======================== -->
 <div class="page-break"></div>
-<h1>8. EJECUCIÓN</h1>
-
-<h2>8.1. Arquitectura Implementada</h2>
-
-<h2>8.1. Visión de Alto Nivel</h2>
+<h1>8. DEMOSTRACIÓN DEL SISTEMA</h1>
 
 <p>
-El sistema <strong>Academia Chat-Driven</strong> implementa una arquitectura de <strong>4 capas distribuidas</strong> con inteligencia artificial conversacional como interfaz única:
+Para visualizar el <strong>funcionamiento completo del sistema</strong> (interfaz Android + integración con Backend Chat + OpenAI GPT-4o + API Workers), se ha preparado un <strong>vídeo demostrativo</strong> que muestra:
 </p>
 
-<div class="codigo">
-┌──────────────────────────────────────────────────────────┐
-│  CAPA 1: CLIENTE MÓVIL (Android)                         │
-│  • Kotlin + Jetpack Compose                              │
-│  • ChatScreen (interfaz única)                           │
-│  • MVVM (ViewModel + StateFlow + Repository)             │
-└─────────────────┬────────────────────────────────────────┘
-                  │ HTTPS + JWT
-                  ▼
-┌──────────────────────────────────────────────────────────┐
-│  CAPA 2: ORQUESTADOR IA (Backend Chat)                   │
-│  • Spring Boot 3.5.5 + Java 21                           │
-│  • OpenAI GPT-4o (gpt-4o-2024-08-06)                     │
-│  • Sistema de prompts multi-turno                        │
-│  • Token Delegation (reenvío JWT sin modificar)          │
-└─────────────────┬────────────────────────────────────────┘
-                  │ HTTPS + MISMO JWT
-                  ▼
-┌──────────────────────────────────────────────────────────┐
-│  CAPA 3: LÓGICA DE NEGOCIO (API Workers)                 │
-│  • Python 3.12 + Flask 3.0                               │
-│  • 20 endpoints CRUD                                     │
-│  • Validación JWT + Lógica de negocio                    │
-└─────────────────┬────────────────────────────────────────┘
-                  │ MySQL Protocol (TLS)
-                  ▼
-┌──────────────────────────────────────────────────────────┐
-│  CAPA 4: PERSISTENCIA (MySQL 8.0 en AWS RDS) ✅          │
-│  • 20 tablas normalizadas                                │
-│  • Triggers + Constraints                                │
-│  • Auditoría con usuarioId del JWT                       │
-└──────────────────────────────────────────────────────────┘
+<ul>
+<li>✅ <strong>Interfaz conversacional</strong> en Android (ChatScreen con Jetpack Compose)</li>
+<li>✅ <strong>Interacción con GPT-4o</strong> para consultas de gestión académica</li>
+<li>✅ <strong>Function calling automático</strong> ejecutado por el LLM</li>
+<li>✅ <strong>Respuestas con datos estructurados</strong> (tablas, listas, sugerencias contextuales)</li>
+<li>✅ <strong>Flujo end-to-end</strong> Android → Backend Chat → API Workers → MySQL RDS</li>
+<li>✅ <strong>Casos de uso reales:</strong> consulta de alumnos, cursos, sesiones, inscripciones, pagos</li>
+</ul>
+
+<div class="solucion-box" style="text-align: center; padding: 30px; margin: 20px 0;">
+<h3 style="margin-top: 0;">🎥 Vídeo Demostrativo del Sistema</h3>
+<p style="font-size: 1.1em; margin: 20px 0;">
+<strong>Duración:</strong> ~10 minutos<br/>
+<strong>Plataforma:</strong> YouTube
+</p>
+<p style="margin: 25px 0;">
+<a href="https://www.youtube.com/watch?v=W32Q2vsQB9g" 
+   target="_blank" 
+   style="display: inline-block; background-color: #1976D2; color: white; padding: 15px 40px; text-decoration: none; border-radius: 5px; font-size: 1.2em; font-weight: bold;">
+   ▶️ VER DEMOSTRACIÓN EN YOUTUBE
+</a>
+</p>
+<p style="font-size: 0.9em; color: #666; margin-top: 15px;">
+URL: <code>https://www.youtube.com/watch?v=W32Q2vsQB9g</code>
+</p>
+</div>
+
+<p class="nota">
+<strong>Nota técnica:</strong> El vídeo muestra el sistema funcionando con los tres módulos desplegados (Android en emulador, Backend Chat en local conectado a OpenAI, API Workers conectada a MySQL en AWS RDS). Todos los flujos demostrados son <strong>reales y funcionales</strong>, no simulaciones.
+</p>
+
+<!-- ======================== 15. ANEXOS ======================== -->
+<div class="page-break"></div>
+<h1>15. LISTA DE ANEXOS</h1>
+
+<p>
+Los siguientes documentos complementan esta memoria y están disponibles en los repositorios GitHub del proyecto:
+</p>
+
+<h2>Anexo A: Modelo de Datos Completo</h2>
+<p>
+<strong>Ubicación:</strong> <code>api-workers-profesores/docs/ANALISIS_ENDPOINTS_Y_MODELO_DATOS.html</code><br/>
+<strong>Contenido:</strong>
+</p>
+<ul>
+<li>Diagrama ER completo (20 tablas)</li>
+<li>Especificación de campos, tipos y constraints</li>
+<li>Relaciones FK detalladas</li>
 </div>
 
 <h2>8.2. Flujo de Token Delegation (Concepto Clave)</h2>
@@ -2843,7 +2798,7 @@ Para reducir latencia en el segundo turno (cuando GPT-4 ya sabe qué endpoints u
 <h2>9.2. Tool Calling Iterativo</h2>
 
 <p>
-El backend soporta <strong>hasta 10 llamadas iterativas</strong> a OpenAI GPT-4 para resolver operaciones complejas:
+El backend implementa un <strong>límite de hasta 10 llamadas iterativas</strong> a OpenAI GPT-4 para resolver operaciones complejas:
 </p>
 
 <div class="codigo">
