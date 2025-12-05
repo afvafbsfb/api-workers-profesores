@@ -525,11 +525,11 @@ Este documento incluye las últimas mejoras implementadas en el sistema:
 
 <h2 id="%C3%ADndice">Índice</h2>
 <ol>
-<li><a href="#repositorios-github">Repositorios GitHub del Proyecto</a></li>
-<li><a href="#1-visi%C3%B3n-general">Visión General</a></li>
-<li><a href="#2-diagrama-de-arquitectura-general-simplificado">Diagrama de Arquitectura General (Simplificado)</a></li>
-<li><a href="#3-diagrama-de-seguridad-jwt---token-delegado">Diagrama de Seguridad JWT - Token Delegado</a></li>
-<li><a href="#4-modelo-de-datos---base-de-datos-mysql">Modelo de Datos - Base de Datos MySQL</a>
+<li><a href="#1-repositorios-github">Repositorios GitHub del Proyecto</a></li>
+<li><a href="#2-visi%C3%B3n-general">Visión General</a></li>
+<li><a href="#3-diagrama-de-arquitectura-general-simplificado">Diagrama de Arquitectura General (Simplificado)</a></li>
+<li><a href="#4-diagrama-de-seguridad-jwt---token-delegado">Diagrama de Seguridad JWT - Token Delegado</a></li>
+<li><a href="#5-modelo-de-datos---base-de-datos-mysql">Modelo de Datos - Base de Datos MySQL</a>
 <ul>
 <li><a href="#cadenas-de-conexi%C3%B3n">Cadenas de Conexión</a></li>
 <li><a href="#tablas-de-la-base-de-datos">Tablas de la Base de Datos</a></li>
@@ -537,19 +537,31 @@ Este documento incluye las últimas mejoras implementadas en el sistema:
 <li><a href="#diccionario-de-datos-completo">Diccionario de Datos Completo</a></li>
 </ul>
 </li>
-<li><a href="#5-contrato-de-respuesta-del-chat">Contrato de Respuesta del Chat</a></li>
-<li><a href="#6-tabla-de-endpoints-y-seguridad">Tabla de Endpoints y Seguridad</a></li>
-<li><a href="#7-flujo-completo-caso-de-uso-real">Flujo Completo: Caso de Uso Real</a></li>
-<li><a href="#8-ventajas-de-la-arquitectura">Ventajas de la Arquitectura</a></li>
-<li><a href="#9-tecnolog%C3%ADas-utilizadas">Tecnologías Utilizadas</a></li>
-<li><a href="#10-testing-y-calidad">Testing y Calidad</a></li>
-<li><a href="#11-plan-de-despliegue-en-producci%C3%B3n">Plan de Despliegue en Producción</a></li>
-<li><a href="#12-an%C3%A1lisis-econ%C3%B3mico-del-proyecto">Análisis Económico del Proyecto</a></li>
+<li><a href="#6-contrato-de-respuesta-del-chat">Contrato de Respuesta del Chat</a></li>
+<li><a href="#7-tabla-de-endpoints-y-seguridad">Tabla de Endpoints y Seguridad</a></li>
+<li><a href="#8-flujo-completo-caso-de-uso-real">Flujo Completo: Caso de Uso Real</a></li>
+<li><a href="#9-ventajas-de-la-arquitectura">Ventajas de la Arquitectura</a>
+<ul>
+<li><a href="#91-separaci%C3%B3n-de-responsabilidades">9.1. Separación de Responsabilidades (SoC)</a></li>
+<li><a href="#92-seguridad-en-capas">9.2. Seguridad en Capas (Defense in Depth)</a></li>
+<li><a href="#93-trazabilidad-completa">9.3. Trazabilidad Completa</a></li>
+<li><a href="#94-escalabilidad-horizontal">9.4. Escalabilidad Horizontal</a></li>
+</ul>
+</li>
+<li><a href="#10-tecnolog%C3%ADas-utilizadas">Tecnologías Utilizadas</a>
+<ul>
+<li><a href="#101-arquitectura-del-backend-chat-spring-boot">10.1. Arquitectura del Backend Chat (Spring Boot)</a></li>
+<li><a href="#102-arquitectura-de-la-api-workers-flask-python">10.2. Arquitectura de la API Workers (Flask + Python)</a></li>
+</ul>
+</li>
+<li><a href="#11-testing-y-calidad">Testing y Calidad</a></li>
+<li><a href="#12-plan-de-despliegue-en-producci%C3%B3n">Plan de Despliegue en Producción</a></li>
+<li><a href="#13-an%C3%A1lisis-econ%C3%B3mico-del-proyecto">Análisis Económico del Proyecto</a></li>
 </ol>
 
 <hr>
 
-<h2 id="repositorios-github">Repositorios GitHub del Proyecto</h2>
+<h2 id="1-repositorios-github">1. Repositorios GitHub del Proyecto</h2>
 
 <div style="background-color: #E3F2FD; border-left: 4px solid #2196F3; padding: 16px; margin: 20px 0; border-radius: 4px;">
 <p><strong>📦 Código Fuente Disponible en GitHub</strong></p>
@@ -614,7 +626,7 @@ Incluyen toda la documentación técnica, diagramas de arquitectura, y configura
 
 <hr>
 
-<h2 id="1-visi%C3%B3n-general">1. Visión General</h2>
+<h2 id="2-visi%C3%B3n-general">2. Visión General</h2>
 <p>El sistema <strong>Academia Chat-Driven</strong> es una plataforma educativa que utiliza inteligencia artificial conversacional como única interfaz de usuario. La arquitectura se basa en tres pilares fundamentales:</p>
 <h3 id="componentes-principales">Componentes Principales</h3>
 <p><strong>Cliente Móvil (Android)</strong></p>
@@ -685,7 +697,7 @@ MySQL registra usuarioId del JWT en auditoría
 <li>En nuestro sistema, ambos backends están bajo el mismo control → solo necesitamos JWT</li>
 </ul>
 <hr>
-<h2 id="2-diagrama-de-arquitectura-general-simplificado">2. Diagrama de Arquitectura General (Simplificado)</h2>
+<h2 id="3-diagrama-de-arquitectura-general-simplificado">3. Diagrama de Arquitectura General (Simplificado)</h2>
 <p>Vista de alto nivel con los 4 componentes principales:</p>
 <pre><code class="language-mermaid"><div class="mermaid">graph LR
     subgraph "CLIENTE"
@@ -728,7 +740,7 @@ MySQL registra usuarioId del JWT en auditoría
 <li>API Workers ↔ MySQL: MySQL Protocol sobre TLS</li>
 </ul>
 <hr>
-<h2 id="3-diagrama-de-seguridad-jwt---token-delegado">3. Diagrama de Seguridad JWT - Token Delegado</h2>
+<h2 id="4-diagrama-de-seguridad-jwt---token-delegado">4. Diagrama de Seguridad JWT - Token Delegado</h2>
 <h3 id="arquitectura-de-seguridad-jwt-%C3%BAnico-token-delegado">Arquitectura de Seguridad: JWT Único (Token Delegado)</h3>
 <p><strong>Principio clave:</strong> Un único JWT viaja de punta a punta (Android → Backend Chat → API Workers)</p>
 <pre><code class="language-mermaid"><div class="mermaid">sequenceDiagram
@@ -876,7 +888,7 @@ MySQL registra usuarioId del JWT en auditoría
 <li>Captcha tras 3 intentos fallidos (futuro)</li>
 </ul>
 <hr>
-<h2 id="4-modelo-de-datos---base-de-datos-mysql">4. Modelo de Datos - Base de Datos MySQL</h2>
+<h2 id="5-modelo-de-datos---base-de-datos-mysql">5. Modelo de Datos - Base de Datos MySQL</h2>
 <h3 id="cadenas-de-conexi%C3%B3n">Cadenas de Conexión</h3>
 <p><strong>Desarrollo (Local):</strong></p>
 <pre class="hljs"><code><div>mysql://root:password@localhost:3307/api_workers
@@ -2539,7 +2551,7 @@ Extractos (1) ──&gt; (*) Movimientos_Extracto
 <p><strong>Nota:</strong> Esta tabla está reservada para funcionalidad futura de automatización con agentes IA que podrán realizar tareas administrativas (recordatorios de pago, generación de informes, respuestas automáticas, etc.).</p>
 
 <hr>
-<h2 id="5-contrato-de-respuesta-del-chat">5. Contrato de Respuesta del Chat</h2>
+<h2 id="6-contrato-de-respuesta-del-chat">6. Contrato de Respuesta del Chat</h2>
 <h3 id="estructura-del-envelope">Estructura del Envelope</h3>
 <p>Todas las respuestas del Backend Chat siguen un contrato estandarizado llamado <strong>Envelope</strong>, que permite renderizar cualquier tipo de información de manera consistente en la UI.</p>
 <pre><code class="language-mermaid"><div class="mermaid">classDiagram
@@ -2963,7 +2975,7 @@ Extractos (1) ──&gt; (*) Movimientos_Extracto
 <li>UI renderiza botones &quot;Ver más&quot; automáticamente</li>
 </ul>
 <hr>
-<h2 id="6-tabla-de-endpoints-y-seguridad">6. Tabla de Endpoints y Seguridad</h2>
+<h2 id="7-tabla-de-endpoints-y-seguridad">7. Tabla de Endpoints y Seguridad</h2>
 
 <div class="update-note">
 <strong>🔄 Actualizado en v2.1.0:</strong> Nuevos parámetros de query, endpoint pasar-lista, restricción en POST /anotaciones.
@@ -3852,7 +3864,7 @@ Authorization: Bearer JWT_TOKEN
 <li><code>Admin_academia</code> y <code>Profesor_academia</code> solo ven datos de su academia (forzado en backend)</li>
 </ul>
 <hr>
-<h2 id="7-flujo-completo-caso-de-uso-real">7. Flujo Completo: Caso de Uso Real</h2>
+<h2 id="8-flujo-completo-caso-de-uso-real">8. Flujo Completo: Caso de Uso Real</h2>
 
 <div class="update-note">
 <strong>🔄 Actualizado en v2.1.0:</strong> Arquitectura de Tool Calling iterativo explicada en detalle.
@@ -4070,8 +4082,8 @@ OpenAI: <span class="hljs-string">"El curso Matemáticas 1º ESO tiene 25 alumno
 <li><strong>UX Natural:</strong> Usuario no necesita conocer la estructura de datos</li>
 </ul>
 <hr>
-<h2 id="8-ventajas-de-la-arquitectura">8. Ventajas de la Arquitectura</h2>
-<h3 id="separaci%C3%B3n-de-responsabilidades-soc">Separación de Responsabilidades (SoC)</h3>
+<h2 id="9-ventajas-de-la-arquitectura">9. Ventajas de la Arquitectura</h2>
+<h3 id="91-separaci%C3%B3n-de-responsabilidades">9.1. Separación de Responsabilidades (SoC)</h3>
 <p><strong>Android App</strong></p>
 <ul>
 <li>Responsabilidad única: Renderizar UI y gestionar estado local</li>
@@ -4103,7 +4115,7 @@ OpenAI: <span class="hljs-string">"El curso Matemáticas 1º ESO tiene 25 alumno
 <li>No conoce el contexto conversacional</li>
 <li>API REST estándar (puede ser usada por otros clientes)</li>
 </ul>
-<h3 id="seguridad-en-capas-defense-in-depth">Seguridad en Capas (Defense in Depth)</h3>
+<h3 id="92-seguridad-en-capas">9.2. Seguridad en Capas (Defense in Depth)</h3>
 <ol>
 <li><strong>Capa 1 - Transporte</strong>: HTTPS/TLS</li>
 <li><strong>Capa 2 - Autenticación</strong>: JWT único de punta a punta</li>
@@ -4112,7 +4124,7 @@ OpenAI: <span class="hljs-string">"El curso Matemáticas 1º ESO tiene 25 alumno
 <li><strong>Capa 5 - BD</strong>: Prepared statements, permisos limitados</li>
 </ol>
 <p><strong>Ventaja:</strong> Si una capa falla, las otras siguen protegiendo el sistema.</p>
-<h3 id="trazabilidad-completa">Trazabilidad Completa</h3>
+<h3 id="93-trazabilidad-completa">9.3. Trazabilidad Completa</h3>
 <p><strong>Un único JWT viaja por todo el sistema:</strong></p>
 <pre class="hljs"><code><div>Usuario login (JWT generado) 
   → Android guarda JWT
@@ -4127,7 +4139,7 @@ OpenAI: <span class="hljs-string">"El curso Matemáticas 1º ESO tiene 25 alumno
 <li>Auditoría completa: sabemos qué usuario hizo cada acción en cada capa</li>
 <li>No hay &quot;conversión&quot; de credenciales (menos superficie de ataque)</li>
 </ul>
-<h3 id="escalabilidad-horizontal">Escalabilidad Horizontal</h3>
+<h3 id="94-escalabilidad-horizontal">9.4. Escalabilidad Horizontal</h3>
 <p><strong>Android App</strong></p>
 <ul>
 <li>Escala automáticamente (cada dispositivo es una instancia)</li>
@@ -4150,159 +4162,8 @@ OpenAI: <span class="hljs-string">"El curso Matemáticas 1º ESO tiene 25 alumno
 <li>Sharding por academiaId (multi-tenancy)</li>
 <li>Índices optimizados para queries comunes</li>
 </ul>
-<h3 id="flexibilidad-y-mantenibilidad">Flexibilidad y Mantenibilidad</h3>
-<p><strong>Cambiar LLM sin romper nada</strong></p>
-<pre class="hljs"><code><div><span class="hljs-comment">// Solo cambiar en Backend Chat</span>
-<span class="hljs-keyword">const</span> openai = <span class="hljs-keyword">new</span> OpenAI({ <span class="hljs-attr">apiKey</span>: process.env.OPENAI_API_KEY });
-<span class="hljs-comment">// Por:</span>
-<span class="hljs-keyword">const</span> anthropic = <span class="hljs-keyword">new</span> Anthropic({ <span class="hljs-attr">apiKey</span>: process.env.ANTHROPIC_API_KEY });
-</div></code></pre>
-<p><strong>Añadir nuevas funcionalidades</strong></p>
-<ul>
-<li>Android: Solo renderizar nuevo tipo en <code>when (data.type)</code></li>
-<li>Backend: Agregar caso al served-openapi.json</li>
-<li>API: Crear nuevo endpoint</li>
-</ul>
-<p><strong>A/B Testing de Prompts</strong></p>
-<pre class="hljs"><code><div><span class="hljs-keyword">const</span> promptVersion = user.id % <span class="hljs-number">2</span> === <span class="hljs-number">0</span> ? <span class="hljs-string">'prompt_v1'</span> : <span class="hljs-string">'prompt_v2'</span>;
-<span class="hljs-keyword">const</span> systemMessage = PROMPTS[promptVersion];
-</div></code></pre>
-<h3 id="desarrollo-paralelo">Desarrollo Paralelo</h3>
-<p><strong>Frontend Team</strong> puede trabajar con mocks mientras <strong>Backend Team</strong> implementa endpoints reales.</p>
-<p><strong>QA Team</strong> puede testear UI sin consumir quota de OpenAI.</p>
-<p><strong>Product Team</strong> puede validar UX sin necesidad de backend funcional.</p>
-<h3 id="auditabilidad-y-debugging">Auditabilidad y Debugging</h3>
-<p><strong>Logs Distribuidos:</strong></p>
-<ul>
-<li>Android: Logcat con tags por componente</li>
-<li>Backend Chat: Winston con niveles (info, warn, error)</li>
-<li>API Workers: Cloudflare Analytics</li>
-<li>MySQL: Slow query log</li>
-</ul>
-<p><strong>Trazabilidad:</strong></p>
-<ul>
-<li>Cada mensaje tiene <code>conversationId</code> único</li>
-<li>Timestamps en cada capa</li>
-<li>Metadata de modelo y tokens usados</li>
-<li><strong>usuarioId del JWT en todos los logs</strong></li>
-</ul>
-<p><strong>Métricas:</strong></p>
-<ul>
-<li>Latencia por endpoint</li>
-<li>Tasa de éxito/fallo</li>
-<li>Uso de tokens (costos)</li>
-<li>Endpoints más usados</li>
-</ul>
-<h3 id="reusabilidad-del-backend-chat-para-otros-proyectos">Reusabilidad del Backend Chat para Otros Proyectos</h3>
-<p><strong>Ventaja Clave de la Arquitectura:</strong> El Backend Chat es un <strong>orquestador genérico</strong> que no contiene lógica de negocio específica del dominio académico. Esto significa que puede ser <strong>reutilizado íntegramente</strong> para otros proyectos SaaS con mínimas modificaciones.</p>
-
-<p><strong>Componentes 100% Reutilizables:</strong></p>
-<ul>
-<li>✅ <strong>Sistema de autenticación JWT</strong> - Validación y delegación de tokens</li>
-<li>✅ <strong>Integración con OpenAI</strong> - Cliente y gestión de API calls</li>
-<li>✅ <strong>Sistema de tool calling iterativo</strong> - Bucle de hasta 10 iteraciones</li>
-<li>✅ <strong>Estructura Envelope</strong> - Contrato de respuesta estandarizado</li>
-<li>✅ <strong>Logs y telemetría E2E</strong> - Reportes HTML automáticos</li>
-<li>✅ <strong>Gestión de errores y retry logic</strong></li>
-<li>✅ <strong>Rate limiting y seguridad</strong></li>
-<li>✅ <strong>Infraestructura Spring Boot completa</strong></li>
-</ul>
-
-<p><strong>¿Qué hay que cambiar para usar el Backend Chat en otro proyecto?</strong></p>
-<p>Solo <strong>2 archivos de configuración</strong> (5-15 horas de trabajo):</p>
-
-<p><strong>1. Whitelist de endpoints</strong> (<code>served-openapi.json</code>):</p>
-<pre class="hljs"><code><div><span class="hljs-comment">// Ejemplo: Cambiar de Academia a Autoescuela</span>
-{
-  <span class="hljs-string">"allowed_endpoints"</span>: [
-    { <span class="hljs-string">"name"</span>: <span class="hljs-string">"alumnos.listar"</span>, <span class="hljs-string">"path"</span>: <span class="hljs-string">"/alumnos"</span>, <span class="hljs-string">"method"</span>: <span class="hljs-string">"GET"</span> },
-    { <span class="hljs-string">"name"</span>: <span class="hljs-string">"clases_practicas.crear"</span>, <span class="hljs-string">"path"</span>: <span class="hljs-string">"/clases-practicas"</span>, <span class="hljs-string">"method"</span>: <span class="hljs-string">"POST"</span> },
-    { <span class="hljs-string">"name"</span>: <span class="hljs-string">"examenes.consultar"</span>, <span class="hljs-string">"path"</span>: <span class="hljs-string">"/examenes/:id"</span>, <span class="hljs-string">"method"</span>: <span class="hljs-string">"GET"</span> }
-  ]
-}
-</div></code></pre>
-
-<p><strong>2. System Prompt</strong> (descripción del dominio):</p>
-<pre class="hljs"><code><div><span class="hljs-comment"># application.properties</span>
-<span class="hljs-meta">openai.system.prompt</span>=<span class="hljs-string">Eres un asistente de gestión de autoescuela. 
-Ayudas a instructores y administradores a gestionar alumnos, clases teóricas y prácticas, 
-exámenes y permisos de conducir. Usa un tono profesional y motivador.</span>
-</div></code></pre>
-
-<p><strong>3. Variables de entorno</strong> (apuntar a nueva API):</p>
-<pre class="hljs"><code><div><span class="hljs-comment"># Cambiar URL de API Workers</span>
-<span class="hljs-meta">API_WORKERS_URL</span>=<span class="hljs-string">https://api-autoescuela.tudominio.com</span>
-<span class="hljs-meta">JWT_DELEGATION_SECRET</span>=<span class="hljs-string">${SHARED_SECRET}</span>  <span class="hljs-comment"># Mismo secret compartido</span>
-</div></code></pre>
-
-<p><strong>Ejemplos de Proyectos Compatibles:</strong></p>
-<table>
-<thead>
-<tr>
-<th>Dominio</th>
-<th>API Workers Necesaria</th>
-<th>Cambios en Backend Chat</th>
-<th>Tiempo Estimado</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>🚗 <strong>Autoescuela</strong></td>
-<td>Alumnos, Clases Prácticas, Exámenes, Permisos</td>
-<td>Whitelist + Prompt</td>
-<td>10-15h</td>
-</tr>
-<tr>
-<td>🏨 <strong>Hotel/Hostal</strong></td>
-<td>Habitaciones, Reservas, Check-in/out, Servicios</td>
-<td>Whitelist + Prompt</td>
-<td>10-15h</td>
-</tr>
-<tr>
-<td>🏋️ <strong>Gimnasio</strong></td>
-<td>Socios, Clases, Entrenamientos, Membresías</td>
-<td>Whitelist + Prompt</td>
-<td>10-15h</td>
-</tr>
-<tr>
-<td>🍕 <strong>Restaurante</strong></td>
-<td>Mesas, Pedidos, Reservas, Inventario</td>
-<td>Whitelist + Prompt</td>
-<td>10-15h</td>
-</tr>
-<tr>
-<td>🚗 <strong>Taller Mecánico</strong></td>
-<td>Vehículos, Reparaciones, Presupuestos, Stock</td>
-<td>Whitelist + Prompt</td>
-<td>10-15h</td>
-</tr>
-</tbody>
-</table>
-
-<p><strong>Ventaja Competitiva:</strong></p>
-<ul>
-<li>💰 <strong>Ahorro de €6,400 - €8,000</strong> por cada nuevo proyecto</li>
-<li>⚡ <strong>Time-to-market reducido en 25-30%</strong></li>
-<li>🔒 <strong>Sistema de seguridad ya probado</strong></li>
-<li>📊 <strong>Telemetría y logs ya implementados</strong></li>
-<li>🧪 <strong>Testing y CI/CD reutilizables</strong></li>
-</ul>
-
-<p><strong>Arquitectura Multi-Proyecto:</strong></p>
-<pre class="hljs"><code><div>Backend Chat (Único - Compartido)
-       ↓
-   ┌───┴───┬────────────┬──────────┐
-   ↓       ↓            ↓          ↓
-API       API          API        API
-Academias Autoescuelas Gimnasios Hoteles
-   ↓       ↓            ↓          ↓
- MySQL   MySQL        MySQL      MySQL
-(BD 1)  (BD 2)       (BD 3)    (BD 4)
-</div></code></pre>
-
-<p><strong>Nota Importante:</strong> El JWT debe incluir un claim que identifique el proyecto/dominio para que el Backend Chat sepa a qué API Workers dirigir las peticiones. Esto se puede implementar con un campo <code>projectId</code> o <code>domain</code> en el token.</p>
 <hr>
-<h2 id="9-tecnolog%C3%ADas-utilizadas">9. Tecnologías Utilizadas</h2>
+<h2 id="10-tecnolog%C3%ADas-utilizadas">10. Tecnologías Utilizadas</h2>
 <h3 id="frontend-android">Frontend (Android)</h3>
 <table>
 <thead>
@@ -4549,7 +4410,7 @@ Academias Autoescuelas Gimnasios Hoteles
 </tbody>
 </table>
 
-<h3 id="94-arquitectura-del-backend-chat-spring-boot">9.4 - Arquitectura del Backend Chat (Spring Boot)</h3>
+<h3 id="101-arquitectura-del-backend-chat-spring-boot">10.1 - Arquitectura del Backend Chat (Spring Boot)</h3>
 
 <p>El Backend Chat es el <strong>orquestador central</strong> del sistema, actuando como intermediario entre la aplicación Android, OpenAI GPT-4 y la API Workers. Esta sección explica en profundidad cómo funciona internamente, qué componentes utiliza y cómo se coordinan.</p>
 
@@ -4992,7 +4853,7 @@ Content-Length: <span class="hljs-number">2456</span>
 
 <p><strong>Conclusión:</strong> Spring Boot fue elegido por su robustez, tipado fuerte y ecosistema maduro, ideal para un sistema de producción con requisitos de seguridad y trazabilidad.</p>
 
-<h3 id="95-arquitectura-de-la-api-workers-flask-python">9.5 - Arquitectura de la API Workers (Flask + Python)</h3>
+<h3 id="102-arquitectura-de-la-api-workers-flask-python">10.2 - Arquitectura de la API Workers (Flask + Python)</h3>
 
 <p>La API Workers es el componente que <strong>gestiona todos los datos del negocio</strong> (academias, alumnos, cursos, sesiones, inscripciones, etc.). Está construida con Python y Flask, siguiendo el patrón arquitectónico <strong>Domain-Driven Design (DDD)</strong>.</p>
 
@@ -5293,7 +5154,7 @@ bp = Blueprint(<span class="hljs-string">'inscripciones'</span>, __name__)
 <p><strong>Conclusión:</strong> Python + Flask + DDD permiten construir una API REST escalable, mantenible y fácil de entender, ideal para un proyecto académico donde la claridad del código es tan importante como la funcionalidad. El patrón DDD organiza el código según el negocio real (academias, alumnos, cursos), facilitando que cualquier persona entienda el proyecto rápidamente.</p>
 
 <hr>
-<h2 id="10-testing-y-calidad">10. Testing y Calidad</h2>
+<h2 id="11-testing-y-calidad">11. Testing y Calidad</h2>
 <h3 id="tipos-de-testing-implementados">Tipos de Testing Implementados</h3>
 <p>El proyecto incluye testing a múltiples niveles para garantizar calidad y fiabilidad:</p>
 <h4 id="1-tests-unitarios-android">1. Tests Unitarios (Android)</h4>
@@ -5540,7 +5401,7 @@ bp = Blueprint(<span class="hljs-string">'inscripciones'</span>, __name__)
 pytest --cov=src --cov-report=html
 </div></code></pre>
 <hr>
-<h2 id="11-plan-de-despliegue-en-producci%C3%B3n">11. Plan de Despliegue en Producción</h2>
+<h2 id="12-plan-de-despliegue-en-producci%C3%B3n">12. Plan de Despliegue en Producción</h2>
 <h3 id="estado-actual-del-proyecto">Estado Actual del Proyecto</h3>
 <p><strong>Fase 1: MVP (✅ COMPLETADO) - Listo para Demo</strong></p>
 <p><strong>Android App:</strong></p>
@@ -5781,7 +5642,7 @@ git checkout &lt;tag-anterior&gt;
 <li><strong>Testing E2E:</strong> <code>documentacion/prueba-20251023-211011-121.html</code> (ejemplo)</li>
 </ul>
 <hr>
-<h2 id="12-an%C3%A1lisis-econ%C3%B3mico-del-proyecto">12. Análisis Económico del Proyecto</h2>
+<h2 id="13-an%C3%A1lisis-econ%C3%B3mico-del-proyecto">13. Análisis Económico del Proyecto</h2>
 
 <p>Esta sección analiza la viabilidad económica del proyecto desde una perspectiva de producto SaaS (Software as a Service), incluyendo estimaciones de desarrollo, costes operativos y proyecciones de rentabilidad.</p>
 
