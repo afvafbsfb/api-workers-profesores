@@ -259,3 +259,5 @@ Este proyecto es parte de un ecosistema de 3 aplicaciones:
 ## 📄 Licencia
 
 Este proyecto es parte de un Trabajo Final de Grado (TFG) y está disponible públicamente para fines educativos y de evaluación.
+   
+ 
