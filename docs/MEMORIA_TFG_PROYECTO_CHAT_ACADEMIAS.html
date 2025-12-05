@@ -311,9 +311,10 @@ li {
     <li><strong>DESCRIPCIÓN</strong>
         <ul style="list-style: none; padding-left: 1cm;">
             <li>3.1. Motivación Personal</li>
-            <li>3.2. Problemática del Cliente</li>
+            <li>3.2. Necesidad Identificada</li>
             <li>3.3. Solución Propuesta</li>
             <li>3.4. Dificultades Técnicas</li>
+            <li>3.5. Decisiones de Diseño Clave</li>
         </ul>
     </li>
     <li><strong>ALCANCE</strong>
@@ -357,9 +358,17 @@ li {
 <div class="seccion-anexos">
 <h2 style="margin-top:1cm;">ANEXOS</h2>
 <ol style="line-height:1.6; font-size:10pt; margin-left: 0; padding-left: 1.2cm;">
-    <li><strong>Anexo A:</strong> Repositorios GitHub y Documentación Online</li>
-    <li><strong>Anexo B:</strong> Plan de Despliegue en AWS</li>
-    <li><strong>Anexo C:</strong> Referencias Técnicas</li>
+    <li><strong>Anexo A:</strong> Repositorios GitHub del Proyecto</li>
+    <li><strong>Anexo B:</strong> Modelo de Datos Academias</li>
+    <li><strong>Anexo C:</strong> Documentación de Endpoints API Workers</li>
+    <li><strong>Anexo D:</strong> Especificación Técnica de Tecnologías y Arquitecturas Backend</li>
+    <li><strong>Anexo E:</strong> Ingeniería de Prompts y Optimización LLM</li>
+    <li><strong>Anexo F:</strong> Arquitectura Android MVVM</li>
+    <li><strong>Anexo G:</strong> Diseño UX Android</li>
+    <li><strong>Anexo H:</strong> Evidencias de Pruebas del Sistema</li>
+    <li><strong>Anexo I:</strong> Seguridad y Token Delegation</li>
+    <li><strong>Anexo J:</strong> Contrato de Respuesta del Chat (Envelope)</li>
+    <li><strong>Anexo K:</strong> Plan de Despliegue en Producción (AWS)</li>
 </ol>
 </div>
 
@@ -434,7 +443,7 @@ Durante el análisis del sector se identificaron las siguientes características
 </p>
 
 <p class="nota">
-<strong>Nota:</strong> El análisis económico completo se encuentra en el <strong>Anexo A: Análisis Económico Extendido</strong> y en la sección 7 de este documento.
+<strong>Nota:</strong> El análisis económico completo se encuentra en la sección 7 de este documento.
 </p>
 
 <!-- ======================== 2. OBJETIVO ======================== -->
@@ -497,7 +506,7 @@ Documentar arquitectura de despliegue en producción con AWS Elastic Beanstalk.
 </ol>
 
 <p class="nota">
-<strong>Nota sobre estado de despliegue:</strong> Actualmente solo MySQL RDS está desplegado en AWS. Los backends funcionan en local. El plan de despliegue completo está documentado en el <strong>Anexo B</strong>.
+<strong>Nota sobre estado de despliegue:</strong> Actualmente solo MySQL RDS está desplegado en AWS. Los backends funcionan en local. El plan de despliegue completo está documentado en la sección 4.1 (tablas de módulos implementados).
 </p>
 
 <!-- ======================== 3. DESCRIPCIÓN ======================== -->
@@ -532,7 +541,7 @@ Esta idea evolucionó hacia un concepto ambicioso: <strong>eliminar completament
 El reto técnico era formidable: hacer que una IA entienda contexto empresarial, resuelva operaciones CRUD mediante conversaciones, mantenga seguridad a nivel empresarial y ofrezca una experiencia de usuario fluida. Este proyecto representa un caso práctico de cómo los <strong>trabajadores virtuales con IA</strong> pueden revolucionar la digitalización de pequeños negocios.
 </p>
 
-<h2>3.2. Problemática Identificada</h2>
+<h2>3.2. Necesidad Identificada</h2>
 
 <h3>3.2.1. Perfil de Negocio Objetivo</h3>
 
@@ -599,15 +608,15 @@ El proyecto está diseñado para pequeñas academias y negocios de formación co
 <h2>3.3. Solución Propuesta</h2>
 
 <p>
-El proyecto propone una <strong>arquitectura de tres capas</strong> con IA conversacional como interfaz única:
+El proyecto propone una <strong>solución en 3 módulos</strong> con IA conversacional como interfaz única:
 </p>
 
-<h3>3.3.1. Arquitectura General</h3>
+<h3>3.3.1. Módulos del Sistema</h3>
 
 <table>
 <thead>
 <tr>
-    <th>Capa</th>
+    <th>Módulo</th>
     <th>Tecnología</th>
     <th>Responsabilidad</th>
 </tr>
@@ -644,8 +653,23 @@ Una de las decisiones arquitectónicas más importantes del proyecto es el <stro
 <li>Implementa <strong>multi-tenancy implícito</strong>: el <code>academiaId</code> del JWT filtra automáticamente los datos</li>
 </ul>
 
+<p>
+<strong>Aspectos de Seguridad:</strong>
+</p>
+
+<ul>
+<li><strong>Autenticación centralizada:</strong> El token JWT se genera en API Workers con firma RSA-256 y contiene los claims esenciales (<code>usuarioId</code>, <code>academiaId</code>, <code>rol</code>)</li>
+<li><strong>Validación en cada capa:</strong> Tanto Backend Chat como API Workers verifican la firma del token antes de procesar cualquier request</li>
+<li><strong>Expiración controlada:</strong> Tokens con tiempo de vida limitado (1 hora) y mecanismo de refresh token para renovación segura</li>
+<li><strong>Aislamiento multi-tenant:</strong> El <code>academiaId</code> del JWT garantiza que cada academia solo accede a sus propios datos, sin posibilidad de fuga de información entre clientes</li>
+</ul>
+
 <p class="nota">
-Ver diagrama de flujo completo en sección 8.2 y <strong>Anexo H: Diagramas de Secuencia</strong>.
+<strong>Consultar diagrama completo de seguridad JWT y flujo de validación en <a href="#anexo-i">Anexo I</a>.</strong>
+</p>
+
+<p class="nota">
+Ver vídeo demostrativo en sección 8 para visualizar el flujo completo del sistema.
 </p>
 
 <h2>3.4. Dificultades Técnicas</h2>
@@ -677,16 +701,12 @@ Patrón de token delegation con secret compartido entre Backend Chat y API Worke
 </ul>
 </div>
 
-<p class="nota">
-Ver implementación en <strong>Anexo I: Código Fuente Destacado - ApiProxyService.java</strong>
-</p>
-
-<h3>3.4.2. Latencia LLM (8-13 segundos)</h3>
+<h3>3.4.2. Latencia LLM (>30 segundos)</h3>
 
 <div class="problema-box">
 <h4>Problema Identificado Durante Desarrollo</h4>
 <p>
-Al trabajar con OpenAI GPT-4, se descubrió que las operaciones tardan <strong>8-13 segundos</strong>, muy por encima del objetivo de <3s. Esto es un <strong>hallazgo propio del carácter innovador</strong> del proyecto: trabajar con modelos de IA generativa presenta desafíos de performance no documentados en el ciclo formativo.
+Al trabajar con OpenAI GPT-4, se descubrió que las operaciones del chat, cuando aumentamos el número de endpoints disponibles para el LLM, presentan latencias de <strong>más de 30 segundos</strong>, muy por encima del objetivo de <3s. Lo mismo ocurre si aumentamos el tamaño de los prompts. Esto es un <strong>hallazgo propio del carácter innovador</strong> del proyecto: trabajar con modelos de IA generativa presenta desafíos de performance no documentados en el ciclo formativo.
 </p>
 
 <h4>Diagnóstico Realizado</h4>
@@ -694,7 +714,7 @@ Al trabajar con OpenAI GPT-4, se descubrió que las operaciones tardan <strong>8
 Mediante análisis profundo del sistema de prompts, se identificó la <strong>causa raíz</strong>:
 </p>
 <ul>
-<li><strong>Whitelist completa</strong> (2,557 líneas de OpenAPI) enviada como texto en cada turno</li>
+<li><strong>Whitelist completa</strong> (más de 5,000 líneas de OpenAPI) enviada como texto en cada turno</li>
 <li>Consumo de ~7,000 tokens innecesarios (44% del total)</li>
 <li>GPT-4 debe procesar especificación completa aunque solo use 1-2 endpoints</li>
 </ul>
@@ -769,9 +789,140 @@ El desarrollador NO necesita recordar añadir este filtro. Es gestionado por dec
 </p>
 </div>
 
+<h2>3.5. Decisiones de Diseño Clave</h2>
+
+<p>
+Las siguientes decisiones arquitectónicas fundamentan el <strong>valor diferencial</strong> del sistema frente a soluciones CRUD tradicionales:
+</p>
+
+<h3>3.5.1. ¿Por qué Chat como Interfaz Única?</h3>
+
+<div class="solucion-box">
+<p><strong>Problema tradicional:</strong> Interfaces CRUD requieren conocimiento técnico y curva de aprendizaje</p>
+
+<p><strong>Solución propuesta:</strong> Interfaz conversacional tipo WhatsApp</p>
+
+<p><strong>Beneficios:</strong></p>
+<ul style="margin-bottom:0;">
+<li>✅ <strong>Cero curva de aprendizaje:</strong> Todo el mundo sabe usar WhatsApp</li>
+<li>✅ <strong>Accesible para no técnicos:</strong> Profesores sin conocimientos informáticos</li>
+<li>✅ <strong>Reducción de errores:</strong> IA valida intents antes de ejecutar</li>
+<li>✅ <strong>Multioperación:</strong> "Crear 3 cursos" en una sola frase</li>
+<li>✅ <strong>Asistencia contextual:</strong> IA sugiere próximos pasos</li>
+</ul>
+</div>
+
+<h3>3.5.2. ¿Por qué Envelope Universal?</h3>
+
+<p>
+El sistema utiliza un <strong>contrato de respuesta unificado</strong> que permite transportar cualquier tipo de entidad (cursos, usuarios, sesiones, pagos, etc.) en un contenedor polimórfico estándar.
+</p>
+
+<p>
+En lugar de crear 20 DTOs diferentes (uno por cada entidad), se implementó un <strong>Envelope Universal</strong> con 3 secciones principales:
+</p>
+
+<ul>
+<li><strong>message:</strong> Texto conversacional + sugerencias de UI contextual</li>
+<li><strong>data:</strong> Contenedor genérico con <code>type</code> (discriminador) + <code>items[]</code> (array de entidades)</li>
+<li><strong>pagination:</strong> Control de paginación con tokens opacos</li>
+</ul>
+
+<div class="codigo">
+{
+  "message": {
+    "text": "Encontré 3 cursos",
+    "ui_suggestions": [
+      { "type": "Paginacion", "label": "Ver más cursos", ... },
+      { "type": "Generica", "label": "Crear nuevo curso", ... }
+    ]
+  },
+  "data": {
+    "type": "curso",
+    "items": [
+      {
+        "id": "1",
+        "title": "Acuarela Básica",
+        "subtitle": "Prof. Juan López",
+        "extraData": { "precio": 45, "plazas": 12, ... }
+      },
+      ...
+    ]
+  },
+  "pagination": { "hasMore": true, "nextToken": "..." }
+}
+</div>
+
+<p><strong>Ventajas:</strong></p>
+<ul>
+<li>✅ Android puede procesar <strong>cualquier entidad</strong> con el <strong>mismo código UI</strong></li>
+<li>✅ Eliminación de duplicación de DTOs (1 contenedor vs 20 clases específicas)</li>
+<li>✅ Extensibilidad: añadir nuevas entidades no requiere cambios en Android</li>
+<li>✅ Sugerencias contextuales: la IA guía al usuario sobre qué hacer a continuación</li>
+</ul>
+
+<p class="nota">
+<strong>Consultar especificación completa del contrato con esquemas JSON y ejemplos reales en <a href="#anexo-j">Anexo J</a>.</strong>
+</p>
+
 <!-- ======================== 4. ALCANCE ======================== -->
 <div class="page-break"></div>
 <h1>4. ALCANCE</h1>
+
+<p>
+El sistema Academia Chat-Driven es una plataforma educativa que utiliza inteligencia artificial conversacional como única interfaz de usuario. La arquitectura se basa en tres pilares fundamentales:
+</p>
+
+<h3>Componentes Principales</h3>
+
+<div class="solucion-box">
+<p><strong>1. Cliente Móvil (Android)</strong></p>
+<ul style="margin-bottom:0;">
+<li>Aplicación Kotlin con Jetpack Compose</li>
+<li>Única pantalla (<code>ChatScreen</code>) para toda la interacción</li>
+<li>Sistema de navegación mediante contexto conversacional</li>
+<li>Soporte para modo Mock (desarrollo) y Real (producción)</li>
+</ul>
+</div>
+
+<div class="solucion-box">
+<p><strong>2. Backend Chat (Orquestador)</strong></p>
+<ul style="margin-bottom:0;">
+<li>Servidor Spring Boot (Java 21) que actúa como intermediario</li>
+<li>Gestión de autenticación JWT para usuarios</li>
+<li>Integración con OpenAI GPT-4 para procesamiento de lenguaje natural</li>
+<li>Orquestación de llamadas a herramientas (tool calling)</li>
+<li>Estructuración de respuestas según contrato Envelope</li>
+<li>Reenvía el JWT del usuario a API Workers (concepto de "token delegado")</li>
+</ul>
+</div>
+
+<div class="solucion-box">
+<p><strong>3. API Workers (Python/Flask)</strong></p>
+<ul style="margin-bottom:0;">
+<li>API REST con lógica de negocio</li>
+<li>Autenticación mediante JWT (el mismo del usuario)</li>
+<li>Acceso directo a base de datos MySQL</li>
+<li>Endpoints para gestión académica completa</li>
+<li>Validación de permisos a nivel de negocio</li>
+<li>Despliegue: AWS Elastic Beanstalk</li>
+</ul>
+</div>
+
+<div class="solucion-box">
+<p><strong>4. Base de Datos (MySQL 8.0)</strong></p>
+<ul style="margin-bottom:0;">
+<li>Modelo relacional normalizado</li>
+<li>Sistema de auditoría con timestamps</li>
+<li>Seguridad mediante prepared statements</li>
+<li><strong>Conexiones:</strong>
+    <ul>
+        <li>Desarrollo: <code>mysql://user:pass@localhost:3307/api_workers</code></li>
+        <li>Producción: AWS RDS MySQL 8.0 (connection string en variable de entorno)</li>
+    </ul>
+</li>
+</ul>
+</div>
 
 <h2>4.1. Módulos Implementados (Versión 1.0 - Diciembre 2025)</h2>
 
@@ -826,7 +977,7 @@ El proyecto se estructura en <strong>tres módulos principales completamente fun
 <tr>
     <td>Despliegue</td>
     <td><span class="badge badge-success">✓ RDS MySQL</span></td>
-    <td>Base de datos desplegada en AWS RDS (plan completo AWS documentado en Anexo B)</td>
+    <td>Base de datos desplegada en AWS RDS (ver diagrama en <strong>Anexo B</strong>)</td>
 </tr>
 </tbody>
 </table>
@@ -879,7 +1030,7 @@ El proyecto se estructura en <strong>tres módulos principales completamente fun
 <tr>
     <td>Despliegue</td>
     <td><span class="badge badge-warning">⚠ Planificado</span></td>
-    <td>Plan AWS documentado (Anexo B: Elastic Beanstalk + SSL/TLS)</td>
+    <td>⚠ Planificado - Funciona en local conectado a OpenAI y API Workers</td>
 </tr>
 </tbody>
 </table>
@@ -943,7 +1094,7 @@ Durante el desarrollo del proyecto, al trabajar con una tecnología emergente co
 <h3 style="margin-top:0; color:#F57C00;">Descubrimiento Durante Desarrollo con IA Generativa</h3>
 
 <h4>Síntoma Observado</h4>
-<p>Las operaciones del chat presentan latencias de <strong>8-13 segundos</strong>, muy superiores al objetivo inicial de <3s.</p>
+<p>Las operaciones del chat, cuando aumentamos el número de endpoints disponibles para el LLM, presentan latencias de <strong>más de 30 segundos</strong>, muy superiores al objetivo inicial de <3s. Lo mismo ocurre si aumentamos el tamaño de los prompts.</p>
 
 <h4>Contexto del Hallazgo</h4>
 <p>
@@ -953,7 +1104,7 @@ Este problema <strong>NO es una limitación del proyecto</strong>, sino un <stro
 <h4>Causa Raíz Identificada</h4>
 <p>Mediante análisis técnico profundo (documentado en <strong>Anexo E</strong>), se identificó:</p>
 <ul>
-<li><strong>Whitelist completa</strong> (2,557 líneas de OpenAPI) enviada como texto en cada llamada</li>
+<li><strong>Whitelist completa</strong> (más de 5,000 líneas de OpenAPI) enviada como texto en cada llamada</li>
 <li>Consumo de <strong>~7,000 tokens innecesarios</strong> (44% del total de tokens por request)</li>
 <li>GPT-4 debe procesar especificación completa aunque solo utilice 1-2 endpoints</li>
 </ul>
@@ -1123,7 +1274,7 @@ Se ha diseñado un <strong>plan técnico completo de optimización</strong>, tra
 </ul>
 
 <p class="nota">
-<strong>Arquitectura Tool Calling:</strong> Ver <a href="https://afvafbsfb.github.io/backend-chat-openai-worker-profesores/MEMORIA_TFG_SISTEMA_CHAT_ACADEMIAS.html#101-arquitectura-del-backend-chat-spring-boot">Documentación Técnica - Sección 10.1: Backend Chat</a> para explicación detallada del sistema de prompts dinámicos y bucle iterativo de tool calling (clase `PromptOpenAi.java`, 699 líneas).
+<strong>Arquitectura Tool Calling:</strong> Consultar <strong><a href="#anexo-d">Anexo D</a></strong> para explicación detallada del sistema de prompts dinámicos, bucle iterativo de tool calling y clase <code>PromptOpenAi.java</code> (699 líneas).
 </p>
 
 <h3>4.3.2. ¿Por qué Jetpack Compose y no XML tradicional?</h3>
@@ -1136,7 +1287,7 @@ Se ha diseñado un <strong>plan técnico completo de optimización</strong>, tra
 </ul>
 
 <p class="nota">
-<strong>Documentación arquitectura Android:</strong> Ver <code>AcademiaAPP/documentacion/ARQUITECTURA_ACADEMIAAPP_ANDROID.html</code> (patrón MVVM con Compose + StateFlow) y <code>UX_ACADEMIAAPP_ANDROID.html</code> (diseño interfaz conversacional con tablas/listas dinámicas)
+<strong>Documentación arquitectura Android:</strong> Consultar <strong><a href="#anexo-f">Anexo F</a></strong> (patrón MVVM con Compose + StateFlow) y <strong><a href="#anexo-g">Anexo G</a></strong> (diseño interfaz conversacional con tablas/listas dinámicas).
 </p>
 
 <h3>4.3.3. ¿Por qué Python para API Workers y no Java?</h3>
@@ -1150,7 +1301,7 @@ Se ha diseñado un <strong>plan técnico completo de optimización</strong>, tra
 </ul>
 
 <p class="nota">
-<strong>Arquitectura detallada:</strong> Ver <a href="https://afvafbsfb.github.io/backend-chat-openai-worker-profesores/MEMORIA_TFG_SISTEMA_CHAT_ACADEMIAS.html#102-arquitectura-de-la-api-workers-flask-python">Documentación Técnica Completa - Sección 10.2: Arquitectura API Workers</a> para explicación completa del patrón DDD, estructura de carpetas y flujo de datos.
+<strong>Arquitectura detallada:</strong> Consultar <strong><a href="#anexo-d">Anexo D</a></strong> para explicación completa del patrón DDD, estructura de carpetas y flujo de datos de API Workers.
 </p>
 
 <h3>4.3.4. ¿Por qué Spring Boot para el Backend Chat?</h3>
@@ -1166,7 +1317,7 @@ Se ha diseñado un <strong>plan técnico completo de optimización</strong>, tra
 </ul>
 
 <p class="nota">
-<strong>Arquitectura detallada:</strong> Ver <a href="https://afvafbsfb.github.io/backend-chat-openai-worker-profesores/MEMORIA_TFG_SISTEMA_CHAT_ACADEMIAS.html#101-arquitectura-del-backend-chat-spring-boot-java-21">Documentación Técnica Completa - Sección 10.1: Arquitectura Backend Chat</a> para explicación completa de la estructura de paquetes, PromptOpenAi.java (699 líneas) y sistema de delegation.
+<strong>Arquitectura detallada:</strong> Consultar <strong><a href="#anexo-d">Anexo D</a></strong> para explicación completa de la estructura de paquetes, <code>PromptOpenAi.java</code> (699 líneas) y sistema de delegation.
 </p>
 
 <!-- ======================== 5. PLANIFICACIÓN ======================== -->
@@ -1566,7 +1717,7 @@ Durante esta fase se desarrollaron <strong>en paralelo</strong> los tres módulo
     <td>Documentación arquitectura despliegue AWS</td>
     <td>8h</td>
     <td>
-        • Anexo B: Plan de despliegue<br/>
+        • Repositorios GitHub con instrucciones de despliegue (<strong>Anexo A</strong>)<br/>
         • Costos estimados AWS
     </td>
 </tr>
@@ -1702,21 +1853,6 @@ Aunque trabajé en solitario, apliqué una <strong>metodología de sprints itera
 </tr>
 </tbody>
 </table>
-
-<h3>5.3.2. Control de Versiones</h3>
-
-<ul>
-<li><strong>Git:</strong> Control de versiones distribuido</li>
-<li><strong>GitHub:</strong> 3 repositorios públicos</li>
-<li><strong>Branching:</strong> 
-    <ul>
-        <li><code>main</code>: Código estable en producción</li>
-        <li><code>ampliacion-proyecto</code>: Desarrollo activo</li>
-        <li>Feature branches: Para funcionalidades específicas</li>
-    </ul>
-</li>
-<li><strong>Commits:</strong> Mensajes descriptivos en español</li>
-</ul>
 
 <h2>5.4. Recursos Humanos</h2>
 
@@ -1891,7 +2027,7 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
 </tr>
 
 <tr style="background-color:#FFF3E0;">
-    <td rowspan="5"><strong>Backend Chat</strong></td>
+    <td rowspan="4"><strong>Backend Chat</strong></td>
     <td>Java</td>
     <td>21</td>
     <td>Lenguaje principal</td>
@@ -1911,11 +2047,6 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
     <td>4.4.0</td>
     <td>Autenticación</td>
 </tr>
-<tr style="background-color:#FFF3E0;">
-    <td>WebClient (WebFlux)</td>
-    <td>-</td>
-    <td>Cliente HTTP async</td>
-</tr>
 
 <tr style="background-color:#FCE4EC;">
     <td rowspan="5"><strong>API Workers</strong></td>
@@ -1925,35 +2056,30 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
 </tr>
 <tr style="background-color:#FCE4EC;">
     <td>Flask</td>
-    <td>3.0.0</td>
+    <td>3.1.2</td>
     <td>Framework web</td>
 </tr>
 <tr style="background-color:#FCE4EC;">
     <td>Marshmallow</td>
-    <td>3.20.1</td>
+    <td>4.0.1</td>
     <td>Serialización/validación</td>
 </tr>
 <tr style="background-color:#FCE4EC;">
     <td>SQLAlchemy</td>
-    <td>2.0.23</td>
+    <td>2.0.43</td>
     <td>ORM</td>
 </tr>
 <tr style="background-color:#FCE4EC;">
     <td>PyJWT</td>
-    <td>2.8.0</td>
+    <td>2.10.1</td>
     <td>JWT encoding/decoding</td>
 </tr>
 
 <tr style="background-color:#F3E5F5;">
-    <td rowspan="2"><strong>Base de Datos</strong></td>
+    <td rowspan="1"><strong>Base de Datos</strong></td>
     <td>MySQL</td>
-    <td>8.0</td>
+    <td>8.4</td>
     <td>RDBMS</td>
-</tr>
-<tr style="background-color:#F3E5F5;">
-    <td>Alembic</td>
-    <td>1.13.1</td>
-    <td>Migraciones</td>
 </tr>
 
 <tr style="background-color:#E3F2FD;">
@@ -1969,19 +2095,19 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
 </tr>
 
 <tr style="background-color:#FFF9C4;">
-    <td rowspan="4"><strong>Testing</strong></td>
+    <td rowspan="3"><strong>Testing</strong></td>
     <td>JUnit</td>
-    <td>5.10.1</td>
+    <td>5.11.3</td>
     <td>Tests unitarios Java</td>
 </tr>
 <tr style="background-color:#FFF9C4;">
     <td>Mockito</td>
-    <td>5.7.0</td>
+    <td>5.14.2</td>
     <td>Mocking (Java)</td>
 </tr>
 <tr style="background-color:#FFF9C4;">
     <td>Pytest</td>
-    <td>7.4.3</td>
+    <td>8.4.2</td>
     <td>Tests Python</td>
 </tr>
 </tbody>
@@ -2009,14 +2135,6 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
     </td>
 </tr>
 <tr>
-    <td><strong>Dispositivo Android Físico</strong></td>
-    <td>
-        • Samsung Galaxy A52<br/>
-        • Android 13<br/>
-        • 6GB RAM
-    </td>
-</tr>
-<tr>
     <td><strong>Emuladores Android</strong></td>
     <td>
         • Pixel 8 API 34 (Android 14)<br/>
@@ -2029,8 +2147,8 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
 <h3>6.2.2. IDEs y Herramientas</h3>
 
 <ul>
-<li><strong>Android Studio:</strong> Koala 2024.1.1 (desarrollo Android)</li>
-<li><strong>VS Code:</strong> 1.85 (desarrollo Backend Chat Java + API Workers Python + documentación)</li>
+<li><strong>Android Studio:</strong> Koala 2024.1.1 (desarrollo Android) + GitHub Copilot con Claude Sonnet 4.5</li>
+<li><strong>VS Code:</strong> 1.85 (desarrollo Backend Chat Java + API Workers Python + documentación) + GitHub Copilot con Claude Sonnet 4.5</li>
 <li><strong>Git:</strong> 2.42 (control de versiones)</li>
 <li><strong>Swagger UI:</strong> Interfaz web integrada (testing y documentación de APIs)</li>
 <li><strong>MySQL Workbench:</strong> 8.0 (diseño de BD)</li>
@@ -2078,7 +2196,7 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
 </table>
 
 <p class="nota">
-<strong>Nota:</strong> Actualmente solo MySQL RDS está desplegado en AWS. El despliegue de backends (Elastic Beanstalk) está planificado y documentado en la Sección 11.
+<strong>Nota:</strong> Actualmente solo MySQL RDS está desplegado en AWS. El despliegue de backends (Elastic Beanstalk) está planificado y documentado en <strong><a href="#anexo-k">Anexo K</a></strong>.
 </p>
 
 <h2>6.4. Licencias y Servicios de Terceros</h2>
@@ -2271,12 +2389,12 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
 <tr>
     <td>AWS EC2 (Backend Chat + API Workers)</td>
     <td>2 × t2.micro</td>
-    <td>€6</td>
+    <td>€8</td>
 </tr>
 <tr>
     <td>AWS RDS MySQL</td>
     <td>db.t3.micro</td>
-    <td>€6</td>
+    <td>€14</td>
 </tr>
 <tr>
     <td>OpenAI API + Soporte técnico</td>
@@ -2285,7 +2403,7 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
 </tr>
 <tr style="font-weight:bold;">
     <td colspan="2"><strong>TOTAL POST FREE TIER</strong></td>
-    <td><strong>€462/mes</strong></td>
+    <td><strong>€472/mes</strong></td>
 </tr>
 </tbody>
 </table>
@@ -2314,7 +2432,12 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
 <tr>
     <td>AWS RDS MySQL Multi-AZ</td>
     <td>db.t3.small (alta disponibilidad)</td>
-    <td>€22</td>
+    <td>€28</td>
+</tr>
+<tr>
+    <td>CloudWatch + S3</td>
+    <td>Logs y almacenamiento</td>
+    <td>€5</td>
 </tr>
 <tr>
     <td>OpenAI API + Soporte técnico</td>
@@ -2323,7 +2446,7 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
 </tr>
 <tr style="font-weight:bold; background-color:#FFF3E0;">
     <td colspan="2"><strong>TOTAL ESCALADO</strong></td>
-    <td><strong>€975/mes</strong></td>
+    <td><strong>€986/mes</strong></td>
 </tr>
 </tbody>
 </table>
@@ -2370,16 +2493,16 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
 <div class="solucion-box">
 <p><strong>Costes operativos mensuales:</strong></p>
 <ul>
-<li>AWS (EC2 + RDS): €12/mes</li>
+<li>AWS (EC2 + RDS): €22/mes</li>
 <li>OpenAI API + Soporte: €450/mes</li>
-<li><strong>Total: €462/mes</strong></li>
+<li><strong>Total: €472/mes</strong></li>
 </ul>
 
 <p><strong>Punto de equilibrio:</strong></p>
 <ul style="margin-bottom:0;">
-<li>Con <strong>10 academias</strong>: €500/mes - €462 = <strong>€38/mes beneficio</strong></li>
-<li>Con <strong>40 academias</strong>: €2,000/mes - €462 = <strong>€1,538/mes beneficio</strong></li>
-<li>Con <strong>100 academias</strong>: €5,000/mes - €462 = <strong>€4,538/mes beneficio</strong> (requiere escalado)</li>
+<li>Con <strong>10 academias</strong>: €500/mes - €472 = <strong>€28/mes beneficio</strong></li>
+<li>Con <strong>40 academias</strong>: €2,000/mes - €472 = <strong>€1,528/mes beneficio</strong></li>
+<li>Con <strong>100 academias</strong>: €5,000/mes - €986 = <strong>€4,014/mes beneficio</strong> (requiere escalado)</li>
 </ul>
 </div>
 
@@ -2408,99 +2531,217 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
 <tr>
     <td>25</td>
     <td>€1,250</td>
-    <td>€463</td>
-    <td>€787</td>
-    <td>-€16,312</td>
+    <td>€472</td>
+    <td>€778</td>
+    <td>-€16,528</td>
     <td>❌ No rentable</td>
 </tr>
 <tr>
     <td>40</td>
     <td>€2,000</td>
-    <td>€463</td>
-    <td>€1,537</td>
-    <td><strong>+€1,688</strong></td>
+    <td>€472</td>
+    <td>€1,528</td>
+    <td><strong>+€1,472</strong></td>
     <td>✅ Rentable</td>
 </tr>
 <tr>
     <td>60</td>
     <td>€3,000</td>
-    <td>€463</td>
-    <td>€2,537</td>
-    <td><strong>+€25,688</strong></td>
+    <td>€472</td>
+    <td>€2,528</td>
+    <td><strong>+€25,472</strong></td>
     <td>✅✅ Muy rentable</td>
 </tr>
 <tr>
     <td>100</td>
     <td>€5,000</td>
-    <td>€976</td>
-    <td>€4,024</td>
-    <td><strong>+€61,376</strong></td>
+    <td>€986</td>
+    <td>€4,014</td>
+    <td><strong>+€61,136</strong></td>
     <td>✅✅✅ Altamente rentable</td>
 </tr>
 </tbody>
 </table>
 
 <p class="nota">
-<strong>Conclusión:</strong> Con <strong>40 academias</strong> suscritas, el proyecto recupera la inversión en aproximadamente <strong>23 meses</strong>. Con 60+ academias, la rentabilidad es muy alta. Los costes de €450/mes incluyen uso estimado de OpenAI API y soporte técnico (10h/mes).
+<strong>Conclusión:</strong> Con <strong>40 academias</strong> suscritas, el proyecto recupera la inversión en aproximadamente <strong>23 meses</strong>. Con 60+ academias, la rentabilidad es muy alta. Los costes operativos incluyen AWS (€22-86/mes según escala), OpenAI API y soporte técnico (€450-900/mes).
 </p>
+
+<h2>7.4. Valor Añadido: Reutilización del Backend Chat</h2>
+
+<p>
+Una de las ventajas estratégicas más importantes del proyecto es que el <strong>Backend Chat es completamente reutilizable</strong> para otros dominios de negocio. Solo requiere adaptar la whitelist de endpoints y ajustar los prompts del sistema.
+</p>
+
+<h3>7.4.1. Ahorro en Proyectos Futuros</h3>
+
+<ul>
+<li><strong>Backend Chat ya desarrollado:</strong> Ahorro de €6,400-€8,000 por proyecto</li>
+<li><strong>Solo adaptar whitelist + prompts:</strong> 10-15 horas (€400-€600)</li>
+<li><strong>Ahorro neto:</strong> 20-25% en desarrollo de nuevos proyectos SaaS</li>
+</ul>
+
+<h3>7.4.2. Ejemplo: Desarrollo de Sistema de Autoescuela</h3>
+
+<table class="no-break">
+<thead>
+<tr>
+    <th>Componente</th>
+    <th>Horas (desde cero)</th>
+    <th>Horas (con Backend Chat)</th>
+    <th>Ahorro</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+    <td>Android App</td>
+    <td>240-300h</td>
+    <td>240-300h</td>
+    <td>€0</td>
+</tr>
+<tr style="background-color:#E8F5E9;">
+    <td><strong>Backend Chat</strong></td>
+    <td>160-200h</td>
+    <td><strong>10-15h</strong></td>
+    <td><strong>€6,000-€7,400</strong></td>
+</tr>
+<tr>
+    <td>API Workers</td>
+    <td>200-240h</td>
+    <td>200-240h</td>
+    <td>€0</td>
+</tr>
+<tr>
+    <td>Base de Datos</td>
+    <td>60-80h</td>
+    <td>60-80h</td>
+    <td>€0</td>
+</tr>
+<tr>
+    <td>Testing + Docs</td>
+    <td>80-100h</td>
+    <td>60-80h</td>
+    <td>€800</td>
+</tr>
+<tr>
+    <td>DevOps</td>
+    <td>40-60h</td>
+    <td>30-40h</td>
+    <td>€400-€800</td>
+</tr>
+<tr style="font-weight:bold; background-color:#E3F2FD;">
+    <td><strong>TOTAL</strong></td>
+    <td><strong>780-980h</strong></td>
+    <td><strong>600-755h</strong></td>
+    <td><strong>€7,200-€9,000</strong></td>
+</tr>
+</tbody>
+</table>
+
+<h3>7.4.3. Proyección Multi-Vertical (3 proyectos SaaS)</h3>
+
+<table class="no-break">
+<thead>
+<tr>
+    <th>Proyecto</th>
+    <th>Inversión Desarrollo</th>
+    <th>Clientes Objetivo</th>
+    <th>Ingresos/mes (con clientes objetivo)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+    <td><strong>Academia</strong> (original)</td>
+    <td>€35,200</td>
+    <td>40 academias</td>
+    <td>€2,000</td>
+</tr>
+<tr style="background-color:#E8F5E9;">
+    <td><strong>Autoescuela</strong></td>
+    <td>€28,000 (con ahorro)</td>
+    <td>35 autoescuelas</td>
+    <td>€1,750</td>
+</tr>
+<tr style="background-color:#E8F5E9;">
+    <td><strong>Gimnasio</strong></td>
+    <td>€28,000 (con ahorro)</td>
+    <td>30 gimnasios</td>
+    <td>€1,500</td>
+</tr>
+<tr style="font-weight:bold; background-color:#E3F2FD;">
+    <td><strong>TOTAL</strong></td>
+    <td><strong>€91,200</strong></td>
+    <td><strong>105 clientes</strong></td>
+    <td><strong>€5,250/mes</strong></td>
+</tr>
+</tbody>
+</table>
+
+<h3>7.4.4. ROI Multi-Vertical</h3>
+
+<div class="solucion-box">
+<p><strong>Inversión total:</strong> €91,200</p>
+<p><strong>Ingresos mensuales:</strong> €5,250</p>
+<p><strong>Costes operativos:</strong> €1,200/mes (AWS escalado + OpenAI × 3 proyectos)</p>
+<p><strong>Beneficio neto mensual:</strong> €4,050</p>
+<p style="margin-bottom:0;"><strong>Tiempo para recuperar inversión:</strong> €91,200 / €4,050 ≈ <strong>22-23 meses</strong> ✅✅✅</p>
+</div>
+
+<p class="nota">
+<strong>Ventaja Estratégica:</strong> Al diversificar en 3 verticales diferentes, se reduce el riesgo empresarial y se mejora la rentabilidad. Cada nuevo dominio requiere solo 20-25% del esfuerzo de desarrollo del proyecto original.
+</p>
+
+<h2>7.5. Conclusiones Económicas</h2>
+
+<h3>7.5.1. Viabilidad del Proyecto</h3>
+
+<ul>
+<li>✅ <strong>Proyecto mono-vertical (solo Academias):</strong> Rentable con 40 clientes en 22-23 meses. Inversión: €35,200. Beneficio: €1,528/mes</li>
+<li>✅✅ <strong>Proyecto multi-vertical (3 dominios):</strong> Rentable con 105 clientes en 22-23 meses. Inversión: €91,200. Beneficio: €4,050/mes. <strong>Ventaja:</strong> Mayor volumen de ingresos y diversificación de riesgo (si un sector falla, los otros compensan)</li>
+<li>✅✅✅ <strong>Escalabilidad:</strong> Cada nuevo dominio requiere solo 20-25% del esfuerzo de desarrollo del proyecto original gracias a la reutilización del Backend Chat</li>
+</ul>
+
+<h3>7.5.2. Factores Críticos de Éxito</h3>
+
+<ul>
+<li><strong>Captación de clientes:</strong> Conseguir 3-5 academias/mes durante el primer año</li>
+<li><strong>Retención:</strong> Mantener tasa de churn (cancelación) < 5% mensual</li>
+<li><strong>Costes contenidos:</strong> Aprovechar Free Tier de AWS el máximo tiempo posible</li>
+<li><strong>Optimización de OpenAI:</strong> Cachear respuestas frecuentes para reducir costes de API</li>
+</ul>
+
+<h3>7.5.3. Riesgos Identificados y Mitigaciones</h3>
+
+<table class="no-break">
+<thead>
+<tr>
+    <th>Riesgo</th>
+    <th>Mitigación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+    <td>⚠️ Competencia de otras soluciones SaaS tradicionales</td>
+    <td>✅ Diferenciación por IA conversacional (UX única)</td>
+</tr>
+<tr>
+    <td>⚠️ Incremento de precios de OpenAI API</td>
+    <td>✅ Posibilidad de migrar a modelos open-source (Llama, Mistral)</td>
+</tr>
+<tr>
+    <td>⚠️ Adopción lenta (resistencia al cambio)</td>
+    <td>✅ Plan de onboarding con demos en vivo y período de prueba gratuito</td>
+</tr>
+<tr>
+    <td>⚠️ Estacionalidad (picos sept-junio, bajo en verano)</td>
+    <td>✅ Pricing anual con descuento para garantizar ingresos estables</td>
+</tr>
+</tbody>
+</table>
 
 <!-- ======================== 8. DEMOSTRACIÓN ======================== -->
 <div class="page-break"></div>
 <h1>8. DEMOSTRACIÓN DEL SISTEMA</h1>
-
-<h2>8.1. Decisiones de Diseño Clave</h2>
-
-<h3>8.1.1. ¿Por qué Chat como Interfaz Única?</h3>
-
-<div class="solucion-box">
-<p><strong>Problema tradicional:</strong> Interfaces CRUD requieren conocimiento técnico y curva de aprendizaje</p>
-
-<p><strong>Solución propuesta:</strong> Interfaz conversacional tipo WhatsApp</p>
-
-<p><strong>Beneficios:</strong></p>
-<ul style="margin-bottom:0;">
-<li>✅ <strong>Cero curva de aprendizaje:</strong> Todo el mundo sabe usar WhatsApp</li>
-<li>✅ <strong>Accesible para no técnicos:</strong> Profesores sin conocimientos informáticos</li>
-<li>✅ <strong>Reducción de errores:</strong> IA valida intents antes de ejecutar</li>
-<li>✅ <strong>Multioperación:</strong> "Crear 3 cursos" en una sola frase</li>
-<li>✅ <strong>Asistencia contextual:</strong> IA sugiere próximos pasos</li>
-</ul>
-</div>
-
-<h3>8.1.2. ¿Por qué Envelope Universal?</h3>
-
-<p>
-En lugar de crear 20 DTOs diferentes (uno por cada entidad: Curso, Usuario, Sesión, etc.), se implementó un <strong>contenedor polimórfico</strong>:
-</p>
-
-<div class="codigo">
-{
-  "message": {
-    "text": "Encontré 3 cursos",
-    "ui_suggestions": [
-      { "type": "Paginacion", "label": "Ver más cursos", ... },
-      { "type": "Generica", "label": "Crear nuevo curso", ... }
-    ]
-  },
-  "data": {
-    "type": "curso",
-    "items": [
-      {
-        "id": "1",
-        "title": "Acuarela Básica",
-        "subtitle": "Prof. Juan López",
-        "extraData": { "precio": 45, "plazas": 12, ... }
-      },
-      ...
-    ]
-  },
-  "pagination": { "hasMore": true, "nextToken": "..." }
-}
-</div>
-
-<p><strong>Ventaja:</strong> Android puede procesar <strong>cualquier entidad</strong> con el <strong>mismo código UI</strong>.</p>
-
-<h2>8.2. Vídeo Demostrativo</h2>
 
 <p>
 Para visualizar el <strong>funcionamiento completo del sistema</strong> (interfaz Android + integración con Backend Chat + OpenAI GPT-4o + API Workers), se ha preparado un <strong>vídeo demostrativo</strong> que muestra:
@@ -2512,7 +2753,7 @@ Para visualizar el <strong>funcionamiento completo del sistema</strong> (interfa
 <li>✅ <strong>Function calling automático</strong> ejecutado por el LLM</li>
 <li>✅ <strong>Respuestas con datos estructurados</strong> (tablas, listas, sugerencias contextuales)</li>
 <li>✅ <strong>Flujo end-to-end</strong> Android → Backend Chat → API Workers → MySQL RDS</li>
-<li>✅ <strong>Casos de uso reales:</strong> consulta de alumnos, cursos, sesiones, inscripciones, pagos</li>
+<li>✅ <strong>Casos de uso:</strong> consulta de usuarios, alta de un profesor, consulta de alumnos, consulta de sesiones, pasar lista y anotaciones de alumnos</li>
 </ul>
 
 <div class="solucion-box" style="text-align: center; padding: 30px; margin: 20px 0;">
@@ -2533,107 +2774,175 @@ URL: <code>https://www.youtube.com/watch?v=W32Q2vsQB9g</code>
 </p>
 </div>
 
-<p class="nota">
-<strong>Nota técnica:</strong> El vídeo muestra el sistema funcionando con los tres módulos desplegados (Android en emulador, Backend Chat en local conectado a OpenAI, API Workers conectada a MySQL en AWS RDS). Todos los flujos demostrados son <strong>reales y funcionales</strong>, no simulaciones.
-</p>
-
 <!-- ======================== 15. ANEXOS ======================== -->
 <div class="page-break"></div>
 <h1>15. LISTA DE ANEXOS</h1>
 
 <p>
-Los siguientes documentos complementan esta memoria y están disponibles en los repositorios GitHub del proyecto:
+Los siguientes anexos complementan esta memoria con información técnica detallada:
 </p>
 
-<h2>Anexo A: Modelo de Datos Completo</h2>
+<h2>Anexo A: Repositorios GitHub del Proyecto</h2>
+
 <p>
-<strong>Ubicación:</strong> <code>api-workers-profesores/docs/ANALISIS_ENDPOINTS_Y_MODELO_DATOS.html</code><br/>
-<strong>Contenido:</strong>
+El proyecto está compuesto por <strong>3 repositorios públicos en GitHub</strong> que contienen todo el código fuente, documentación y configuraciones de despliegue:
 </p>
+
+<table class="no-break">
+<thead>
+<tr style="background-color: #1976D2; color: white;">
+<th>Componente</th>
+<th>Tecnología</th>
+<th>Repositorio GitHub</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>📱 AcademiaAPP</strong><br/><small>Cliente móvil Android</small></td>
+<td>Kotlin + Jetpack Compose 1.5.4</td>
+<td>
+<a href="https://github.com/afvafbsfb/AcademiasAPP" target="_blank" style="color: #1976D2;">
+github.com/afvafbsfb/AcademiasAPP
+</a>
+</td>
+</tr>
+<tr>
+<td><strong>🔄 Backend Chat</strong><br/><small>Orquestador IA (OpenAI GPT-4)</small></td>
+<td>Java 21 + Spring Boot 3.5.5</td>
+<td>
+<a href="https://github.com/afvafbsfb/backend-chat-openai-worker-profesores" target="_blank" style="color: #1976D2;">
+github.com/afvafbsfb/backend-chat-openai-worker-profesores
+</a>
+</td>
+</tr>
+<tr>
+<td><strong>⚙️ API Workers</strong><br/><small>API REST + Lógica de negocio</small></td>
+<td>Python 3.12 + Flask 3.0 + MySQL 8.0</td>
+<td>
+<a href="https://github.com/afvafbsfb/api-workers-profesores" target="_blank" style="color: #1976D2;">
+github.com/afvafbsfb/api-workers-profesores
+</a>
+</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>Documentación Técnica Disponible en GitHub Pages:</strong></p>
 <ul>
-<li>Diagrama ER completo (20 tablas)</li>
-<li>Especificación de campos, tipos y constraints</li>
-<li>Relaciones FK detalladas</li>
-<li>Triggers y procedimientos almacenados</li>
+<li><strong>Ingeniería de Prompts y Optimización LLM:</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/INGENIERIA_PROMPTS_Y_OPTIMIZACION_LLM.html" target="_blank">Análisis Técnico</a></li>
+<li><strong>Arquitectura Android (MVVM):</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/ARQUITECTURA_ACADEMIAAPP_ANDROID.html" target="_blank">Documentación MVVM</a></li>
+<li><strong>Experiencia de Usuario (UX):</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/UX_ACADEMIAAPP_ANDROID.html" target="_blank">Guía UX Android</a></li>
+<li><strong>README:</strong> Cada repositorio incluye instrucciones de instalación y despliegue</li>
+<li><strong>Scripts SQL:</strong> Esquema completo de base de datos en <code>api-workers-profesores/docs/</code></li>
+<li><strong>Testing:</strong> Tests unitarios y de integración en cada proyecto</li>
 </ul>
 
-<h2>Anexo B: Documentación de Endpoints API Workers</h2>
-<p>
-<strong>Ubicación:</strong> <code>api-workers-profesores/docs/ANALISIS_ENDPOINTS_Y_MODELO_DATOS.html</code> (Sección 2)<br/>
-<strong>Contenido:</strong>
+<p class="nota">
+<strong>Nota:</strong> Los repositorios están configurados como públicos para permitir la evaluación del TFG. Incluyen documentación técnica, diagramas de arquitectura y configuraciones de CI/CD.
 </p>
+
+<h2>Anexo B: Modelo de Datos Academias</h2>
+<p>
+<strong>Descripción:</strong> Esquema completo de la base de datos MySQL (20 tablas relacionales) para gestión de academias.
+</p>
+
+<p><strong>Documentación Online:</strong></p>
 <ul>
-<li>20 recursos CRUD documentados</li>
-<li>Request/Response schemas</li>
-<li>Códigos de error HTTP</li>
-<li>Ejemplos de uso con curl</li>
-<li>Especificación OpenAPI 3.1 completa</li>
+<li><strong>Documentación Técnica Completa:</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/MEMORIA_TFG_SISTEMA_CHAT_ACADEMIAS.html#5-modelo-de-datos---base-de-datos-mysql" target="_blank">Modelo de Datos - MySQL</a></li>
+<li><strong>Diagrama EER (PDF):</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/Diagrama%20EER%20Academias.pdf" target="_blank">Diagrama EER Academias.pdf</a></li>
 </ul>
 
-<h2>Anexo C: Especificación Técnica de Tecnologías</h2>
+<h2>Anexo C: Documentación de Endpoints API Workers</h2>
 <p>
-<strong>Ubicación:</strong> <code>api-workers-profesores/docs/DETALLE_TECNOLOGIAS.html</code><br/>
-<strong>Contenido:</strong>
+<strong>Descripción:</strong> API REST con 20 recursos CRUD (especificación OpenAPI 3.1).
 </p>
+
+<p><strong>Documentación Online:</strong></p>
 <ul>
-<li>Java 21: Features utilizadas (Records, Pattern Matching, Virtual Threads)</li>
-<li>Spring Boot 3.5.5: Configuración y dependencias</li>
-<li>Python 3.12: Bibliotecas y estructura del proyecto</li>
-<li>OpenAI GPT-4o: Configuración de API, rate limits, costes</li>
-<li>MySQL 8.0: Configuración de índices y optimizaciones</li>
-<li>Jetpack Compose 1.5.4: Componentes UI personalizados</li>
+<li><strong>API REST (Swagger):</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/API_SWAGGER_STANDALONE_TFG.html" target="_blank">Documentación Interactiva</a></li>
+<li><strong>Especificación OpenAPI (JSON):</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/served-openapi.json" download>served-openapi.json</a> <small>(archivo usado por GPT-4)</small></li>
 </ul>
 
-<h2>Anexo D: Análisis Económico Completo</h2>
+<h2>Anexo D: Especificación Técnica de Tecnologías y Arquitecturas Backend</h2>
 <p>
-<strong>Ubicación:</strong> <code>api-workers-profesores/docs/ANALISIS_ECONOMICO_Y_MODELO_NEGOCIO.html</code><br/>
-<strong>Contenido:</strong>
+<strong>Descripción:</strong> Tecnologías utilizadas (Java 21, Python 3.12, Spring Boot, Flask, MySQL, OpenAI GPT-4o) y arquitecturas de Backend Chat y API Workers.
 </p>
+
+<p><strong>Documentación Online:</strong></p>
 <ul>
-<li>Costes de infraestructura AWS detallados por servicio</li>
-<li>Proyecciones de ingresos para 1, 5, 10, 50 y 100 academias</li>
-<li>Punto de equilibrio (break-even) según escenarios</li>
-<li>Comparación con alternativas comerciales (Salesforce, HubSpot, custom development)</li>
-<li>ROI en 3 escenarios de adopción (conservador, medio, optimista)</li>
+<li><strong>Tecnologías Utilizadas:</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/MEMORIA_TFG_SISTEMA_CHAT_ACADEMIAS.html#9-tecnolog%C3%ADas-utilizadas" target="_blank">Especificación Técnica Completa</a></li>
 </ul>
 
 <h2>Anexo E: Ingeniería de Prompts y Optimización LLM</h2>
 <p>
-<strong>Ubicación:</strong> <code>api-workers-profesores/docs/INGENIERIA_PROMPTS_Y_OPTIMIZACION_LLM.html</code><br/>
-<strong>Contenido:</strong>
+<strong>Descripción:</strong> Sistema de prompts dinámico con 3 modos (Completo, Compacto, Reformateo) y análisis de optimización para reducir latencia y costes.
 </p>
+
+<p><strong>Documentación Online:</strong></p>
 <ul>
-<li>Diseño de los 3 modos de prompt (Completo, Compacto, Reformateo)</li>
-<li>Técnicas de reducción de tokens (contexto dinámico)</li>
-<li>Estrategias de manejo de rate limits</li>
-<li>Métricas de calidad de respuesta</li>
-<li>Comparación de versiones GPT-4o vs GPT-4-turbo</li>
+<li><strong>Análisis Técnico Completo:</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/INGENIERIA_PROMPTS_Y_OPTIMIZACION_LLM.html" target="_blank">Ingeniería de Prompts y Optimización LLM</a></li>
 </ul>
 
 <h2>Anexo F: Arquitectura Android MVVM</h2>
 <p>
-<strong>Ubicación:</strong> <code>AcademiaAPP/documentacion/ARQUITECTURA_ACADEMIAAPP_ANDROID.html</code><br/>
-<strong>Contenido:</strong>
+<strong>Descripción:</strong> Arquitectura del cliente Android con patrón MVVM, StateFlow, inyección de dependencias (Hilt) y Jetpack Compose.
 </p>
+
+<p><strong>Documentación Online:</strong></p>
 <ul>
-<li>Diagrama completo de capas (UI → ViewModel → Repository → DataSource)</li>
-<li>Gestión de estado con StateFlow</li>
-<li>Inyección de dependencias con Hilt</li>
-<li>Gestión de ciclo de vida de coroutines</li>
-<li>Patrones de manejo de errores</li>
+<li><strong>Arquitectura Completa:</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/ARQUITECTURA_ACADEMIAAPP_ANDROID.html" target="_blank">Arquitectura Android MVVM</a></li>
 </ul>
 
 <h2>Anexo G: Diseño UX Android</h2>
 <p>
-<strong>Ubicación:</strong> <code>AcademiaAPP/documentacion/UX_ACADEMIAAPP_ANDROID.html</code><br/>
-<strong>Contenido:</strong>
+<strong>Descripción:</strong> Diseño de interfaz conversacional con Material3 (Light/Dark), componentes personalizados y patrones de accesibilidad.
 </p>
+
+<p><strong>Documentación Online:</strong></p>
 <ul>
-<li>Especificación de temas Material3 (Light/Dark)</li>
-<li>Componentes personalizados (ChatBubble, LoadingIndicator)</li>
-<li>Navegación entre pantallas</li>
-<li>Feedback visual de estados (loading, error, success)</li>
-<li>Accesibilidad (screen readers, contrast ratios)</li>
+<li><strong>Guía UX Completa:</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/UX_ACADEMIAAPP_ANDROID.html" target="_blank">Diseño UX Android</a></li>
+</ul>
+
+<h2>Anexo H: Evidencias de Pruebas del Sistema</h2>
+<p>
+<strong>Descripción:</strong> Capturas de pantalla y trazas de pruebas de integración con logs completos de request/response.
+</p>
+
+<p><strong>Documentación Online (PDFs):</strong></p>
+<ul>
+<li><strong>Alta de Usuario (Parte 1):</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/prueba%20dar%20de%20alta%20un%20usuario%201%20de%202%20(1).pdf" target="_blank">prueba dar de alta un usuario 1 de 2.pdf</a></li>
+<li><strong>Alta de Usuario (Parte 2):</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/prueba%20dar%20de%20alta%20un%20usuario%202%20de%202%20(1).pdf" target="_blank">prueba dar de alta un usuario 2 de 2.pdf</a></li>
+<li><strong>Listar Usuarios:</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/Prueba%20listar%20usuarios%20(1).pdf" target="_blank">Prueba listar usuarios.pdf</a></li>
+</ul>
+
+<h2 id="anexo-i">Anexo I: Seguridad y Token Delegation</h2>
+<p>
+<strong>Descripción:</strong> Diagrama de flujo JWT desde autenticación hasta validación en cada capa. Muestra cómo el token delegado garantiza seguridad hop-by-hop con firma RSA-256, validación en Backend Chat y API Workers, y aislamiento multi-tenant automático mediante claims <code>usuarioId</code> y <code>academiaId</code>.
+</p>
+
+<p><strong>Documentación Online:</strong></p>
+<ul>
+<li><strong>Diagrama de Seguridad JWT - Token Delegado:</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/MEMORIA_TFG_SISTEMA_CHAT_ACADEMIAS.html#4-diagrama-de-seguridad-jwt---token-delegado" target="_blank">Ver sección 4 del documento técnico del sistema</a></li>
+</ul>
+
+<h2 id="anexo-j">Anexo J: Contrato de Respuesta del Chat (Envelope)</h2>
+<p>
+<strong>Descripción:</strong> Especificación técnica completa del contenedor polimórfico universal (<em>ChatResponseEnvelope</em>). Incluye esquemas JSON Schema, ejemplos de respuestas reales para todas las entidades (cursos, usuarios, sesiones, pagos, etc.), estructura de sugerencias UI contextuales, y mecanismo de paginación con tokens opacos. Este contrato permite que Android procese cualquier tipo de dato con el mismo componente UI, eliminando duplicación de código.
+</p>
+
+<p><strong>Documentación Online:</strong></p>
+<ul>
+<li><strong>Contrato de Respuesta del Chat - Envelope Universal:</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/MEMORIA_TFG_SISTEMA_CHAT_ACADEMIAS.html#6-contrato-de-respuesta-del-chat" target="_blank">Ver sección 6 del documento técnico del sistema</a></li>
+</ul>
+
+<h2 id="anexo-k">Anexo K: Plan de Despliegue en Producción (AWS)</h2>
+<p>
+<strong>Descripción:</strong> Plan completo de despliegue en AWS con Elastic Beanstalk para Backend Chat (Spring Boot) y API Workers (Python/Flask). Incluye configuración de instancias EC2, load balancers, variables de entorno, certificados SSL, logs con CloudWatch, y estrategia de auto-scaling. Documenta también la configuración de RDS MySQL en producción, gestión de secrets, y procedimientos de despliegue continuo.
+</p>
+
+<p><strong>Documentación Online:</strong></p>
+<ul>
+<li><strong>Plan de Despliegue en Producción:</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/MEMORIA_TFG_SISTEMA_CHAT_ACADEMIAS.html#12-plan-de-despliegue-en-producci%C3%B3n" target="_blank">Ver sección 12 del documento técnico del sistema</a></li>
 </ul>
 
 </div>

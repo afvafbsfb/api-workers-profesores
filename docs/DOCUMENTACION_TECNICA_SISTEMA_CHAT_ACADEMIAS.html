@@ -847,9 +847,9 @@ MySQL registra usuarioId del JWT en auditoría
 <h3 id="capas-de-seguridad-implementadas">Capas de Seguridad Implementadas</h3>
 <p><strong>Capa 1: Transporte</strong></p>
 <ul>
-<li>HTTPS obligatorio en todas las comunicaciones</li>
-<li>TLS 1.3 para cifrado end-to-end</li>
-<li>Certificados SSL/TLS válidos</li>
+<li>HTTPS con TLS 1.3 en todas las comunicaciones</li>
+<li>Cifrado hop-by-hop: Android → Backend Chat → API Workers</li>
+<li>Certificados SSL/TLS válidos en producción</li>
 </ul>
 <p><strong>Capa 2: Autenticación de Usuario (JWT en 3 puntos)</strong></p>
 <ul>
@@ -4300,12 +4300,12 @@ OpenAI: <span class="hljs-string">"El curso Matemáticas 1º ESO tiene 25 alumno
 <tbody>
 <tr>
 <td>Python</td>
-<td>3.11.x</td>
+<td>3.12</td>
 <td>Lenguaje principal</td>
 </tr>
 <tr>
 <td>Flask</td>
-<td>3.0.x</td>
+<td>3.1.2</td>
 <td>Framework web</td>
 </tr>
 <tr>
@@ -4315,7 +4315,7 @@ OpenAI: <span class="hljs-string">"El curso Matemáticas 1º ESO tiene 25 alumno
 </tr>
 <tr>
 <td>PyJWT</td>
-<td>2.8.x</td>
+<td>2.10.1</td>
 <td>Generación y validación JWT</td>
 </tr>
 <tr>
@@ -4325,7 +4325,7 @@ OpenAI: <span class="hljs-string">"El curso Matemáticas 1º ESO tiene 25 alumno
 </tr>
 <tr>
 <td>Marshmallow</td>
-<td>3.20.x</td>
+<td>4.0.1</td>
 <td>Validación de schemas</td>
 </tr>
 <tr>
@@ -4338,11 +4338,7 @@ OpenAI: <span class="hljs-string">"El curso Matemáticas 1º ESO tiene 25 alumno
 <td>1.0.x</td>
 <td>Variables de entorno</td>
 </tr>
-<tr>
-<td>Alembic</td>
-<td>1.13.x</td>
-<td>Migraciones de BD</td>
-</tr>
+
 </tbody>
 </table>
 <h3 id="base-de-datos">Base de Datos</h3>
@@ -4357,7 +4353,7 @@ OpenAI: <span class="hljs-string">"El curso Matemáticas 1º ESO tiene 25 alumno
 <tbody>
 <tr>
 <td>MySQL</td>
-<td>8.0.x</td>
+<td>8.4</td>
 <td>Base de datos relacional</td>
 </tr>
 <tr>
