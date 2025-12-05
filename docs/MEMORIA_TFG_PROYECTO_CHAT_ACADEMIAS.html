@@ -2500,74 +2500,91 @@ Los siguientes documentos complementan esta memoria y están disponibles en los 
 <li>Diagrama ER completo (20 tablas)</li>
 <li>Especificación de campos, tipos y constraints</li>
 <li>Relaciones FK detalladas</li>
-</div>
+<li>Triggers y procedimientos almacenados</li>
+</ul>
 
-<h2>8.2. Flujo de Token Delegation (Concepto Clave)</h2>
-
+<h2>Anexo B: Documentación de Endpoints API Workers</h2>
 <p>
-El <strong>patrón de Token Delegation</strong> es una de las decisiones arquitectónicas más importantes del proyecto. A diferencia de arquitecturas tradicionales donde cada capa genera su propio token, aquí el <strong>mismo JWT viaja sin modificación</strong> desde Android hasta MySQL:
+<strong>Ubicación:</strong> <code>api-workers-profesores/docs/ANALISIS_ENDPOINTS_Y_MODELO_DATOS.html</code> (Sección 2)<br/>
+<strong>Contenido:</strong>
 </p>
+<ul>
+<li>20 recursos CRUD documentados</li>
+<li>Request/Response schemas</li>
+<li>Códigos de error HTTP</li>
+<li>Ejemplos de uso con curl</li>
+<li>Especificación OpenAPI 3.1 completa</li>
+</ul>
 
-<div class="solucion-box">
-<h4>Flujo Completo del JWT</h4>
+<h2>Anexo C: Especificación Técnica de Tecnologías</h2>
+<p>
+<strong>Ubicación:</strong> <code>api-workers-profesores/docs/DETALLE_TECNOLOGIAS.html</code><br/>
+<strong>Contenido:</strong>
+</p>
+<ul>
+<li>Java 21: Features utilizadas (Records, Pattern Matching, Virtual Threads)</li>
+<li>Spring Boot 3.5.5: Configuración y dependencias</li>
+<li>Python 3.12: Bibliotecas y estructura del proyecto</li>
+<li>OpenAI GPT-4o: Configuración de API, rate limits, costes</li>
+<li>MySQL 8.0: Configuración de índices y optimizaciones</li>
+<li>Jetpack Compose 1.5.4: Componentes UI personalizados</li>
+</ul>
 
-<ol>
-<li><strong>Login en Android:</strong>
-    <div class="codigo">POST /auth/login → API Workers
-Response: { "jwt": "eyJ...", "user": {...} }</div>
-</li>
+<h2>Anexo D: Análisis Económico Completo</h2>
+<p>
+<strong>Ubicación:</strong> <code>api-workers-profesores/docs/ANALISIS_ECONOMICO_Y_MODELO_NEGOCIO.html</code><br/>
+<strong>Contenido:</strong>
+</p>
+<ul>
+<li>Costes de infraestructura AWS detallados por servicio</li>
+<li>Proyecciones de ingresos para 1, 5, 10, 50 y 100 academias</li>
+<li>Punto de equilibrio (break-even) según escenarios</li>
+<li>Comparación con alternativas comerciales (Salesforce, HubSpot, custom development)</li>
+<li>ROI en 3 escenarios de adopción (conservador, medio, optimista)</li>
+</ul>
 
-<li><strong>Android almacena JWT:</strong>
-    <div class="codigo">DataStore.saveToken("eyJ...")</div>
-</li>
+<h2>Anexo E: Ingeniería de Prompts y Optimización LLM</h2>
+<p>
+<strong>Ubicación:</strong> <code>api-workers-profesores/docs/INGENIERIA_PROMPTS_Y_OPTIMIZACION_LLM.html</code><br/>
+<strong>Contenido:</strong>
+</p>
+<ul>
+<li>Diseño de los 3 modos de prompt (Completo, Compacto, Reformateo)</li>
+<li>Técnicas de reducción de tokens (contexto dinámico)</li>
+<li>Estrategias de manejo de rate limits</li>
+<li>Métricas de calidad de respuesta</li>
+<li>Comparación de versiones GPT-4o vs GPT-4-turbo</li>
+</ul>
 
-<li><strong>Usuario envía mensaje:</strong>
-    <div class="codigo">POST /chat/send
-Headers: { Authorization: "Bearer eyJ..." }
-Body: { "message": "Listar mis cursos" }</div>
-</li>
+<h2>Anexo F: Arquitectura Android MVVM</h2>
+<p>
+<strong>Ubicación:</strong> <code>AcademiaAPP/documentacion/ARQUITECTURA_ACADEMIAAPP_ANDROID.html</code><br/>
+<strong>Contenido:</strong>
+</p>
+<ul>
+<li>Diagrama completo de capas (UI → ViewModel → Repository → DataSource)</li>
+<li>Gestión de estado con StateFlow</li>
+<li>Inyección de dependencias con Hilt</li>
+<li>Gestión de ciclo de vida de coroutines</li>
+<li>Patrones de manejo de errores</li>
+</ul>
 
-<li><strong>Backend Chat valida JWT:</strong>
-    <div class="codigo">jwt.verify(token, SECRET_KEY)
-Claims: { usuarioId: 12, academiaId: 5, role: "Profesor" }</div>
-</li>
+<h2>Anexo G: Diseño UX Android</h2>
+<p>
+<strong>Ubicación:</strong> <code>AcademiaAPP/documentacion/UX_ACADEMIAAPP_ANDROID.html</code><br/>
+<strong>Contenido:</strong>
+</p>
+<ul>
+<li>Especificación de temas Material3 (Light/Dark)</li>
+<li>Componentes personalizados (ChatBubble, LoadingIndicator)</li>
+<li>Navegación entre pantallas</li>
+<li>Feedback visual de estados (loading, error, success)</li>
+<li>Accesibilidad (screen readers, contrast ratios)</li>
+</ul>
 
-<li><strong>Backend Chat REENVÍA el MISMO JWT:</strong>
-    <div class="codigo">GET /cursos?profesor_id=12
-Headers: { Authorization: "Bearer eyJ..." } ← MISMO JWT</div>
-</li>
-
-<li><strong>API Workers valida de nuevo:</strong>
-    <div class="codigo">jwt.verify(token, SAME_SECRET_KEY)
-Claims: { usuarioId: 12, academiaId: 5, ... }</div>
-</li>
-
-<li><strong>MySQL registra auditoría:</strong>
-    <div class="codigo">INSERT INTO Curso (..., usuario_alta_id) VALUES (..., 12)</div>
-</li>
-</ol>
 </div>
 
-<h3>8.2.1. Ventajas del Token Delegation</h3>
-
-<table class="no-break">
-<thead>
-<tr>
-    <th>Ventaja</th>
-    <th>Descripción</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-    <td><strong>Trazabilidad Completa</strong></td>
-    <td>Mismo <code>usuarioId</code> en logs de Android, Backend Chat, API Workers y MySQL</td>
-</tr>
-<tr>
-    <td><strong>Simplicidad</strong></td>
-    <td>Un único secret compartido (no hay transformación de tokens)</td>
-</tr>
-<tr>
-    <td><strong>Multi-Tenancy Automático</strong></td>
+<!-- ======================== FOOTER ======================== -->
     <td>El <code>academiaId</code> del JWT filtra datos en todas las capas</td>
 </tr>
 <tr>
@@ -3508,212 +3525,9 @@ Se han generado <strong>7 documentos técnicos en HTML</strong> publicados en Gi
 </li>
 </ol>
 
-<h2>14.3. Documentación en GitHub Pages</h2>
+</div>
 
-<ol>
-<li>
-    <strong>Arquitectura del Sistema</strong><br/>
-    <a href="https://angelfv.github.io/api-workers-profesores/ARQUITECTURA_SISTEMA_CHAT_ACADEMIAS.html" target="_blank">ARQUITECTURA_SISTEMA_CHAT_ACADEMIAS.html</a>
-</li>
-
-<li>
-    <strong>Análisis Endpoints y Modelo de Datos</strong><br/>
-    <a href="https://angelfv.github.io/api-workers-profesores/ANALISIS_ENDPOINTS_Y_MODELO_DATOS.html" target="_blank">ANALISIS_ENDPOINTS_Y_MODELO_DATOS.html</a>
-</li>
-
-<li>
-    <strong>Detalles Tecnologías (Java 21, Python 3.12, OpenAI)</strong><br/>
-    <a href="https://angelfv.github.io/api-workers-profesores/DETALLE_TECNOLOGIAS.html" target="_blank">DETALLE_TECNOLOGIAS.html</a>
-</li>
-
-<li>
-    <strong>Análisis Económico y Modelo de Negocio</strong><br/>
-    <a href="https://angelfv.github.io/api-workers-profesores/ANALISIS_ECONOMICO_Y_MODELO_NEGOCIO.html" target="_blank">ANALISIS_ECONOMICO_Y_MODELO_NEGOCIO.html</a>
-</li>
-
-<li>
-    <strong>Ingeniería de Prompts y Optimización LLM</strong><br/>
-    <a href="https://angelfv.github.io/api-workers-profesores/INGENIERIA_PROMPTS_Y_OPTIMIZACION_LLM.html" target="_blank">INGENIERIA_PROMPTS_Y_OPTIMIZACION_LLM.html</a>
-</li>
-
-<li>
-    <strong>Arquitectura Android MVVM</strong><br/>
-    <a href="https://angelfv.github.io/AcademiaAPP/ARQUITECTURA_ACADEMIAAPP_ANDROID.html" target="_blank">ARQUITECTURA_ACADEMIAAPP_ANDROID.html</a>
-</li>
-
-<li>
-    <strong>Diseño UX Android</strong><br/>
-    <a href="https://angelfv.github.io/AcademiaAPP/UX_ACADEMIAAPP_ANDROID.html" target="_blank">UX_ACADEMIAAPP_ANDROID.html</a>
-</li>
-</ol>
-
-<!-- ======================== 15. ANEXOS ======================== -->
-<div class="page-break"></div>
-<h1>15. LISTA DE ANEXOS</h1>
-
-<p>
-Los siguientes documentos complementan esta memoria y están disponibles en los repositorios GitHub del proyecto:
-</p>
-
-<h2>Anexo A: Modelo de Datos Completo</h2>
-<p>
-<strong>Ubicación:</strong> <code>api-workers-profesores/docs/ANALISIS_ENDPOINTS_Y_MODELO_DATOS.html</code><br/>
-<strong>Contenido:</strong>
-</p>
-<ul>
-<li>Diagrama ER completo (20 tablas)</li>
-<li>Especificación de campos, tipos y constraints</li>
-<li>Relaciones FK detalladas</li>
-<li>Triggers y procedimientos almacenados</li>
-</ul>
-
-<h2>Anexo B: Documentación de Endpoints API Workers</h2>
-<p>
-<strong>Ubicación:</strong> <code>api-workers-profesores/docs/ANALISIS_ENDPOINTS_Y_MODELO_DATOS.html</code> (Sección 2)<br/>
-<strong>Contenido:</strong>
-</p>
-<ul>
-<li>20 recursos CRUD documentados</li>
-<li>Request/Response schemas</li>
-<li>Códigos de error HTTP</li>
-<li>Ejemplos de uso con curl</li>
-<li>Especificación OpenAPI 3.1 completa</li>
-</ul>
-
-<h2>Anexo C: Especificación Técnica de Tecnologías</h2>
-<p>
-<strong>Ubicación:</strong> <code>api-workers-profesores/docs/DETALLE_TECNOLOGIAS.html</code><br/>
-<strong>Contenido:</strong>
-</p>
-<ul>
-<li>Java 21: Features utilizadas (Records, Pattern Matching, Virtual Threads)</li>
-<li>Spring Boot 3.5.5: Configuración y dependencias</li>
-<li>Python 3.12: Bibliotecas y estructura del proyecto</li>
-<li>OpenAI GPT-4o: Configuración de API, rate limits, costes</li>
-<li>MySQL 8.0: Configuración de índices y optimizaciones</li>
-<li>Jetpack Compose 1.5.4: Componentes UI personalizados</li>
-</ul>
-
-<h2>Anexo D: Análisis Económico Completo</h2>
-<p>
-<strong>Ubicación:</strong> <code>api-workers-profesores/docs/ANALISIS_ECONOMICO_Y_MODELO_NEGOCIO.html</code><br/>
-<strong>Contenido:</strong>
-</p>
-<ul>
-<li>Desglose de costes desarrollo (880 horas)</li>
-<li>Costes operacionales AWS (detallado por servicio)</li>
-<li>Modelo SaaS: 3 planes (Básico, Estándar, Premium)</li>
-<li>Proyección de clientes y ingresos (5 años)</li>
-<li>Punto de equilibrio y ROI</li>
-<li>Análisis de sensibilidad (escenario pesimista, base, optimista)</li>
-</ul>
-
-<h2>Anexo E: Ingeniería de Prompts Detallada</h2>
-<p>
-<strong>Ubicación:</strong> <code>api-workers-profesores/docs/INGENIERIA_PROMPTS_Y_OPTIMIZACION_LLM.html</code><br/>
-<strong>Contenido:</strong>
-</p>
-<ul>
-<li>Código completo de PromptOpenAi.java (699 líneas comentadas)</li>
-<li>Evolución del prompt (8 semanas de iteración)</li>
-<li>Técnicas de optimización aplicadas</li>
-<li>Casos de confusión de GPT-4 y soluciones implementadas</li>
-<li>Comparativa de versiones de prompts (precisión vs. latencia)</li>
-</ul>
-
-<h2>Anexo F: Arquitectura Android MVVM</h2>
-<p>
-<strong>Ubicación:</strong> <code>AcademiaAPP/docs/ARQUITECTURA_ACADEMIAAPP_ANDROID.html</code><br/>
-<strong>Contenido:</strong>
-</p>
-<ul>
-<li>Diagramas de capas (UI, ViewModel, Repository, DataSource)</li>
-<li>StateFlow y manejo de estados</li>
-<li>Inyección de dependencias con Hilt</li>
-<li>Gestión de tokens JWT con DataStore</li>
-<li>Código fuente comentado de componentes clave</li>
-</ul>
-
-<h2>Anexo G: Diseño UX y Guías de Estilo</h2>
-<p>
-<strong>Ubicación:</strong> <code>AcademiaAPP/docs/UX_ACADEMIAAPP_ANDROID.html</code><br/>
-<strong>Contenido:</strong>
-</p>
-<ul>
-<li>Wireframes y mockups de pantallas</li>
-<li>Paleta de colores y tipografías</li>
-<li>Guía de componentes reutilizables</li>
-<li>Patrones de interacción (bubbles, suggestions, cards)</li>
-<li>Accesibilidad y soporte para modo oscuro</li>
-</ul>
-
-<h2>Anexo H: Diagramas de Secuencia</h2>
-<p>
-<strong>Ubicación:</strong> <code>backend-chat-openai-worker-profesores/docs/ARQUITECTURA_SISTEMA_CHAT_ACADEMIAS.html</code> (Sección 4)<br/>
-<strong>Contenido:</strong>
-</p>
-<ul>
-<li>Flujo completo de login con JWT</li>
-<li>Flujo de mensaje chat (Android → Backend Chat → OpenAI → API Workers → MySQL)</li>
-<li>Flujo de operación multi-turno</li>
-<li>Flujo de paginación con nextToken</li>
-<li>Flujo de manejo de errores HTTP</li>
-</ul>
-
-<h2>Anexo I: Código Fuente Destacado</h2>
-<p>
-<strong>Ubicación:</strong> Repositorios GitHub (enlaces en Sección 14.2)<br/>
-<strong>Contenido:</strong>
-</p>
-<ul>
-<li><code>PromptOpenAi.java</code>: Construcción dinámica de prompts</li>
-<li><code>ChatService.java</code>: Orquestación de llamadas OpenAI</li>
-<li><code>ChatViewModel.kt</code>: Gestión de estado en Android</li>
-<li><code>ChatScreen.kt</code>: UI conversacional con Jetpack Compose</li>
-<li><code>auth_module.py</code>: Validación JWT en Python</li>
-<li><code>served-openapi.json</code>: Especificación OpenAPI con <code>x-permissions</code></li>
-</ul>
-
-<h2>Anexo J: Evidencias de Pruebas</h2>
-<p>
-<strong>Ubicación:</strong> <code>backend-chat-openai-worker-profesores/documentacion/prueba-*.html</code><br/>
-<strong>Contenido:</strong>
-</p>
-<ul>
-<li>100+ HTMLs de trazabilidad de pruebas</li>
-<li>Logs completos de request/response OpenAI</li>
-<li>Tool calls ejecutados paso a paso</li>
-<li>Tiempos de ejecución por fase</li>
-<li>Capturas de errores y validaciones</li>
-</ul>
-
-<h2>Anexo K: Documentación Adicional</h2>
-<p>
-<strong>Ubicación:</strong> Carpetas <code>/documentacion</code> de cada repositorio<br/>
-<strong>Contenido:</strong>
-</p>
-<ul>
-<li>READMEs de instalación y despliegue</li>
-<li>Comandos útiles para desarrollo</li>
-<li>Checklist CORS y configuración SSL</li>
-<li>Logs de servidor y debugging</li>
-<li>Capturas de pantalla de la app Android</li>
-</ul>
-
-<h2>Anexo L: Configuración de Despliegue AWS</h2>
-<p>
-<strong>Ubicación:</strong> <code>backend-chat-openai-worker-profesores/docs/</code> y <code>api-workers-profesores/docs/</code><br/>
-<strong>Contenido:</strong>
-</p>
-<ul>
-<li>Scripts de configuración Elastic Beanstalk</li>
-<li>Configuración RDS MySQL (parámetros, backups)</li>
-<li>Políticas IAM y Security Groups</li>
-<li>Certificados SSL/TLS (Let's Encrypt)</li>
-<li>Pipelines CI/CD con GitHub Actions</li>
-<li>Monitorización con CloudWatch (dashboards, alertas)</li>
-</ul>
-
+<!-- ======================== FOOTER ======================== -->
 <div class="page-break"></div>
 <p style="text-align:center; margin-top:100px; font-size:1.2em; color:#666;">
 <strong>— FIN DE LA MEMORIA —</strong>
