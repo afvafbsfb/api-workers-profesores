@@ -658,9 +658,9 @@ Una de las decisiones arquitectónicas más importantes del proyecto es el <stro
 </p>
 
 <ul>
-<li><strong>Autenticación centralizada:</strong> El token JWT se genera en API Workers con firma RSA-256 y contiene los claims esenciales (<code>usuarioId</code>, <code>academiaId</code>, <code>rol</code>)</li>
+<li><strong>Autenticación centralizada:</strong> El token JWT se genera en API Workers con firma HMAC-SHA256 (HS256) y contiene los claims esenciales (<code>usuarioId</code>, <code>tokenVersion</code>, <code>academiaId</code>, <code>roles</code>)</li>
 <li><strong>Validación en cada capa:</strong> Tanto Backend Chat como API Workers verifican la firma del token antes de procesar cualquier request</li>
-<li><strong>Expiración controlada:</strong> Tokens con tiempo de vida limitado (1 hora) y mecanismo de refresh token para renovación segura</li>
+<li><strong>Expiración controlada:</strong> Tokens con tiempo de vida limitado (15 minutos) y mecanismo de refresh token para renovación segura (7 días)</li>
 <li><strong>Aislamiento multi-tenant:</strong> El <code>academiaId</code> del JWT garantiza que cada academia solo accede a sus propios datos, sin posibilidad de fuga de información entre clientes</li>
 </ul>
 
@@ -870,7 +870,7 @@ En lugar de crear 20 DTOs diferentes (uno por cada entidad), se implementó un <
 <h1>4. ALCANCE</h1>
 
 <p>
-El sistema Academia Chat-Driven es una plataforma educativa que utiliza inteligencia artificial conversacional como única interfaz de usuario. La arquitectura se basa en tres pilares fundamentales:
+El sistema Academia Chat-Driven es una plataforma educativa que utiliza inteligencia artificial conversacional como única interfaz de usuario. La arquitectura se basa en cuatro pilares fundamentales:
 </p>
 
 <h3>Componentes Principales</h3>
@@ -881,7 +881,6 @@ El sistema Academia Chat-Driven es una plataforma educativa que utiliza intelige
 <li>Aplicación Kotlin con Jetpack Compose</li>
 <li>Única pantalla (<code>ChatScreen</code>) para toda la interacción</li>
 <li>Sistema de navegación mediante contexto conversacional</li>
-<li>Soporte para modo Mock (desarrollo) y Real (producción)</li>
 </ul>
 </div>
 
@@ -905,7 +904,6 @@ El sistema Academia Chat-Driven es una plataforma educativa que utiliza intelige
 <li>Acceso directo a base de datos MySQL</li>
 <li>Endpoints para gestión académica completa</li>
 <li>Validación de permisos a nivel de negocio</li>
-<li>Despliegue: AWS Elastic Beanstalk</li>
 </ul>
 </div>
 
@@ -1005,7 +1003,7 @@ El proyecto se estructura en <strong>tres módulos principales completamente fun
 <tr>
     <td>Prompts Multi-Turno</td>
     <td><span class="badge badge-success">✓ 3 modos</span></td>
-    <td>Completo/Compacto/Reformateo (PromptOpenAi.java - 699 líneas)</td>
+    <td>Completo/Compacto/Reformateo (PromptOpenAi.java - 671 líneas)</td>
 </tr>
 <tr>
     <td>Token Delegation</td>
@@ -1274,7 +1272,7 @@ Se ha diseñado un <strong>plan técnico completo de optimización</strong>, tra
 </ul>
 
 <p class="nota">
-<strong>Arquitectura Tool Calling:</strong> Consultar <strong><a href="#anexo-d">Anexo D</a></strong> para explicación detallada del sistema de prompts dinámicos, bucle iterativo de tool calling y clase <code>PromptOpenAi.java</code> (699 líneas).
+<strong>Arquitectura Tool Calling:</strong> Consultar <strong><a href="#anexo-d">Anexo D</a></strong> para explicación detallada del sistema de prompts dinámicos, bucle iterativo de tool calling y clase <code>PromptOpenAi.java</code> (671 líneas).
 </p>
 
 <h3>4.3.2. ¿Por qué Jetpack Compose y no XML tradicional?</h3>
@@ -1317,7 +1315,7 @@ Se ha diseñado un <strong>plan técnico completo de optimización</strong>, tra
 </ul>
 
 <p class="nota">
-<strong>Arquitectura detallada:</strong> Consultar <strong><a href="#anexo-d">Anexo D</a></strong> para explicación completa de la estructura de paquetes, <code>PromptOpenAi.java</code> (699 líneas) y sistema de delegation.
+<strong>Arquitectura detallada:</strong> Consultar <strong><a href="#anexo-d">Anexo D</a></strong> para explicación completa de la estructura de paquetes, <code>PromptOpenAi.java</code> (671 líneas) y sistema de delegation.
 </p>
 
 <!-- ======================== 5. PLANIFICACIÓN ======================== -->
@@ -1327,7 +1325,7 @@ Se ha diseñado un <strong>plan técnico completo de optimización</strong>, tra
 <h2>5.1. Cronograma General</h2>
 
 <p>
-El proyecto se desarrolló entre <strong>julio y diciembre de 2025</strong> (6 meses), con una dedicación de <strong>40 horas semanales</strong> (jornada completa), totalizando <strong>880 horas reales de trabajo</strong>.
+Se planificó un proyecto de <strong>6 meses</strong> (julio a diciembre de 2025), con dedicación de <strong>40 horas semanales</strong> (jornada completa), totalizando <strong>880 horas de trabajo planificado</strong>.
 </p>
 
 <table class="no-break">
@@ -1344,7 +1342,7 @@ El proyecto se desarrolló entre <strong>julio y diciembre de 2025</strong> (6 m
     <td>Julio 2025</td>
     <td>4</td>
     <td>160h</td>
-    <td>Análisis de Necesidades</td>
+    <td>Investigación IA + LLM</td>
 </tr>
 <tr>
     <td>Agosto - Octubre 2025</td>
@@ -1374,7 +1372,7 @@ El proyecto se desarrolló entre <strong>julio y diciembre de 2025</strong> (6 m
 
 <h2>5.2. Fases del Proyecto</h2>
 
-<h3>FASE DE ANÁLISIS: Análisis de Necesidades de Usuarios (Julio 2025 - 160h)</h3>
+<h3>FASE DE INVESTIGACIÓN: Investigación IA + LLM (Julio 2025 - 160h)</h3>
 
 <table class="no-break">
 <thead>
@@ -1387,7 +1385,7 @@ El proyecto se desarrolló entre <strong>julio y diciembre de 2025</strong> (6 m
 <tbody>
 <tr>
     <td>Investigación de problemática academias</td>
-    <td>40h</td>
+    <td>20h</td>
     <td>
         • Análisis de necesidades funcionales<br/>
         • Identificación de necesidades comunes<br/>
@@ -1395,26 +1393,17 @@ El proyecto se desarrolló entre <strong>julio y diciembre de 2025</strong> (6 m
     </td>
 </tr>
 <tr>
-    <td>Análisis de procesos de gestión académica</td>
-    <td>30h</td>
-    <td>
-        • Estudio de flujos de trabajo típicos<br/>
-        • Análisis de procesos: alumnos, horarios, pagos<br/>
-        • Diseño de modelo de datos inicial
-    </td>
-</tr>
-<tr>
     <td>Investigación y aprendizaje de tecnologías IA</td>
-    <td>50h</td>
+    <td>120h</td>
     <td>
         • Documentación OpenAI API y function calling<br/>
-        • Tutoriales Spring Boot 3 + Java 21<br/>
+        • Creación de workers para manejo de APIs desde ChatGPT/OpenAI<br/>
         • Pruebas iniciales de integración OpenAI
     </td>
 </tr>
 <tr>
     <td>Diseño de arquitectura del sistema</td>
-    <td>40h</td>
+    <td>20h</td>
     <td>
         • Definición de capas (Android → Backend → API → DB)<br/>
         • Diseño de patrón token delegation<br/>
@@ -1427,7 +1416,7 @@ El proyecto se desarrolló entre <strong>julio y diciembre de 2025</strong> (6 m
 <h3>FASE DE DESARROLLO: Desarrollo de los 3 Módulos (Agosto - Octubre 2025 - 480h)</h3>
 
 <p>
-Durante esta fase se desarrollaron <strong>en paralelo</strong> los tres módulos principales del sistema mediante sprints iterativos (ver sección 5.3.1). A continuación se detallan las actividades realizadas en cada módulo:
+Esta fase contempla el desarrollo <strong>en paralelo</strong> de los tres módulos principales del sistema mediante iteraciones (ver sección 5.3.1). A continuación se detallan las actividades planificadas para cada módulo:
 </p>
 
 <h4>Módulo 1: Backend Chat Orquestador (160h)</h4>
@@ -1459,7 +1448,7 @@ Durante esta fase se desarrollaron <strong>en paralelo</strong> los tres módulo
     </td>
 </tr>
 <tr>
-    <td>Desarrollo PromptOpenAi.java (699 líneas)</td>
+    <td>Desarrollo PromptOpenAi.java (671 líneas)</td>
     <td>40h</td>
     <td>
         • Sistema de prompts multi-turno<br/>
@@ -1740,25 +1729,24 @@ Durante esta fase se desarrollaron <strong>en paralelo</strong> los tres módulo
 
 <h2>5.3. Metodología de Trabajo</h2>
 
-<h3>5.3.1. Desarrollo en Sprints</h3>
+<h3>5.3.1. Desarrollo en Iteraciones</h3>
 
 <p>
-Aunque trabajé en solitario, apliqué una <strong>metodología de sprints iterativos con trabajo paralelo</strong> entre los diferentes módulos. <strong>Julio 2025 se dedicó exclusivamente al análisis</strong>, comenzando el desarrollo en agosto con iteraciones que priorizaban diferentes módulos según las necesidades:
+Se planificó un desarrollo en solitario estructurado en <strong>iteraciones temporales de 4 semanas</strong>, lo que permitiría desarrollo paralelo y revisiones periódicas entre los diferentes módulos. <strong>Julio 2025 se destinaría exclusivamente a investigación</strong>, comenzando el desarrollo en agosto con iteraciones que priorizarían diferentes módulos según las necesidades:
 </p>
 
 <table class="no-break">
 <thead>
 <tr>
-    <th>Sprint</th>
+    <th>Iteración</th>
     <th>Periodo</th>
     <th>Duración Total</th>
     <th>Distribución Semanal</th>
-    <th>Entregas Clave</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-    <td><strong>Sprint 1</strong></td>
+    <td><strong>Iteración 1</strong></td>
     <td>Agosto 2025</td>
     <td>4 semanas<br/>(160h)</td>
     <td>
@@ -1771,13 +1759,9 @@ Aunque trabajé en solitario, apliqué una <strong>metodología de sprints itera
         • Setup Flask + SQLAlchemy<br/>
         • Diseño modelo de datos inicial
     </td>
-    <td>
-        ✅ Primer commit backend-chat (25 ago)<br/>
-        ✅ Primera llamada OpenAI exitosa (01 sep)
-    </td>
 </tr>
 <tr>
-    <td><strong>Sprint 2</strong></td>
+    <td><strong>Iteración 2</strong></td>
     <td>Septiembre 2025</td>
     <td>4 semanas<br/>(160h)</td>
     <td>
@@ -1794,18 +1778,14 @@ Aunque trabajé en solitario, apliqué una <strong>metodología de sprints itera
         • Setup inicial proyecto<br/>
         • Estructura MVVM base
     </td>
-    <td>
-        ✅ Base de datos desplegada (15 sep)<br/>
-        ✅ OpenAPI generado automáticamente
-    </td>
 </tr>
 <tr>
-    <td><strong>Sprint 3</strong></td>
+    <td><strong>Iteración 3</strong></td>
     <td>Octubre 2025</td>
-    <td>4 semanas<br/>(160h)</td>
+    <td>4 semanas - 160h</td>
     <td>
         <strong>1 semana API Workers</strong><br/>
-        • Endpoints finales (pagos, inscripciones)<br/>
+        • Endpoints finales<br/>
         • Testing y ajustes<br/>
         <br/>
         <strong>3 semanas Android</strong><br/>
@@ -1814,13 +1794,9 @@ Aunque trabajé en solitario, apliqué una <strong>metodología de sprints itera
         • Sistema de navegación<br/>
         • ViewModels y StateFlow
     </td>
-    <td>
-        ✅ Primer commit Android (15 oct)<br/>
-        ✅ Primera conversación E2E (01 nov)
-    </td>
 </tr>
 <tr>
-    <td><strong>Sprint 4</strong></td>
+    <td><strong>Iteración 4</strong></td>
     <td>Noviembre 2025</td>
     <td>4 semanas<br/>(160h)</td>
     <td>
@@ -1830,13 +1806,9 @@ Aunque trabajé en solitario, apliqué una <strong>metodología de sprints itera
         • Análisis de latencia<br/>
         • Debugging y corrección de errores
     </td>
-    <td>
-        ✅ Identificación problema latencia (10 nov)<br/>
-        ✅ Plan despliegue AWS (20 nov)
-    </td>
 </tr>
 <tr>
-    <td><strong>Sprint 5</strong></td>
+    <td><strong>Iteración 5</strong></td>
     <td>Diciembre 2025</td>
     <td>2 semanas<br/>(80h)</td>
     <td>
@@ -1845,10 +1817,6 @@ Aunque trabajé en solitario, apliqué una <strong>metodología de sprints itera
         • Diagramas técnicos<br/>
         • READMEs de repositorios<br/>
         • Publicación GitHub Pages
-    </td>
-    <td>
-        ✅ Documentación publicada (04 dic)<br/>
-        ✅ Memoria TFG completada (05 dic)
     </td>
 </tr>
 </tbody>
@@ -1859,7 +1827,7 @@ Aunque trabajé en solitario, apliqué una <strong>metodología de sprints itera
 <h3>5.4.1. Desarrollador Único Multi-Rol</h3>
 
 <p>
-Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> asumiendo múltiples roles profesionales:
+El proyecto sería desarrollado por <strong>Ángel Fernández Vidal</strong> asumiendo múltiples roles profesionales:
 </p>
 
 <table class="no-break">
@@ -1919,12 +1887,12 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
 </tbody>
 </table>
 
-<h2>5.5. Hitos Clave del Proyecto</h2>
+<h2>5.5. Hitos Clave a Conseguir</h2>
 
 <table class="no-break">
 <thead>
 <tr>
-    <th>Fecha</th>
+    <th>Fecha Estimada</th>
     <th>Hito</th>
     <th>Descripción</th>
 </tr>
@@ -1933,47 +1901,47 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
 <tr>
     <td><strong>01 Jul 2025</strong></td>
     <td>Inicio del proyecto</td>
-    <td>Análisis de necesidades y viabilidad</td>
+    <td>Investigación IA y análisis de necesidades</td>
+</tr>
+<tr>
+    <td><strong>05 Ago 2025</strong></td>
+    <td>Primer commit backend-chat</td>
+    <td>Inicio desarrollo técnico Backend Chat</td>
 </tr>
 <tr>
     <td><strong>25 Ago 2025</strong></td>
-    <td>Primer commit backend-chat</td>
-    <td>Inicio desarrollo técnico</td>
-</tr>
-<tr>
-    <td><strong>01 Sep 2025</strong></td>
     <td>Primera llamada OpenAI exitosa</td>
     <td>Proof of concept IA funcional</td>
 </tr>
 <tr>
-    <td><strong>15 Sep 2025</strong></td>
+    <td><strong>30 Sep 2025</strong></td>
     <td>Base de datos desplegada</td>
     <td>MySQL en AWS RDS operativo</td>
 </tr>
 <tr>
-    <td><strong>15 Oct 2025</strong></td>
+    <td><strong>20 Sep 2025</strong></td>
     <td>Primer commit Android</td>
     <td>Inicio desarrollo móvil</td>
 </tr>
 <tr>
-    <td><strong>01 Nov 2025</strong></td>
+    <td><strong>30 Oct 2025</strong></td>
     <td>Primera conversación end-to-end</td>
     <td>Flujo completo Android→Backend→API→MySQL funcional</td>
 </tr>
 <tr>
     <td><strong>10 Nov 2025</strong></td>
-    <td>Identificación problema latencia</td>
-    <td>Análisis de causa raíz completado</td>
+    <td>Testing y optimización</td>
+    <td>Pruebas end-to-end y análisis de rendimiento</td>
 </tr>
 <tr>
-    <td><strong>20 Nov 2025</strong></td>
+    <td><strong>25 Nov 2025</strong></td>
     <td>Plan de despliegue AWS documentado</td>
     <td>Documentación completa de arquitectura cloud</td>
 </tr>
 <tr>
     <td><strong>04 Dic 2025</strong></td>
     <td>Documentación publicada</td>
-    <td>GitHub Pages con 7 documentos HTML</td>
+    <td>GitHub Pages con documentación técnica completa</td>
 </tr>
 <tr>
     <td><strong>05 Dic 2025</strong></td>
@@ -2249,7 +2217,7 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
 </thead>
 <tbody>
 <tr>
-    <td><strong>Análisis de Necesidades</strong></td>
+    <td><strong>Investigación y estudio de viabilidad</strong></td>
     <td>160h</td>
     <td>€40/h</td>
     <td>€6,400</td>
@@ -2319,8 +2287,8 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
 </tr>
 <tr>
     <td>OpenAI API (desarrollo/testing)</td>
-    <td>€20</td>
-    <td>€240</td>
+    <td>€50</td>
+    <td>€600</td>
     <td>✅ Activo</td>
 </tr>
 <tr>
@@ -2331,8 +2299,8 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
 </tr>
 <tr style="font-weight:bold;">
     <td><strong>TOTAL DESARROLLO</strong></td>
-    <td><strong>€26/mes</strong></td>
-    <td><strong>€312/año</strong></td>
+    <td><strong>€56/mes</strong></td>
+    <td><strong>€672/año</strong></td>
     <td></td>
 </tr>
 </tbody>
@@ -2452,7 +2420,7 @@ Todo el proyecto fue desarrollado por <strong>Ángel Fernández Vidal</strong> a
 </table>
 
 <p class="nota">
-<strong>Nota:</strong> Actualmente solo está desplegado MySQL en AWS RDS. Los backends (Spring Boot y Flask) están en desarrollo local. Los costes AWS EC2 son proyecciones para el despliegue futuro documentado en la <a href="https://afvafbsfb.github.io/backend-chat-openai-worker-profesores/MEMORIA_TFG_SISTEMA_CHAT_ACADEMIAS.html#12-plan-de-despliegue-en-producci%C3%B3n" target="_blank">Sección 12 del documento técnico</a>.
+<strong>Nota:</strong> Actualmente solo está desplegado MySQL en AWS RDS. Los backends (Spring Boot y Flask) están en desarrollo local. Los costes AWS EC2 son proyecciones para el despliegue futuro documentado en la <a href="https://afvafbsfb.github.io/api-workers-profesores/DOCUMENTACION_TECNICA_SISTEMA_CHAT_ACADEMIAS.html#12-plan-de-despliegue-en-producci%C3%B3n" target="_blank">Sección 12 del documento técnico</a>.
 </p>
 
 <h2>7.3. Análisis de Rentabilidad (Modelo SaaS)</h2>
@@ -2827,16 +2795,6 @@ github.com/afvafbsfb/api-workers-profesores
 </tbody>
 </table>
 
-<p><strong>Documentación Técnica Disponible en GitHub Pages:</strong></p>
-<ul>
-<li><strong>Ingeniería de Prompts y Optimización LLM:</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/INGENIERIA_PROMPTS_Y_OPTIMIZACION_LLM.html" target="_blank">Análisis Técnico</a></li>
-<li><strong>Arquitectura Android (MVVM):</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/ARQUITECTURA_ACADEMIAAPP_ANDROID.html" target="_blank">Documentación MVVM</a></li>
-<li><strong>Experiencia de Usuario (UX):</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/UX_ACADEMIAAPP_ANDROID.html" target="_blank">Guía UX Android</a></li>
-<li><strong>README:</strong> Cada repositorio incluye instrucciones de instalación y despliegue</li>
-<li><strong>Scripts SQL:</strong> Esquema completo de base de datos en <code>api-workers-profesores/docs/</code></li>
-<li><strong>Testing:</strong> Tests unitarios y de integración en cada proyecto</li>
-</ul>
-
 <p class="nota">
 <strong>Nota:</strong> Los repositorios están configurados como públicos para permitir la evaluación del TFG. Incluyen documentación técnica, diagramas de arquitectura y configuraciones de CI/CD.
 </p>
@@ -2848,7 +2806,7 @@ github.com/afvafbsfb/api-workers-profesores
 
 <p><strong>Documentación Online:</strong></p>
 <ul>
-<li><strong>Documentación Técnica Completa:</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/MEMORIA_TFG_SISTEMA_CHAT_ACADEMIAS.html#5-modelo-de-datos---base-de-datos-mysql" target="_blank">Modelo de Datos - MySQL</a></li>
+<li><strong>Documentación Técnica Completa:</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/DOCUMENTACION_TECNICA_SISTEMA_CHAT_ACADEMIAS.html#5-modelo-de-datos---base-de-datos-mysql" target="_blank">Modelo de Datos - MySQL</a></li>
 <li><strong>Diagrama EER (PDF):</strong> <a href="https://afvafbsfb.github.io/api-workers-profesores/Diagrama%20EER%20Academias.pdf" target="_blank">Diagrama EER Academias.pdf</a></li>
 </ul>
 
