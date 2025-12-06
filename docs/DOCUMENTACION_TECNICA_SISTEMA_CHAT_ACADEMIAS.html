@@ -5398,8 +5398,15 @@ pytest --cov=src --cov-report=html
 </div></code></pre>
 <hr>
 <h2 id="12-plan-de-despliegue-en-producci%C3%B3n">12. Plan de Despliegue en Producción</h2>
-<h3 id="estado-actual-del-proyecto">Estado Actual del Proyecto</h3>
-<p><strong>Fase 1: MVP (✅ COMPLETADO) - Listo para Demo</strong></p>
+
+<div class="update-note">
+<strong>⚠️ IMPORTANTE - Estado de Implementación:</strong> Este plan de despliegue está <strong>DOCUMENTADO pero NO IMPLEMENTADO</strong>. Actualmente <strong>solo MySQL RDS está desplegado en AWS</strong>. Los backends (Backend Chat y API Workers) funcionan en entorno local de desarrollo. La arquitectura descrita representa el objetivo planificado para despliegue futuro.
+</div>
+
+<h3 id="estado-actual-del-proyecto">Estado Real del Proyecto</h3>
+
+<p><strong>✅ IMPLEMENTADO Y FUNCIONAL:</strong></p>
+
 <p><strong>Android App:</strong></p>
 <ul>
 <li>✅ ChatScreen completamente funcional</li>
@@ -5408,7 +5415,7 @@ pytest --cov=src --cov-report=html
 <li>✅ RealChatRepository implementado y testeado</li>
 <li>✅ SessionStore con gestión de tokens JWT</li>
 <li>✅ LoginScreen con validación y manejo de errores</li>
-<li>✅ Integración completa con Backend Chat en producción</li>
+<li>⚠️ Integración con Backend Chat funcionando en <strong>localhost</strong></li>
 </ul>
 <p><strong>Backend Chat (Spring Boot):</strong></p>
 <ul>
@@ -5421,6 +5428,8 @@ pytest --cov=src --cov-report=html
 <li>✅ Rate limiting configurado</li>
 <li>✅ Middleware de reenvío de JWT (token delegado)</li>
 <li>✅ Reportes HTML E2E para debugging</li>
+<li>⚠️ Ejecutándose en <strong>localhost:8080</strong></li>
+<li>✅ Archivos <code>.ebextensions</code> preparados para AWS</li>
 </ul>
 <p><strong>API Workers (Python/Flask):</strong></p>
 <ul>
@@ -5432,15 +5441,19 @@ pytest --cov=src --cov-report=html
 <li>✅ Migraciones de BD (create_database.sql)</li>
 <li>✅ Seeds de datos de prueba</li>
 <li>✅ Tests de integración funcionales</li>
+<li>⚠️ Ejecutándose en <strong>localhost:5000</strong></li>
+<li>✅ Archivos <code>.ebextensions</code> preparados para AWS</li>
 </ul>
 <p><strong>Base de Datos:</strong></p>
 <ul>
-<li>✅ MySQL 8.0 en AWS RDS</li>
+<li>✅ MySQL 8.0 en <strong>AWS RDS (desplegado en producción)</strong></li>
 <li>✅ 26 tablas con relaciones completas</li>
 <li>✅ Índices optimizados</li>
 <li>✅ Backups automáticos configurados</li>
+<li>✅ Conexión funcionando desde backends locales</li>
 </ul>
-<h3 id="arquitectura-de-despliegue-en-aws">Arquitectura de Despliegue en AWS</h3>
+
+<h3 id="arquitectura-de-despliegue-en-aws">Arquitectura de Despliegue en AWS (PLANIFICADA)</h3>
 <pre class="hljs"><code><div>┌─────────────────────────────────────────────────────────────┐
 │ USUARIOS MÓVILES (Android App)                              │
 └────────────────┬────────────────────────────────────────────┘
@@ -5450,9 +5463,9 @@ pytest --cov=src --cov-report=html
 │ AWS ELASTIC BEANSTALK - Backend Chat                        │
 │ - Entorno: Java 21 (Corretto)                              │
 │ - Tipo: Single Instance t2.micro (Free Tier)               │
-│ - HTTPS: Let's Encrypt (certbot automático)                │
+│ - HTTPS: AWS Certificate Manager (ACM)                     │
 │ - URL: backend-chat.elasticbeanstalk.com                   │
-│ - Health check: /health                                     │
+│ - Health check: /actuator/health                            │
 │ - Auto-scaling: Disabled (costo $0 primer año)             │
 └────────────────┬────────────────────────────────────────────┘
                  │ HTTPS (token delegado - JWT)
@@ -5461,7 +5474,7 @@ pytest --cov=src --cov-report=html
 │ AWS ELASTIC BEANSTALK - API Workers                         │
 │ - Entorno: Python 3.11                                      │
 │ - Tipo: Single Instance t2.micro (Free Tier)               │
-│ - HTTPS: Let's Encrypt                                      │
+│ - HTTPS: AWS Certificate Manager (ACM)                     │
 │ - URL: api-workers.elasticbeanstalk.com                    │
 │ - Health check: /health                                     │
 └────────────────┬────────────────────────────────────────────┘
@@ -5476,13 +5489,24 @@ pytest --cov=src --cov-report=html
 │ - Conexión: SSL/TLS obligatorio                            │
 └─────────────────────────────────────────────────────────────┘
 </div></code></pre>
-<h3 id="costos-mensuales-estimados">Costos Mensuales Estimados</h3>
-<p><strong>Opción 1: Free Tier (Primer Año) - $0/mes</strong></p>
+
+<p><strong>Nota:</strong> Este diagrama representa la <strong>arquitectura objetivo</strong>. Actualmente solo el componente MySQL RDS está desplegado en AWS. Los componentes Backend Chat y API Workers están preparados para despliegue (con archivos <code>.ebextensions</code> configurados) pero se ejecutan localmente.</p>
+
+<h3 id="costos-mensuales-estimados">Costos Mensuales Proyectados</h3>
+
+<p><strong>Costo Actual (Solo RDS desplegado):</strong></p>
 <ul>
-<li>Elastic Beanstalk Backend Chat: $0 (t2.micro Free Tier)</li>
-<li>Elastic Beanstalk API Workers: $0 (t2.micro Free Tier)</li>
-<li>RDS MySQL: $0 (db.t3.micro Free Tier 750h/mes)</li>
-<li><strong>Total: $0/mes</strong> ✅</li>
+<li>RDS MySQL db.t3.micro: ~$6/mes (con Free Tier primer año)</li>
+<li>Backends en localhost: $0</li>
+<li><strong>Total actual: ~$6/mes</strong></li>
+</ul>
+
+<p><strong>Opción 1: Despliegue Completo con Free Tier (Primer Año) - ~$0/mes</strong></p>
+<ul>
+<li>Elastic Beanstalk Backend Chat: $0 (t2.micro Free Tier - planificado)</li>
+<li>Elastic Beanstalk API Workers: $0 (t2.micro Free Tier - planificado)</li>
+<li>RDS MySQL: $0 (db.t3.micro Free Tier 750h/mes - desplegado)</li>
+<li><strong>Total proyectado: $0/mes</strong> ✅</li>
 </ul>
 <p><strong>Opción 2: Post Free Tier - ~$11-13/mes</strong></p>
 <ul>
@@ -5501,7 +5525,11 @@ pytest --cov=src --cov-report=html
 <li><strong>Total: ~$65-85/mes</strong> (50-100 usuarios concurrentes)</li>
 </ul>
 <p>Ver documento completo: <code>docs/ESCALADO_A_PRODUCCION_COMERCIAL.md</code></p>
-<h3 id="pasos-de-despliegue">Pasos de Despliegue</h3>
+
+<h3 id="pasos-de-despliegue">Pasos de Despliegue (Planificados)</h3>
+
+<p><strong>Nota:</strong> Los siguientes pasos documentan el proceso de despliegue planificado. Los archivos de configuración (<code>.ebextensions</code>) ya están preparados en ambos repositorios.</p>
+
 <p><strong>Fase 2: Despliegue Inicial (1-2 semanas)</strong></p>
 <ol>
 <li>
