@@ -174,6 +174,7 @@ pre {
 <li><a href="#loading">Estados de Carga</a></li>
 <li><a href="#navegacion">Navegación con Drawer</a></li>
 <li><a href="#interacciones">Interacciones Clave</a></li>
+<li><a href="#usabilidad">Principios de Usabilidad</a></li>
 </ol>
 
 <hr>
@@ -1019,6 +1020,212 @@ if (ui.detailsItem != null) {
 
 <hr>
 
+<h2 id="usabilidad">10. Principios de Usabilidad</h2>
+
+<p>AcademiaAPP implementa las <strong>10 Heurísticas de Usabilidad de Nielsen</strong>:</p>
+
+<h3>1. Visibilidad del Estado del Sistema</h3>
+<table>
+<tr>
+<th>Implementación</th>
+<th>Evidencia en Código</th>
+</tr>
+<tr>
+<td><strong>TypingIndicator</strong>: Animación de 3 puntos mientras el LLM procesa</td>
+<td><code>ui.loading == true</code> en ChatUiState (línea 31 ChatViewModel.kt)</td>
+</tr>
+<tr>
+<td><strong>Scroll automático</strong>: El chat se desplaza al último mensaje automáticamente</td>
+<td><code>LaunchedEffect(ui.messages.size, ui.loading)</code> (líneas 200-214 ChatScreen.kt)</td>
+</tr>
+</table>
+
+<h3>2. Coincidencia entre Sistema y Mundo Real</h3>
+<table>
+<tr>
+<th>Implementación</th>
+<th>Evidencia en Código</th>
+</tr>
+<tr>
+<td><strong>Chat conversacional</strong>: Interacción en lenguaje natural con GPT-4o</td>
+<td>Integración con OpenAI API en Backend Chat</td>
+</tr>
+<tr>
+<td><strong>Terminología académica</strong>: Alumnos, sesiones, cursos, profesores (sin jerga técnica)</td>
+<td>Nomenclatura en modelos y UI</td>
+</tr>
+</table>
+
+<h3>3. Control y Libertad del Usuario</h3>
+<table>
+<tr>
+<th>Implementación</th>
+<th>Evidencia en Código</th>
+</tr>
+<tr>
+<td><strong>ModalNavigationDrawer</strong>: Menú lateral con opciones según rol</td>
+<td><code>MenuBuilder.getMenuOptions(userRole)</code> (línea 254 ChatScreen.kt)</td>
+</tr>
+<tr>
+<td><strong>Navegación libre</strong>: Usuario puede ir a cualquier sección en cualquier momento</td>
+<td>Opción "Chat libre" + auto-envío de mensajes desde drawer (líneas 272-290)</td>
+</tr>
+</table>
+
+<h3>4. Consistencia y Estándares</h3>
+<table>
+<tr>
+<th>Implementación</th>
+<th>Evidencia en Código</th>
+</tr>
+<tr>
+<td><strong>Material Design 3</strong>: Componentes nativos (Scaffold, Card, OutlinedTextField)</td>
+<td>Jetpack Compose 100%</td>
+</tr>
+<tr>
+<td><strong>Paleta consistente</strong>: Colores WhatsApp en toda la app</td>
+<td><code>#128C7E</code>, <code>#DCF8C6</code>, <code>#ECE5DD</code></td>
+</tr>
+<tr>
+<td><strong>Arquitectura MVVM</strong>: Patrón uniforme en todas las pantallas</td>
+<td>ChatViewModel + ChatUiState + ChatScreen</td>
+</tr>
+</table>
+
+<h3>5. Prevención de Errores</h3>
+<table>
+<tr>
+<th>Implementación</th>
+<th>Evidencia en Código</th>
+</tr>
+<tr>
+<td><strong>Validación de formularios</strong>: Campos obligatorios (nombre, teléfono, fecha)</td>
+<td><code>nombreError</code>, <code>telefonoError</code>, <code>fechaError</code> en ChatUiState (líneas 57-59)</td>
+</tr>
+<tr>
+<td><strong>Validación de formato</strong>: Fecha con regex <code>DD/MM/YYYY</code></td>
+<td><code>"^\\d{2}/\\d{2}/\\d{4}$".toRegex()</code> (línea 132 AlumnoForm.kt)</td>
+</tr>
+<tr>
+<td><strong>Focus en error</strong>: El cursor se posiciona automáticamente en el primer campo con error</td>
+<td><code>firstErrorField?.requestFocus()</code> (línea 135 AlumnoForm.kt)</td>
+</tr>
+<tr>
+<td><strong>Diálogos de confirmación</strong>: Antes de enviar formularios de alta/modificación</td>
+<td><code>showConfirmDialogAlta</code>, <code>showConfirmDialogModificacion</code></td>
+</tr>
+</table>
+
+<h3>6. Reconocer antes que Recordar</h3>
+<table>
+<tr>
+<th>Implementación</th>
+<th>Evidencia en Código</th>
+</tr>
+<tr>
+<td><strong>SuggestionChips</strong>: Acciones visibles en cada mensaje del asistente</td>
+<td><code>suggestions: List&lt;Suggestion&gt;</code> en ChatMessage</td>
+</tr>
+<tr>
+<td><strong>Historial persistente</strong>: Todos los mensajes visibles en el chat</td>
+<td><code>messages: List&lt;ChatMessage&gt;</code> en ChatUiState</td>
+</tr>
+<tr>
+<td><strong>Iconos en navegación</strong>: Cada opción del drawer con su icono representativo</td>
+<td><code>icon = { Icon(imageVector = option.icon) }</code></td>
+</tr>
+</table>
+
+<h3>7. Flexibilidad y Eficiencia de Uso</h3>
+<table>
+<tr>
+<th>Implementación</th>
+<th>Evidencia en Código</th>
+</tr>
+<tr>
+<td><strong>SuggestionChips</strong>: Acciones rápidas con un click</td>
+<td><code>onClick = { vm.sendMessage(suggestion.text) }</code></td>
+</tr>
+<tr>
+<td><strong>Auto-envío desde drawer</strong>: Navegación rápida a funciones específicas</td>
+<td><code>option.chatMessage?.let { vm.sendMessage(it) }</code> (líneas 272-290)</td>
+</tr>
+<tr>
+<td><strong>Componentes reutilizables</strong>: Código modular y eficiente</td>
+<td><code>CompactList</code>, <code>SesionesDelDiaCards</code>, <code>AlumnoForm</code> unificado</td>
+</tr>
+<tr>
+<td><strong>Paginación</strong>: Navegación entre páginas de resultados</td>
+<td><code>pagination: PaginationInfo?</code> con tokens <code>prev</code>/<code>next</code></td>
+</tr>
+</table>
+
+<h3>8. Diseño Estético y Minimalista</h3>
+<table>
+<tr>
+<th>Implementación</th>
+<th>Evidencia en Código</th>
+</tr>
+<tr>
+<td><strong>Burbujas limpias</strong>: Solo contenido relevante, sin saturación</td>
+<td>Diseño de burbujas user/assistant</td>
+</tr>
+<tr>
+<td><strong>Elevation sutil</strong>: Profundidad visual moderada</td>
+<td><code>CardDefaults.elevatedCardElevation(4.dp)</code></td>
+</tr>
+<tr>
+<td><strong>Espaciado consistente</strong>: Ritmo visual uniforme</td>
+<td><code>Spacer(Modifier.height(8.dp))</code>, <code>padding(16.dp)</code></td>
+</tr>
+<tr>
+<td><strong>Scroll horizontal para chips</strong>: Sin ocupar espacio innecesario verticalmente</td>
+<td><code>Row(Modifier.horizontalScroll())</code></td>
+</tr>
+</table>
+
+<h3>9. Ayudar a Reconocer, Diagnosticar y Recuperarse de Errores</h3>
+<table>
+<tr>
+<th>Implementación</th>
+<th>Evidencia en Código</th>
+</tr>
+<tr>
+<td><strong>Validación en formularios</strong>: Focus automático en primer campo con error</td>
+<td><code>firstErrorField?.requestFocus()</code> (línea 135 AlumnoForm.kt)</td>
+</tr>
+<tr>
+<td><strong>LLM informa errores</strong>: Si hay error de comunicación o autorización, el asistente responde con mensaje explicativo</td>
+<td>Manejo de errores en Backend Chat + respuesta del LLM</td>
+</tr>
+<tr>
+<td><strong>Mensajes contextuales</strong>: El GPT-4o explica qué salió mal y cómo corregirlo</td>
+<td>Respuestas inteligentes del modelo</td>
+</tr>
+</table>
+
+<h3>10. Ayuda y Documentación</h3>
+<table>
+<tr>
+<th>Implementación</th>
+<th>Evidencia en Código</th>
+</tr>
+<tr>
+<td><strong>Sugerencias inteligentes</strong>: El LLM proporciona chips con acciones relevantes según el contexto</td>
+<td><code>uiSuggestions</code> en Envelope de respuesta</td>
+</tr>
+<tr>
+<td><strong>Ayuda contextual</strong>: Ante cualquier acción, el LLM sugiere próximos pasos</td>
+<td>Generación dinámica de sugerencias por GPT-4o</td>
+</tr>
+</table>
+
+<div class="info-box">
+<strong>📚 Conclusión:</strong> AcademiaAPP cumple con las 10 Heurísticas de Usabilidad de Jakob Nielsen, aplicando principios de diseño centrado en el usuario.
+</div>
+
+<hr>
+
 <h2>Resumen UX</h2>
 
 <p>AcademiaAPP implementa un patrón de interacción <strong>chat-first</strong>:</p>
@@ -1036,7 +1243,6 @@ if (ui.detailsItem != null) {
 <hr>
 
 <p style="text-align: center; color: #666; font-size: 12px; margin-top: 40px;">
-Documento basado 100% en el código fuente de AcademiaAPP<br>
 <strong>Ángel Fernández Vidal</strong> - TFG FP DAM - IES Fernando Wirtz Suárez<br>
 Noviembre 2025
 </p>
