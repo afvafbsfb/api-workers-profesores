@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompts del Sistema Chat Academias</title>
+<meta name="author" content="Ángel Fernández Vidal">
+<style>
+body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Ubuntu", sans-serif;
+	font-size: 14px;
+	padding: 20px;
+	max-width: 900px;
+	margin: 0 auto;
+	line-height: 1.6;
+}
+h1 { color: #1976D2; border-bottom: 2px solid #eaecef; padding-bottom: 10px; }
+h2 { color: #388E3C; margin-top: 30px; }
+pre {
+	background-color: #f6f8fa;
+	border-left: 4px solid #1976D2;
+	padding: 12px;
+	overflow-x: auto;
+	font-size: 13px;
+}
+code { background-color: rgba(27,31,35,0.05); padding: 2px 5px; border-radius: 3px; }
+.note {
+	background-color: #fff3cd;
+	border-left: 4px solid #ff9800;
+	padding: 10px 15px;
+	margin: 15px 0;
+}
+</style>
+</head>
+<body>
+
+<h1>Prompts del Sistema Chat Academias</h1>
+
+<h2>1. Contexto</h2>
+
+<p>El sistema utiliza GPT-4o mediante la API de OpenAI para generar consultas SQL a partir de lenguaje natural. Los prompts están implementados en <code>PromptOpenAi.java</code> (671 líneas) y controlan:</p>
+
+<ul>
+<li>Definición del rol del modelo (agente SQL especializado)</li>
+<li>Contexto del esquema de base de datos</li>
+<li>Resolución de claves foráneas implícitas</li>
+<li>Validaciones y restricciones</li>
+<li>Formato de respuesta JSON</li>
+</ul>
+
+<h2>2. Estructura del Prompt Principal</h2>
+
+<p>El prompt se compone de varias secciones concatenadas:</p>
+
+<pre>
+// 1. DEFINICIÓN DE ROL
+Eres un agente especializado en generar consultas SQL seguras y eficientes
+para una base de datos académica...
+
+// 2. ESQUEMA DE DATOS
+Base de datos: ${nombreBaseDatos}
+Tablas disponibles: ${listaTablas}
+Restricciones de privacidad: Solo datos de academiaId=${academiaId}
+
+// 3. RESOLUCIÓN FK
+Cuando el usuario mencione "mis alumnos", generar JOIN con tabla alumnos
+filtrando por profesorId=${usuarioId}...
+
+// 4. FORMATO RESPUESTA
+{
+  "consulta": "SELECT ...",
+  "explicacion": "Esta consulta obtiene...",
+  "necesitaAprobacion": false
+}
+</pre>
+
+<h2>3. Ejemplo Real de Prompt FK</h2>
+
+<p>Fragmento simplificado de resolución de claves foráneas implícitas:</p>
+
+<pre>
+IMPORTANTE: Resolución automática de FK implícitas
+
+Si el usuario pregunta por "mis alumnos" o "alumnos que tengo":
+- Tabla: alumnos
+- JOIN con asignaciones: alumnos.alumnoId = asignaciones.alumnoId
+- Filtro: asignaciones.profesorId = ${usuarioId}
+- Añadir: AND alumnos.academiaId = ${academiaId}
+
+Si pregunta por "mis grupos" o "grupos que imparto":
+- Tabla: grupos
+- JOIN con asignaciones_grupos: grupos.grupoId = asignaciones_grupos.grupoId
+- Filtro: asignaciones_grupos.profesorId = ${usuarioId}
+- Añadir: AND grupos.academiaId = ${academiaId}
+</pre>
+
+<h2>4. Limitaciones Conocidas</h2>
+
+<ul>
+<li><strong>Ambigüedad semántica:</strong> Preguntas como "¿cuántos tengo?" requieren contexto adicional que no siempre se infiere correctamente</li>
+<li><strong>FK complejas:</strong> Relaciones multi-tabla pueden generar JOINs incorrectos o incompletos</li>
+<li><strong>Validaciones:</strong> El modelo a veces omite filtros de academiaId en subconsultas</li>
+<li><strong>Iteraciones:</strong> Se permiten hasta 10 llamadas GPT-4o (2 iniciales + 8 correcciones) para converger a SQL válido</li>
+</ul>
+
+<h2>5. Configuración Actual</h2>
+
+<p>Parámetros relevantes en <code>application.properties</code>:</p>
+
+<pre>
+# Límite de iteraciones para correcciones GPT-4o
+secondTurnMaxExtraIterations=8
+
+# Timeout para llamadas OpenAI (20 segundos)
+openai.timeout.connect=20000
+openai.timeout.read=20000
+</pre>
+
+<h2>6. Mejoras Identificadas</h2>
+
+<p>Áreas identificadas para optimización:</p>
+
+<ul>
+<li>Reducir ambigüedad mediante historial conversacional (ya implementado parcialmente)</li>
+<li>Prompt dinámico basado en tablas detectadas en la pregunta (evitar enviar esquema completo)</li>
+<li>Validación estructural del JSON antes de ejecutar SQL</li>
+<li>Caché de patrones pregunta-SQL para consultas frecuentes</li>
+</ul>
+
+<hr>
+
+<p><em>Última actualización: 6 diciembre 2024</em></p>
+<p><em>Archivo fuente: <code>src/main/java/es/.../service/PromptOpenAi.java</code></em></p>
+
+</body>
+</html>
